@@ -1,2 +1,2 @@
-# rewire
-e-learning platform project
+# SmartTeam
+Team management project.
