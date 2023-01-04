@@ -1,2 +1,2 @@
 # SmartTeam
-Team management project.
+Projects management project.
