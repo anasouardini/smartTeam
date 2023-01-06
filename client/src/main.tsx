@@ -7,14 +7,16 @@ import Signup from './pages/signup';
 import Profile from './pages/profile';
 import SharedLayout from './components/sharedLayout';
 
+
 const Router = () => {
+
   return (
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<SharedLayout/>}>
-          <Route path='login' element={<Login/>}></Route>
-          <Route path='signup' element={<Signup/>}></Route>
-          <Route path=':user' element={<Profile/>}></Route>
+          <Route path='/login' element={<Login/>}></Route>
+          <Route path='/signup' element={<Signup/>}></Route>
+          <Route path='/:user' element={<Profile/>}></Route>
         </Route>
       </Routes>
     </BrowserRouter>
