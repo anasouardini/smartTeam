@@ -2,10 +2,10 @@
   "name": "samrtTeam/server",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "nodemon ./src",
-    "build": "rm -rf ./build && tsc && node ./build",
+    "dev": "nodemon ./src/index.ts",
+    "build": "rm -rf ./build && tsc",
+    "preview": "node ./build",
     "clean": "rm -rf ./build"
   },
   "devDependencies": {
@@ -17,7 +17,10 @@
   },
   "dependencies": {
     "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "helmet": "^6.0.1"
+    "helmet": "^6.0.1",
+    "mysql2": "^2.3.3"
   }
 }
