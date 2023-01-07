@@ -3,13 +3,17 @@ lockfileVersion: 5.4
 specifiers:
   '@types/express': ^4.17.15
   '@types/node': ^18.11.18
+  cookie-parser: ^1.4.6
   express: ^4.18.2
+  helmet: ^6.0.1
   nodemon: ^2.0.20
   ts-node: ^10.9.1
   typescript: ^4.9.4
 
 dependencies:
+  cookie-parser: 1.4.6
   express: 4.18.2
+  helmet: 6.0.1
 
 devDependencies:
   '@types/express': 4.17.15
@@ -237,8 +241,21 @@ packages:
     engines: {node: '>= 0.6'}
     dev: false
 
+  /cookie-parser/1.4.6:
+    resolution: {integrity: sha512-z3IzaNjdwUC2olLIB5/ITd0/setiaFMLYiZJle7xg5Fe9KWAceil7xszYfHHBtDFYLSgJduS2Ty0P1uJdPDJeA==}
+    engines: {node: '>= 0.8.0'}
+    dependencies:
+      cookie: 0.4.1
+      cookie-signature: 1.0.6
+    dev: false
+
   /cookie-signature/1.0.6:
     resolution: {integrity: sha512-QADzlaHc8icV8I7vbaJXJwod9HWYp8uCqf1xa4OfNu1T7JVxQIrUgOWtHdNDtPiywmFbiS12VjotIXLrKM3orQ==}
+    dev: false
+
+  /cookie/0.4.1:
+    resolution: {integrity: sha512-ZwrFkGJxUR3EIoXtO+yVE69Eb7KlixbaeAWfBQB9vVsNn/o+Yw69gBWSSDK825hQNdN+wF8zELf3dFNl/kxkUA==}
+    engines: {node: '>= 0.6'}
     dev: false
 
   /cookie/0.5.0:
@@ -419,6 +436,11 @@ packages:
     engines: {node: '>= 0.4.0'}
     dependencies:
       function-bind: 1.1.1
+    dev: false
+
+  /helmet/6.0.1:
+    resolution: {integrity: sha512-8wo+VdQhTMVBMCITYZaGTbE4lvlthelPYSvoyNvk4RECTmrVjMerp9RfUOQXZWLvCcAn1pKj7ZRxK4lI9Alrcw==}
+    engines: {node: '>=14.0.0'}
     dev: false
 
   /http-errors/2.0.0:
