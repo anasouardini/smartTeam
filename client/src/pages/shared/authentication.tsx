@@ -1,19 +1,27 @@
 import React from 'react';
 
-export default function Login() {
-  const classes = {
+export default function Authentication(props: {
+  title: string;
+  label: string;
+  fields: string[];
+}) {
+  const tailwindClasses = {
     formItem: 'w-full my-3 py-2',
-    input:`capitalize border-b-orange-500 border-b-2
+    input: `capitalize border-b-primary border-b-2
            focus:border-b-white outline-none
            bg-transparent placeholder:text-gray-200
           `,
-    button: 'bg-orange rounded-md bg-orange-500 font-bold',
+    button: 'bg-orange rounded-md bg-primary font-bold',
+  };
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
   };
 
   return (
     <>
       <main
-        aria-label='login'
+        aria-label={props.label}
         className={`bg-[url("/bg1.png")] bg-no-repeat bg-center relative
                   before:absolute before:top-0 before:right-0
                   before:bottom-0 before:left-0
@@ -26,32 +34,37 @@ export default function Login() {
                   flex items-center justify-center`}
       >
         <div
-          aria-label='login card'
+          aria-label={`${props.label} card`}
           className='flex flex-col items-center justify-center backdrop-blur-lg px-20 py-20'
         >
           <div aria-label='grouping card'>
             <div aria-label='logo'></div>
             <h1 className='first-letter:uppercase font-bold text-xl mb-6'>
-              log in to your account
+              {props.title}
             </h1>
             <form className='max-w-xs'>
+              {props.fields.map((field) => {
+                return (
+                  <input
+                    className={`${tailwindClasses.formItem} ${tailwindClasses.input}`}
+                    type={field == 'username' ? 'text' : { field }}
+                    name={field}
+                    placeholder={field}
+                  />
+                );
+              })}
               <input
-                className={`${classes.formItem} ${classes.input}`}
-                type='text'
-                name='username'
-                placeholder='Username'
-              />
-              <input
-                className={`${classes.formItem} ${classes.input}`}
-                type='password'
-                name='password'
-                placeholder='password'
-              />
-              <input
-                className={`${classes.formItem} ${classes.button}`}
+                onClick={handleSubmit}
+                className={`${tailwindClasses.formItem} ${tailwindClasses.button} mt-7`}
                 type='submit'
                 name='submit'
-                value='Login'
+                value={props.label}
+              />
+              <input
+                className={`${tailwindClasses.formItem} bg-transparent border-2 border-primary rounded-md`}
+                type='submit'
+                name='submit'
+                value='use google account'
               />
             </form>
           </div>
