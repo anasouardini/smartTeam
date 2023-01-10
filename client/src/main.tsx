@@ -17,23 +17,23 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
             path='/login'
             element={
               <Authentication
-                label='signup'
-                title='create new account'
+                label='login'
+                title='Login to your account'
                 fields={['username', 'password']}
               />
             }
-          ></Route>
+          />
           <Route
             path='/signup'
             element={
               <Authentication
                 label='signup'
                 title='create new account'
-                fields={['username', 'password', 'email']}
+                fields={['email', 'username', 'password']}
               />
             }
-          ></Route>
-          <Route path='/:user' element={<Profile />}></Route>
+          />
+          <Route path='/:user' element={<Profile />}/>
         </Route>
       </Routes>
     </BrowserRouter>

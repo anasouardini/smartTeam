@@ -23,15 +23,15 @@ export default function Authentication(props: {
       <main
         aria-label={props.label}
         className={`bg-[url("/bg1.png")] bg-no-repeat bg-center relative
-                  before:absolute before:top-0 before:right-0
-                  before:bottom-0 before:left-0
-                  before:opacity-80
+                    before:absolute before:top-0 before:right-0
+                    before:bottom-0 before:left-0
+                    before:opacity-80
 
-                  before:bg-gradient-to-r before:from-slate-900
-                  before:via-purple-900 before:to-slate-900
+                    before:bg-gradient-to-r before:from-slate-900
+                    before:via-purple-900 before:to-slate-900
 
-                  text-white h-[100vh]
-                  flex items-center justify-center`}
+                    text-white h-[100vh]
+                    flex items-center justify-center`}
       >
         <div
           aria-label={`${props.label} card`}
@@ -46,6 +46,7 @@ export default function Authentication(props: {
               {props.fields.map((field) => {
                 return (
                   <input
+                    key={field}
                     className={`${tailwindClasses.formItem} ${tailwindClasses.input}`}
                     type={field == 'username' ? 'text' : { field }}
                     name={field}
