@@ -4,7 +4,7 @@ import Bridge from '../tools/bridge';
 
 export default function signup() {
   const initDB = async () => {
-    const res = await Bridge.create('initDB');
+    const res = await Bridge('post', 'initDB');
     console.log(res);
   };
 
