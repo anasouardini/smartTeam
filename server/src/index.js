@@ -1,4 +1,4 @@
-import express from 'express';
+const express = require('express');
 const app = express();
 const helmet = require('helmet');
 const cors = require('cors');
@@ -24,7 +24,8 @@ app.use('*', (_, res) => {
   res.status(404).json({ data: 'nothing to see here' });
 });
 
-app.use((err:any, req:any, res:any, next:any) => {
+app.use((err, req, res, next) => {
+  console.log(err)
   console.error(err.stack);
   if (res.headerSent) {
     return next(err);

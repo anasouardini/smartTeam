@@ -1,4 +1,5 @@
 import React from 'react';
+import Bridge from '../../tools/bridge';
 
 export default function Authentication(props: {
   title: string;
@@ -7,15 +8,36 @@ export default function Authentication(props: {
 }) {
   const tailwindClasses = {
     formItem: 'w-full my-3 py-2',
-    input: `capitalize border-b-primary border-b-2
+    input: `border-b-primary border-b-2
            focus:border-b-white outline-none
            bg-transparent placeholder:text-gray-200
           `,
     button: 'bg-orange rounded-md bg-primary font-bold',
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
+    let response: {
+      data?: {};
+      status?: number;
+      err?: string;
+      route?: string;
+    } | null = null;
+
+    if (props.label == 'login') {
+      response = await Bridge('post', 'login', {
+        username: e.target[0].value,
+        password: e.target[1].value,
+      });
+    } else if (props.label == 'signup') {
+      response = await Bridge('post', 'signup', {
+        email: e.target[0].value,
+        username: e.target[1].value,
+        password: e.target[2].value,
+      });
+    }
+
+    if (!response?.err) return console.log(response?.data);
   };
 
   return (
@@ -42,7 +64,7 @@ export default function Authentication(props: {
             <h1 className='first-letter:uppercase font-bold text-xl mb-6'>
               {props.title}
             </h1>
-            <form className='max-w-xs'>
+            <form className='max-w-xs' onSubmit={handleSubmit}>
               {props.fields.map((field) => {
                 return (
                   <input
@@ -55,7 +77,6 @@ export default function Authentication(props: {
                 );
               })}
               <input
-                onClick={handleSubmit}
                 className={`${tailwindClasses.formItem} ${tailwindClasses.button} mt-7`}
                 type='submit'
                 name='submit'

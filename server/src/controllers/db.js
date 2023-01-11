@@ -1,6 +1,6 @@
 const Db = require('../models/db')
 
-const init = async (req:any, res:any)=>{
+const init = async (req, res)=>{
   const response = await Db.initi();
 
   if(response){
