@@ -8,6 +8,8 @@ router.use(controllers.checkAuth);
 router.post('/login', controllers.login);
 router.post('/signup', controllers.signup);
 
+router.get('/verifyEmail/:token', controllers.verifyEmail);
+
 router.post('/user/:user', controllers.user.read);
 router.get('/user/:user', controllers.user.read);
 router.put('/user/:user', controllers.user.read);

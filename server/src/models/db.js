@@ -9,7 +9,8 @@ const initQueries = {
                       email varchar(30),
                       avatar varchar(30),
                       description varchar(30),
-                      createDate dateTime default current_timestamp
+                      createDate dateTime default current_timestamp,
+                      verified tinyint default 0
                     )`,
   createPorfoliosTable: `create table portfolios(
                       id varchar(50) primary key,
