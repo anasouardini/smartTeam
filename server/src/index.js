@@ -25,12 +25,16 @@ app.use('*', (_, res) => {
 });
 
 app.use((err, req, res, next) => {
+  console.log('================================ error handler route')
   console.log(err)
-  console.error(err.stack);
+  // console.error(err.stack);
+
+  // rare case
   if (res.headerSent) {
     return next(err);
   }
-  res.status(500).json({ err: 'something went bad' });
+
+  res.status(500).json({ err: 'something went bad in the server' });
 });
 
 app.listen(PORT, () => {
