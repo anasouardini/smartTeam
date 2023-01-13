@@ -44,20 +44,20 @@ export default function Authentication(props: {
     <>
       <main
         aria-label={props.label}
-        className={`bg-[url("/bg1.png")] bg-no-repeat bg-center relative
+        className={`bg-[url("/bg2.png")] bg-no-repeat bg-center bg-cover relative
                     before:absolute before:top-0 before:right-0
                     before:bottom-0 before:left-0
                     before:opacity-80
 
-                    before:bg-gradient-to-r before:from-slate-900
-                    before:via-purple-900 before:to-slate-900
+                    before:bg-gradient-to-r before:from-orange-900
+                    before:via-red-900 before:to-orange-900
 
                     text-white h-[100vh]
                     flex items-center justify-center`}
       >
         <div
           aria-label={`${props.label} card`}
-          className='flex flex-col items-center justify-center backdrop-blur-lg px-20 py-20'
+          className='flex flex-col items-center justify-center backdrop-blur-2xl rounded-xl px-12 py-12'
         >
           <div aria-label='grouping card'>
             <div aria-label='logo'></div>
@@ -70,7 +70,7 @@ export default function Authentication(props: {
                   <input
                     key={field}
                     className={`${tailwindClasses.formItem} ${tailwindClasses.input}`}
-                    type={field == 'username' ? 'text' : { field }}
+                    type={field == 'username' ? 'text' : field}
                     name={field}
                     placeholder={field}
                   />
