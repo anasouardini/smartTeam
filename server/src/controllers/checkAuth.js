@@ -16,12 +16,8 @@ const genNewAccessToken = async (userID) => {
   return token;
 };
 
-const checkAuth = async (req, res, next) => {
 
-  // TODO: clean up the syntax
-
-  let accessTokenValid = false;
-  {
+const checkAccessToken = async ()=>{
     let accessToken = req.headers?.accesstoken;
     if (accessToken) {
       const pubKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pub`, {
@@ -30,26 +26,24 @@ const checkAuth = async (req, res, next) => {
 
       try {
         res.userID = jwt.verify(accessToken, pubKey);
-        accessTokenValid = true;
+        return true;
       } catch (err) {}
     }
-  }
-  console.log('accessTokenValid: ', accessTokenValid);
 
-  let refreshTokenValid = false;
-  {
+    return false;
+}
+
+const checkRefreshToken = async ()=>{
     const refreshToken = req?.cookies?.[process.env.COOKIE_NAME];
     if (refreshToken) {
       const pubKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pub`, {
         encoding: 'utf-8',
       });
 
-      let usrID = null;
-      let newAccessToken = null;
       try {
         const { userID } = jwt.verify(refreshToken, pubKey);
         if (accessTokenValid) {
-          refreshTokenValid = true;
+          return true;
         } else {
           return res.json({
             data: 'new access token',
@@ -58,7 +52,16 @@ const checkAuth = async (req, res, next) => {
         }
       } catch (err) {}
     }
-  }
+
+  return false;
+}
+
+const checkAuth = async (req, res, next) => {
+
+  let accessTokenValid = await checkAccessToken();
+  console.log('accessTokenValid: ', accessTokenValid);
+
+  let refreshTokenValid = checkRefreshToken();
   console.log('refreshTokenValid: ', refreshTokenValid);
 
   const tokensValid = accessTokenValid && refreshTokenValid;
