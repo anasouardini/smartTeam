@@ -37,7 +37,7 @@ export default function Authentication(props: {
       });
     }
 
-    if (!response?.err) return console.log(response?.data);
+    if (!response?.err) return console.log(response);
   };
 
   return (

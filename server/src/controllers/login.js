@@ -1,5 +1,7 @@
 const Bcript = require('bcrypt');
 const UserM = require('../models/user');
+const fs = require('fs/promises');
+const jwt = require('jsonwebtoken')
 
 const login = async (req, res, next) => {
   if (!req.body?.username || !req.body?.password) {
@@ -23,15 +25,32 @@ const login = async (req, res, next) => {
     checkUserResponse[0][0].password
   );
 
-  if (passwordCorrect) {
-    return res.json({ data: 'logged in successfully' });
+  if (!passwordCorrect) {
+    return res.status(400).json({ data: 'credentials are not correct.' });
   }
 
-  return res.status(400).json({ data: 'credentials are not correct.' });
+  // creating the refresh token
+  {
+    const privKey = await fs.readFile(`${process.cwd()}/rsa/auth/key`, {
+      encoding: 'utf8',
+    });
+    const jwtOptions = { algorithm: 'RS256', expiresIn: '1h' };
+    const refreshToken = jwt.sign({ userID: checkUserResponse[0][0].id }, privKey, jwtOptions);
 
-  // create tokens
-  // if(passwordCorrect){
-  //
+    res.cookie(process.env.COOKIE_NAME, refreshToken, {httpOnly: true, maxAge: 1000*60*60*24});
+  }
+
+  // creating the access token
+  {
+    const privKey = await fs.readFile(`${process.cwd()}/rsa/auth/key`, {
+      encoding: 'utf8',
+    });
+    const jwtOptions = { algorithm: 'RS256', expiresIn: '1m' };
+    const accessToken = jwt.sign({ userID: checkUserResponse[0][0].id }, privKey, jwtOptions);
+
+    res.json({ data: 'logged in successfully', accessToken});
+  }
+
 };
 
 module.exports = login;

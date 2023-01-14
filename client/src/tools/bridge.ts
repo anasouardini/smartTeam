@@ -1,5 +1,6 @@
 const server = {
   url: 'http://127.0.0.1:2000/',
+  accessToken: '',
 
   options: (method: string, body?: {}) => {
     // console.log(body);
@@ -9,6 +10,7 @@ const server = {
       headers: {
         Accept: 'application.json',
         'Content-Type': 'application/json',
+        accessToken: server.accessToken,
       },
       cache: 'default',
       credentials: 'include',
@@ -93,7 +95,7 @@ const handleError = async (
   route: string,
   body: {}
 ) => {
-  const response = await methods[method](route, body);
+  const response = await methods[method](route, {...body, accessToken: server.accessToken});
   if (!response) {
     return { err: 'noResponse', route};
   }
@@ -101,6 +103,10 @@ const handleError = async (
   if (response.status != 200) {
     console.log({ err: response, route });
     return { err: 'serverError' };
+  }
+
+  if(response?.accessToken){
+    server.accessToken = response?.accessToken;
   }
 
   return response;
