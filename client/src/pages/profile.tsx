@@ -1,10 +1,10 @@
 import { useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
-
 import Bridge from '../tools/bridge';
 
-export default function Profile(){
+export default function Profile() {
+  const { user: usernameParam } = useParams();
 
 
   const profileInputsRef = useRef({fullname: '', title: ''}).current;
