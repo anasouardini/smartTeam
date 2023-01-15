@@ -44,17 +44,18 @@ const signup = async (req, res) => {
   }
 
   // email verification
-  const privKey = await fs.readFile(`${process.cwd()}/rsa/emailVerification/key`, { encoding: 'utf8' });
-  // console.log('l48 signup.js: ', privKey);
-  const jwtOptions = { algorithm: 'RS256'};
-  const token = jwt.sign({ username, email }, privKey, jwtOptions);
-  const hostname = process.env.PRODUCTION ? req.hostname : '127.0.0.1:3000';
-  const messageBody = `This email was linkded to an account on ${hostname},
-                      If you are the one that linked it feel free to click on the link 
-                      bellow to verify it.\n ${hostname}/verifyEmail/${token}`;
+  // const privKey = await fs.readFile(`${process.cwd()}/rsa/emailVerification/key.pem`, { encoding: 'utf8' });
+  // // console.log('l48 signup.js: ', privKey);
+  // const jwtOptions = { algorithm: 'RS256'};
+  // const token = jwt.sign({ username, email }, privKey, jwtOptions);
+  // const hostname = process.env.PRODUCTION ? req.hostname : '127.0.0.1:3000';
+  // const messageBody = `This email was linkded to an account on ${hostname},
+  //                     If you are the one that linked it feel free to click on the link 
+  //                     bellow to verify it.\n ${hostname}/verifyEmail/${token}`;
   // console.log('signup.js: ', messageBody);
+  
   // async
-  mailer(email, messageBody);
+  // mailer(email, messageBody);
 
   return res.json({
     data: 'account created successfully. please check your email for a verification link.',

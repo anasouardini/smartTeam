@@ -1,5 +1,5 @@
 const read = async (req, res) =>{
-
+  res.json({data: {username: '3sila'}});
 }
 
 const update = async (req, res)=>{

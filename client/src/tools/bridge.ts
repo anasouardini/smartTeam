@@ -1,6 +1,5 @@
 const server = {
   url: 'http://127.0.0.1:2000/',
-  accessToken: '',
 
   options: (method: string, body?: {}) => {
     // console.log(body);
@@ -10,7 +9,7 @@ const server = {
       headers: {
         Accept: 'application.json',
         'Content-Type': 'application/json',
-        accessToken: server.accessToken,
+        accessToken: localStorage.getItem('accessToken') as string,
       },
       cache: 'default',
       credentials: 'include',
@@ -46,7 +45,7 @@ const methods = {
       })
       .catch((err) => err),
 
-  updateFile: (route: string, body: {}) =>
+  updateFile: (route: string, body?: {}) =>
     fetch(server.url + route, {
       method: 'put',
       credentials: 'include',
@@ -90,26 +89,40 @@ const methods = {
       .catch((err) => false),
 };
 
-const handleError = async (
+const handleRequest = async (
   method: 'post' | 'get' | 'update' | 'updateFile' | 'remove',
   route: string,
-  body: {}
+  body?: {}
 ) => {
-  const response = await methods[method](route, {...body, accessToken: server.accessToken});
-  if (!response) {
-    return { err: 'noResponse', route};
-  }
+  let accessTokenRenewal = false;
+  let response = null;
+  do {
+    response = await methods[method](route, body);
+    if (!response) {
+      return { err: 'clientError', route };
+    }
 
-  if (response.status != 200) {
-    console.log({ err: response, route });
-    return { err: 'serverError' };
-  }
+    if (response.status != 200) {
+      console.log({ err: response, route });
+      return { err: 'serverError' };
+    }
 
-  if(response?.accessToken){
-    server.accessToken = response?.accessToken;
-  }
+    accessTokenRenewal = false;
+    if (response?.accessToken) {
+      // the user either just logged in or the accessToken is invalid
+      localStorage.setItem('accessToken', response?.accessToken);
+      accessTokenRenewal = true;
+    }
+
+    if (response?.redirect) {
+      // I need a way to change layout without using react-router
+      console.log('redirecting..', response?.redirect);
+      alert();
+      location.replace(response?.redirect);
+    }
+  }while (accessTokenRenewal)
 
   return response;
 };
 
-export default handleError;
+export default handleRequest;

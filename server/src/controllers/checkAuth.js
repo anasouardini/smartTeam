@@ -4,7 +4,7 @@ const fs = require('fs/promises');
 require('dotenv').config();
 
 const genNewAccessToken = async (userID) => {
-  const privKey = await fs.readFile(`${process.cwd()}/rsa/auth/key`, {
+  const privKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pem`, {
     encoding: 'utf-8',
   });
 
@@ -16,53 +16,60 @@ const genNewAccessToken = async (userID) => {
   return token;
 };
 
+const checkAccessToken = async (accessToken) => {
+  if (accessToken) {
+    const pubKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pub`, {
+      encoding: 'utf-8',
+    });
 
-const checkAccessToken = async ()=>{
-    let accessToken = req.headers?.accesstoken;
-    if (accessToken) {
-      const pubKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pub`, {
-        encoding: 'utf-8',
-      });
-
-      try {
-        res.userID = jwt.verify(accessToken, pubKey);
-        return true;
-      } catch (err) {}
+    try {
+      return jwt.verify(accessToken, pubKey).userID;
+    } catch (err) {
+      console.log('verifying access token: ', err);
     }
+  }
 
-    return false;
-}
+  return undefined;
+};
 
-const checkRefreshToken = async ()=>{
-    const refreshToken = req?.cookies?.[process.env.COOKIE_NAME];
-    if (refreshToken) {
-      const pubKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pub`, {
-        encoding: 'utf-8',
-      });
+const checkRefreshToken = async (refreshToken) => {
+  if (refreshToken) {
+    const pubKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pub`, {
+      encoding: 'utf-8',
+    });
 
-      try {
-        const { userID } = jwt.verify(refreshToken, pubKey);
-        if (accessTokenValid) {
-          return true;
-        } else {
-          return res.json({
-            data: 'new access token',
-            accessToken: await genNewAccessToken(userID),
-          });
-        }
-      } catch (err) {}
+    // console.log(refreshToken);
+    // console.log(pubKey);
+
+    try {
+      return jwt.verify(refreshToken, pubKey);
+    } catch (err) {
+      console.log('verifying refresh token: ', err);
     }
+  }
 
-  return false;
-}
+  return undefined;
+};
 
 const checkAuth = async (req, res, next) => {
+  // console.log(req.headers?.accesstoken);
 
-  let accessTokenValid = await checkAccessToken();
+  let accessTokenValid = await checkAccessToken(req.headers?.accesstoken);
   console.log('accessTokenValid: ', accessTokenValid);
+  if (accessTokenValid) res.userID = accessTokenValid.userID;
 
-  let refreshTokenValid = checkRefreshToken();
+  let refreshTokenValid = await checkRefreshToken(
+    req?.cookies?.[process.env.COOKIE_NAME]
+  );
   console.log('refreshTokenValid: ', refreshTokenValid);
+
+  // refreshing the access token
+  if (!accessTokenValid && refreshTokenValid) {
+    return res.json({
+      data: 'new access token',
+      accessToken: await genNewAccessToken(refreshTokenValid.userID),
+    });
+  }
 
   const tokensValid = accessTokenValid && refreshTokenValid;
 
@@ -71,11 +78,11 @@ const checkAuth = async (req, res, next) => {
 
   const theFirst3Items = [0, 3];
   if (exceptionRoutes.slice(theFirst3Items).includes(req.path) && tokensValid) {
-    return res.json({ data: 'you are already logged in' });
+    return res.json({ data: 'you are already logged in', redirect: '/' });
   }
 
   if (!exceptionRoutes.includes(req.path) && !tokensValid) {
-    return res.json({ data: 'you have to log in first' });
+    return res.json({ data: 'you have to log in first', redirect: '/login' });
   }
 
   // the other two cases are passed to the proper route
