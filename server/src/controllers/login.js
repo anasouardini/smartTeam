@@ -5,18 +5,18 @@ const jwt = require('jsonwebtoken')
 
 const login = async (req, res, next) => {
   if (!req.body?.username || !req.body?.password) {
-    res.status(400).json({ data: 'the entered information is not complete' });
+    res.status(400).json({ error: 'the entered information is not complete' });
   }
 
   // check if username exists
   // console.log(req.body);
   const checkUserResponse = await UserM.read({ username: req.body.username });
-  if (!checkUserResponse) {
+  if (checkUserResponse?.err) {
     return next('something went bad in the server while loggin in');
   }
   // console.log(checkUserResponse)
   if (!checkUserResponse[0].length) {
-    return res.status(400).json({ data: 'credentials are not correct.' });
+    return res.status(400).json({ error: 'credentials are not correct.' });
   }
 
   // checking if passwords match up
@@ -26,7 +26,7 @@ const login = async (req, res, next) => {
   );
 
   if (!passwordCorrect) {
-    return res.status(400).json({ data: 'credentials are not correct.' });
+    return res.status(400).json({ error: 'credentials are not correct.' });
   }
 
   // creating the refresh token

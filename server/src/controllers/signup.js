@@ -7,12 +7,12 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs/promises');
 
 const signup = async (req, res) => {
+  const fullname = req.body.fullname;
   const username = req.body.username;
   const email = req.body.email;
   const password = req.body.password;
 
   if (!username || !password) {
-    // console.log(req.body);
     return res
       .status(400)
       .json({ data: 'the entered information is not complete' });
@@ -26,7 +26,7 @@ const signup = async (req, res) => {
   if (checkUserResponse[0].length) {
     return res
       .status(400)
-      .json({ data: 'username is taken, choose another one.' });
+      .json({ error: 'username is taken, choose another one.' });
   }
 
   // craete the new account with hashed password
@@ -35,12 +35,14 @@ const signup = async (req, res) => {
     username,
     password: hashedPassword,
     email,
+    fullname,
+    title: '',
     description: '',
     avatar: '',
   });
 
   if (createUserResponse?.err || !createUserResponse[0]?.affectedRows) {
-    return res.status(500).json({ data: 'error while creating account' });
+    return res.status(500).json({ error: 'error while creating account' });
   }
 
   // email verification

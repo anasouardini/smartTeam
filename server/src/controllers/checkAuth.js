@@ -23,7 +23,7 @@ const checkAccessToken = async (accessToken) => {
     });
 
     try {
-      return jwt.verify(accessToken, pubKey).userID;
+      return jwt.verify(accessToken, pubKey);
     } catch (err) {
       console.log('verifying access token: ', err);
     }
@@ -44,7 +44,7 @@ const checkRefreshToken = async (refreshToken) => {
     try {
       return jwt.verify(refreshToken, pubKey);
     } catch (err) {
-      console.log('verifying refresh token: ', err);
+      console.log('erro verifying refresh token: ', err);
     }
   }
 
@@ -55,13 +55,13 @@ const checkAuth = async (req, res, next) => {
   // console.log(req.headers?.accesstoken);
 
   let accessTokenValid = await checkAccessToken(req.headers?.accesstoken);
-  console.log('accessTokenValid: ', accessTokenValid);
+  // console.log('accessTokenValid: ', accessTokenValid);
   if (accessTokenValid) res.userID = accessTokenValid.userID;
 
   let refreshTokenValid = await checkRefreshToken(
     req?.cookies?.[process.env.COOKIE_NAME]
   );
-  console.log('refreshTokenValid: ', refreshTokenValid);
+  // console.log('refreshTokenValid: ', refreshTokenValid);
 
   // refreshing the access token
   if (!accessTokenValid && refreshTokenValid) {
@@ -77,12 +77,13 @@ const checkAuth = async (req, res, next) => {
   const exceptionRoutes = ['/login', '/signup', '/oauth', '/initDB'];
 
   const theFirst3Items = [0, 3];
-  if (exceptionRoutes.slice(theFirst3Items).includes(req.path) && tokensValid) {
-    return res.json({ data: 'you are already logged in', redirect: '/' });
+  if (exceptionRoutes.slice(...theFirst3Items).includes(req.path) && tokensValid) {
+    // console.log('redirect to home', exceptionRoutes.slice(theFirst3Items))
+    return res.json({ redirect: '/' });
   }
 
   if (!exceptionRoutes.includes(req.path) && !tokensValid) {
-    return res.json({ data: 'you have to log in first', redirect: '/login' });
+    return res.json({ redirect: '/login' });
   }
 
   // the other two cases are passed to the proper route

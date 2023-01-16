@@ -4,8 +4,11 @@ import Bridge from '../../tools/bridge';
 export default function Authentication(props: {
   title: string;
   label: string;
-  fields: string[];
+  fields: string[][];
 }) {
+
+  
+
   const tailwindClasses = {
     formItem: 'w-full my-3 py-2',
     input: `border-b-primary border-b-2
@@ -30,11 +33,11 @@ export default function Authentication(props: {
         password: e.target[1].value,
       });
     } else if (props.label == 'signup') {
-      response = await Bridge('post', 'signup', {
-        email: e.target[0].value,
-        username: e.target[1].value,
-        password: e.target[2].value,
-      });
+      const genBody = props.fields.reduce((acc:{[key: string]: string}, field, index)=>{
+        acc[field[0]] = e.target[index].value;
+        return acc;
+      },{});
+      response = await Bridge('post', 'signup', genBody);
     }
 
     if (!response?.err) return console.log(response);
@@ -68,11 +71,11 @@ export default function Authentication(props: {
               {props.fields.map((field) => {
                 return (
                   <input
-                    key={field}
+                    key={field[0]}
                     className={`${tailwindClasses.formItem} ${tailwindClasses.input}`}
-                    type={field == 'username' ? 'text' : field}
-                    name={field}
-                    placeholder={field}
+                    type={field[1]}
+                    name={field[0]}
+                    placeholder={field[0]}
                   />
                 );
               })}

@@ -7,7 +7,7 @@ const init = async (req, res)=>{
     return res.json({data: 'database re-initialized successfully'})
   }
 
-  return res.status(500).json({data: 'database could not be initialized'})
+  return res.status(500).json({err: 'database could not be initialized'})
 }
 
 module.exports = {init};
