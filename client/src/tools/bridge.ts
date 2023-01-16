@@ -97,14 +97,16 @@ const handleRequest = async (
   let accessTokenRenewal = false;
   let response = null;
   do {
-    response = await methods[method](route, body);
-    if (!response) {
-      return { err: 'clientError', route };
+    try{
+      response = await methods[method](route, body);
+    }catch(err){
+      console.log('client error while trying to make a request: ', { err: 'connectionError', route });
+      return { err: 'connectionError', route };
     }
 
-    if (response.status != 200) {
-      console.log({ err: response, route });
-      return { err: 'serverError' };
+    if (response.err) {
+      console.log('ERROR: ', { data: response, route });
+      return response;
     }
 
     accessTokenRenewal = false;
@@ -117,7 +119,6 @@ const handleRequest = async (
     if (response?.redirect) {
       // I need a way to change layout without using react-router
       console.log('redirecting..', response?.redirect);
-      alert();
       location.replace(response?.redirect);
     }
   }while (accessTokenRenewal)
