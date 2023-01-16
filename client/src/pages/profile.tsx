@@ -1,11 +1,19 @@
 import { useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
+
 import Bridge from '../tools/bridge';
 
 export default function Profile() {
   const { user: usernameParam } = useParams();
 
+
+  const profileInputsRef = useRef({fullname: '', title: ''}).current;
+
+  const userInfoQuery = useQuery('userInfoQuery', async () => {
+    const response = await Bridge('get', `user/${usernameParam}`);
+    return response?.err == 'serverError' ? false : response.data;
+  });
 
   const profileInputsRef = useRef({fullname: '', title: ''}).current;
 
@@ -26,8 +34,8 @@ export default function Profile() {
       <section aria-label='name-title-pic'>
         <img aria-label='profile picture' src='' alt='' />
         <div>
-          <h1 aria-label='fullname'>{userInfoQuery.data?.fullname}</h1>
-          <h2 aria-label='title'>{userInfoQuery.data?.title}</h2>
+          <h1 aria-label='fullname'>{userInfoQuery.data.fullname}</h1>
+          <h2 aria-label='title'>{userInfoQuery.data.title}</h2>
         </div>
       </section>
       <section></section>
