@@ -8,6 +8,8 @@ const initQueries = {
                       password varchar(60),
                       email varchar(30),
                       avatar varchar(30),
+                      fullname varchar(30),
+                      title varchar(30),
                       description varchar(30),
                       createDate dateTime default current_timestamp,
                       verified tinyint default 0

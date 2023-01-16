@@ -1,24 +1,29 @@
 const pool = require('./dbPool');
 const { v4: uuid } = require('uuid');
 
-const create = async ({ username, password, email, description, avatar }) => {
+const create = async (userData) => {
+  // this simply resuls in this -> ?, ?, ?, ?... times the length of userData
+  const placeholders = '?, '.repeat(Object.entries(userData).length) + '?';
+
   const response = await pool(
-    `insert into users(id, username, password, email, avatar, description)
-     values(?, ?, ?, ?, ?, ?);`,
-    [uuid(), username, password, email, description, avatar]
+    `insert into users(id, ${Object.keys(userData).join(', ')})
+     values(${placeholders});`,
+    [uuid(), ...Object.values(userData)]
   );
 
   return response;
 };
 
-const read = async ({ username, email }) => {
-  let query = 'select * from users where username=?';
-  let vars = [username];
+const read = async (filter) => {
+  let query = 'select * from users';
+  let vars = [];
 
-  if (email) {
-    query += ' and email=?';
-    vars.push(email);
-  }
+  // where 1=1 and filter=value...
+  query += ' where 1=1';
+  Object.entries(filter).forEach((item) => {
+    query += ` and ${item[0]}=?`;
+    vars.push(item[1]);
+  });
 
   const response = await pool(query, vars);
 
@@ -31,10 +36,10 @@ const update = async (filter, newData) => {
   }
 
   let query = `update users set`;
-  let vars = [username, email];
+  let vars = [];
 
   // data=value, data=value...
-  newData.entries.forEach((item, index) => {
+  Object.entries(newData).forEach((item, index) => {
     if (index == 0) {
       query += ` ${item[0]}=?`;
       vars.push(item[1]);
@@ -45,7 +50,7 @@ const update = async (filter, newData) => {
 
   // where 1=1 and filter=value...
   query += ' where 1=1';
-  filter.entries.forEach((item) => {
+  Object.entries(filter).forEach((item) => {
     query += ` and ${item[0]}=?`;
     vars.push(item[1]);
   });
