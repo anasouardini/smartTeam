@@ -18,7 +18,10 @@ const MyRouter = () => (
             <Authentication
               label='login'
               title='Login to your account'
-              fields={[['username', 'text'], ['password', 'password']]}
+              fields={[
+                ['username', 'text'],
+                ['password', 'password'],
+              ]}
             />
           }
         />
@@ -28,7 +31,12 @@ const MyRouter = () => (
             <Authentication
               label='signup'
               title='create new account'
-              fields={[['fullname', 'text'], ['username', 'text'], ['email', 'email'], ['password', 'password']]}
+              fields={[
+                ['fullname', 'text'],
+                ['username', 'text'],
+                ['email', 'email'],
+                ['password', 'password'],
+              ]}
             />
           }
         />
@@ -40,36 +48,10 @@ const MyRouter = () => (
 
 import { QueryClient, QueryClientProvider } from 'react-query';
 const queryClient = new QueryClient({
-    defaultOptions: { queries: { refetchOnWindowFocus: true } },
-  });
+  defaultOptions: { queries: { refetchOnWindowFocus: true } },
+});
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <>
-    <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<SharedLayout />}>
-          <Route
-            path='/login'
-            element={
-              <Authentication
-                label='login'
-                title='Login to your account'
-                fields={['username', 'password']}
-              />
-            }
-          />
-          <Route
-            path='/signup'
-            element={
-              <Authentication
-                label='signup'
-                title='create new account'
-                fields={['email', 'username', 'password']}
-              />
-            }
-          />
-          <Route path='/:user' element={<Profile />}/>
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  </>
+  <QueryClientProvider client={queryClient}>
+    <MyRouter />
+  </QueryClientProvider>
 );

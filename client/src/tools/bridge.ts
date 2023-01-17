@@ -119,6 +119,7 @@ const handleRequest = async (
     if (response?.redirect) {
       // I need a way to change layout without using react-router
       console.log('redirecting..', response?.redirect);
+      // alert();
       location.replace(response?.redirect);
     }
   }while (accessTokenRenewal)
