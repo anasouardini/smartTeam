@@ -25,7 +25,7 @@ const checkAccessToken = async (accessToken) => {
     try {
       return jwt.verify(accessToken, pubKey);
     } catch (err) {
-      console.log('verifying access token: ', err);
+      // console.log('verifying access token: ', err);
     }
   }
 
@@ -82,7 +82,7 @@ const checkAuth = async (req, res, next) => {
     return res.json({ redirect: '/' });
   }
 
-  if (!exceptionRoutes.includes(req.path) && !tokensValid) {
+  if (!exceptionRoutes.includes(req.path) && !req.path.match('^/verifyEmail') && !tokensValid) {
     return res.json({ redirect: '/login' });
   }
 

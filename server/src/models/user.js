@@ -26,7 +26,7 @@ const read = async ({ username, email }) => {
 };
 
 const update = async (filter, newData) => {
-  if (!newData || newData.keys.length == 0) {
+  if (!newData || Object.keys(newData).length == 0) {
     return { err: 'no data is provided' };
   }
 

@@ -19,6 +19,10 @@ const login = async (req, res, next) => {
     return res.status(400).json({ error: 'credentials are not correct.' });
   }
 
+  if(!checkUserResponse[0][0].verified){
+    return res.status(400).json({ error: 'verify your account before you can login.' });
+  }
+
   // checking if passwords match up
   const passwordCorrect = await Bcript.compare(
     req.body.password,
