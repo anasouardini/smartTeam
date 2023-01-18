@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const fs = require('fs/promises');
+const MUser = require('../models/user');
 
 require('dotenv').config();
 
@@ -73,16 +74,39 @@ const checkAuth = async (req, res, next) => {
 
   const tokensValid = accessTokenValid && refreshTokenValid;
 
+  // the client is checking the login session
+  if (req.path == '/isLogin') {
+    if (!tokensValid) {
+      return res.json({ loginStatus: false });
+    }
+    const userResp = await MUser.read({ id: accessTokenValid.userID });
+    const userInfo = {
+      id: userResp[0][0].id,
+      username: userResp[0][0].username
+    }
+    if (userResp.err) {
+      next('error while trying to get user info for the client sharedLayout');
+    }
+    return res.json({ loginStatus: true, loggedInUser: userInfo });
+  }
+
   // order matters
   const exceptionRoutes = ['/login', '/signup', '/oauth', '/initDB'];
 
   const theFirst3Items = [0, 3];
-  if (exceptionRoutes.slice(...theFirst3Items).includes(req.path) && tokensValid) {
+  if (
+    exceptionRoutes.slice(...theFirst3Items).includes(req.path) &&
+    tokensValid
+  ) {
     // console.log('redirect to home', exceptionRoutes.slice(theFirst3Items))
     return res.json({ redirect: '/' });
   }
 
-  if (!exceptionRoutes.includes(req.path) && !req.path.match('^/verifyEmail') && !tokensValid) {
+  if (
+    !exceptionRoutes.includes(req.path) &&
+    !req.path.match('^/verifyEmail/') &&
+    !tokensValid
+  ) {
     return res.json({ redirect: '/login' });
   }
 

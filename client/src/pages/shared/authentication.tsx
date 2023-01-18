@@ -1,5 +1,6 @@
 import React from 'react';
 import Bridge from '../../tools/bridge';
+import {useOutletContext, Navigate} from 'react-router-dom';
 
 export default function Authentication(props: {
   title: string;
@@ -7,7 +8,11 @@ export default function Authentication(props: {
   fields: string[][];
 }) {
 
-  
+  const outletContext: {isLoggedIn: boolean} = useOutletContext();
+  // console.log('outlet: ', outletContext)
+  if(outletContext.isLoggedIn){
+    return <Navigate to='/'></Navigate>;
+  }
 
   const tailwindClasses = {
     formItem: 'w-full my-3 py-2',
