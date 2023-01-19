@@ -1,76 +1,9 @@
-const axios = require('axios');
 require('dotenv').config();
+const OauthLib = require('./oauthLib');
 
 // for presisting login
 const fs = require('fs/promises');
 const jwt = require('jsonwebtoken');
-
-const oauth = async (req, res, oauthServer, options) => {
-  // AUTH_GOOGLE_INFO_ENDPOINT='https://www.googleapis.com/oauth2/v1/userinfo'
-
-  const defaults = {
-    google: {
-      accessTokenEndpoint: 'https://oauth2.googleapis.com/token',
-      consentEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-    },
-  };
-
-  if (req.query?.code) {
-    const accessTokenRequest = {
-      redirect_uri: options.redirect_uri,
-      client_id: options.client_id,
-      client_secret: options.client_secret,
-      grant_type: 'authorization_code',
-      code: req.query.code,
-    };
-    const response = await axios
-      .post(defaults[oauthServer].accessTokenEndpoint, accessTokenRequest, {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      })
-      .then((res) => res.data)
-      .catch((error) => ({ error: error.response.data.error }));
-
-    if (response?.error) {
-      options.onError('oauth server error');
-      return { status: 'error' };
-    }
-
-    try {
-      const accessTokenResponse = jwt.decode(response.id_token);
-
-      // CHECK EMAIL VERIFICATION
-      if (!accessTokenResponse.email_verified) {
-        options.onError('email is not verified');
-        return { status: 'error' };
-      }
-
-      return { status: 'success', ...accessTokenResponse };
-    } catch (err) {
-      options.onError(
-        oauthServer + ' auth server sent an invalid access token'
-      );
-
-      return { status: 'error' };
-    }
-  }
-
-  // NO ID TOKEN: REDIRECTING TO THE CONSENT SCREEN
-  consentData = {
-    response_type: 'code',
-    scope: 'email profile',
-    nonce: '161581761691-3tjdu1rca5q35h60qcgrd7eb0tb2ulmpakonamatata',
-    redirect_uri: options.redirect_uri,
-    client_id: options.client_id,
-  };
-
-  res.redirect(
-    `${defaults[oauthServer].consentEndpoint}?${new URLSearchParams(
-      consentData
-    )}`
-  );
-
-  return { status: 'consent' };
-};
 
 const upsertUser = async (oauthAccessToken) => {
   const { email, email_verified } = oauthAccessToken;
@@ -115,7 +48,14 @@ const presistAuth = async (req, res) => {
   }
 };
 
-const google = async (req, res) => {
+const oauth = async (req, res) => {
+  const method = req.params.method;
+
+  // check if function exists
+  if (!OauthLib[method]) {
+    return res.status(404).json({data: 'this oauth method is not implementd in the server'})
+  }
+
   const options = {
     redirect_uri: process.env.DEV_SERVER_ADDRESS + '/oauth/google',
     client_id: process.env.AUTH_GOOGLE_ID,
@@ -126,7 +66,7 @@ const google = async (req, res) => {
     },
   };
 
-  const accessTokenResponse = await oauth(req, res, 'google', options);
+  const accessTokenResponse = await OauthLib[method](req, res, method, options);
 
   // console.log(accessTokenResponse)
   if (accessTokenResponse.status == 'success') {
@@ -136,4 +76,4 @@ const google = async (req, res) => {
   }
 };
 
-module.exports = { google };
+module.exports = oauth;

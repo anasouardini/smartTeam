@@ -9,7 +9,7 @@ router.post('/login', controllers.login);
 router.post('/signup', controllers.signup);
 
 // oauthServer example: google, instagram
-router.get('/oauth/:oauthServer', controllers.oauth.google);
+router.get('/oauth/:method', controllers.oauth);
 
 router.get('/verifyEmail/:token', controllers.verifyEmail);
 
