@@ -25,7 +25,9 @@ export default function signup() {
     if (!res?.err) {
       setIsLoginState(res.loginStatus);
       setLoggedInUserState(res.loggedInUser);
+      return;
     }
+      setIsLoginState(false);
   };
 
   React.useEffect(() => {

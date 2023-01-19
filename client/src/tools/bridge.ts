@@ -1,5 +1,7 @@
+import Vars from '../vars';
+
 const server = {
-  url: 'http://127.0.0.1:2000/',
+  url: Vars.serverAddress,
 
   options: (method: string, body?: {}) => {
     // console.log(body);
@@ -23,7 +25,7 @@ const server = {
 
 const methods = {
   post: (route: string, body?: {}) =>
-    fetch(server.url + route, server.options('post', body))
+    fetch(`${server.url}/${route}`, server.options('post', body))
       .then(async (res) => {
         return {
           ...(await res.json().then((res) => res)),
@@ -33,7 +35,7 @@ const methods = {
       .catch(() => false),
 
   get: (route: string) =>
-    fetch(server.url + route, server.options('get'))
+    fetch(`${server.url}/${route}`, server.options('get'))
       .then(async (res) => {
         return {
           ...(await res
@@ -46,7 +48,7 @@ const methods = {
       .catch((err) => err),
 
   updateFile: (route: string, body?: {}) =>
-    fetch(server.url + route, {
+    fetch(`${server.url}/${route}`, {
       method: 'put',
       credentials: 'include',
       body: JSON.stringify(body),
@@ -63,7 +65,7 @@ const methods = {
       .catch((err) => false),
 
   update: (route: string, body?: {}) =>
-    fetch(server.url + route, server.options('put', body))
+    fetch(`${server.url}/${route}`, server.options('put', body))
       .then(async (res) => {
         return {
           ...(await res
@@ -76,7 +78,7 @@ const methods = {
       .catch((err) => false),
 
   remove: (route: string, body?: {}) =>
-    fetch(server.url + route, server.options('delete', body))
+    fetch(`${server.url}/${route}`, server.options('delete', body))
       .then(async (res) => {
         return {
           ...(await res
@@ -94,6 +96,7 @@ const handleRequest = async (
   route: string,
   body?: {}
 ) => {
+
   let accessTokenRenewal = false;
   let response = null;
   do {
@@ -104,9 +107,10 @@ const handleRequest = async (
       return { err: 'connectionError', route };
     }
 
-    if (response.err) {
-      console.log('ERROR: ', { data: response, route });
-      return response;
+    // TODO: probably send the falsy response to react-query
+    if (response.status != 200) {
+      console.log({ err: response, route });
+      return { err: 'serverError' };
     }
 
     accessTokenRenewal = false;
