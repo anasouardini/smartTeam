@@ -25,7 +25,7 @@ export default function Authentication(props: {
 
   const handleOAuth = async (e: any) => {
     e.preventDefault();
-    window.location.replace(`${Vars.serverAddress}/oauth/google`);
+    window.location.assign(`${Vars.serverAddress}/oauth/google`);
   };
 
   const handleAuth = async (e: any) => {
