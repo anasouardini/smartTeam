@@ -1,16 +1,16 @@
 import React from 'react';
 import Bridge from '../../tools/bridge';
-import {useOutletContext, Navigate} from 'react-router-dom';
+import { useOutletContext, Navigate } from 'react-router-dom';
+import Vars from '../../vars';
 
 export default function Authentication(props: {
   title: string;
   label: string;
   fields: string[][];
 }) {
-
-  const outletContext: {isLoggedIn: boolean} = useOutletContext();
+  const outletContext: { isLoggedIn: boolean } = useOutletContext();
   // console.log('outlet: ', outletContext)
-  if(outletContext.isLoggedIn){
+  if (outletContext.isLoggedIn) {
     return <Navigate to='/'></Navigate>;
   }
 
@@ -23,7 +23,12 @@ export default function Authentication(props: {
     button: 'bg-orange rounded-md bg-primary font-bold',
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleOAuth = async (e: any) => {
+    e.preventDefault();
+    window.location.replace(`${Vars.serverAddress}/oauth/google`);
+  };
+
+  const handleAuth = async (e: any) => {
     e.preventDefault();
     let response: {
       data?: {};
@@ -38,10 +43,13 @@ export default function Authentication(props: {
         password: e.target[1].value,
       });
     } else if (props.label == 'signup') {
-      const genBody = props.fields.reduce((acc:{[key: string]: string}, field, index)=>{
-        acc[field[0]] = e.target[index].value;
-        return acc;
-      },{});
+      const genBody = props.fields.reduce(
+        (acc: { [key: string]: string }, field, index) => {
+          acc[field[0]] = e.target[index].value;
+          return acc;
+        },
+        {}
+      );
       response = await Bridge('post', 'signup', genBody);
     }
 
@@ -72,7 +80,10 @@ export default function Authentication(props: {
             <h1 className='first-letter:uppercase font-bold text-xl mb-6'>
               {props.title}
             </h1>
-            <form className='max-w-xs' onSubmit={handleSubmit}>
+            <form
+              className='max-w-xs'
+              onSubmit={(e: any) => e.preventDefault()}
+            >
               {props.fields.map((field) => {
                 return (
                   <input
@@ -85,12 +96,14 @@ export default function Authentication(props: {
                 );
               })}
               <input
+                onClick={handleAuth}
                 className={`${tailwindClasses.formItem} ${tailwindClasses.button} mt-7`}
                 type='submit'
                 name='submit'
                 value={props.label}
               />
               <input
+                onClick={handleOAuth}
                 className={`${tailwindClasses.formItem} bg-transparent border-2 border-primary rounded-md`}
                 type='submit'
                 name='submit'

@@ -21,7 +21,7 @@ app.use(express.urlencoded());
 app.use('/', require('./router'));
 
 app.use('*', (_, res) => {
-  res.status(404).json({ data: 'nothing to see here' });
+  return res.status(404).json({ data: 'nothing to see here' });
 });
 
 app.use((err, req, res, next) => {
@@ -30,7 +30,7 @@ app.use((err, req, res, next) => {
   // console.error(err.stack);
 
   // rare case
-  if (res.headerSent) {
+  if (res.headersSent) {
     return next(err);
   }
 

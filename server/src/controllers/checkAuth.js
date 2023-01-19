@@ -91,7 +91,7 @@ const checkAuth = async (req, res, next) => {
   }
 
   // order matters
-  const exceptionRoutes = ['/login', '/signup', '/oauth', '/initDB'];
+  const exceptionRoutes = ['/login', '/signup', '/oauth/google', '/initDB'];
 
   const theFirst3Items = [0, 3];
   if (
