@@ -72,18 +72,18 @@ const checkAuth = async (req, res, next) => {
     });
   }
 
-  const tokensValid = accessTokenValid && refreshTokenValid;
+  const authenticated = accessTokenValid && refreshTokenValid;
 
   // the client is checking the login session
   if (req.path == '/isLogin') {
-    if (!tokensValid) {
+    if (!authenticated) {
       return res.json({ loginStatus: false });
     }
     const userResp = await MUser.read({ id: accessTokenValid.userID });
     const userInfo = {
       id: userResp[0][0].id,
-      username: userResp[0][0].username
-    }
+      username: userResp[0][0].username,
+    };
     if (userResp.err) {
       next('error while trying to get user info for the client sharedLayout');
     }
@@ -91,22 +91,20 @@ const checkAuth = async (req, res, next) => {
   }
 
   // order matters
-  const exceptionRoutes = ['/login', '/signup', '/oauth/google', '/initDB'];
+  const authRoutes = ['/login', '/signup', '/oauth/google', '/oauth/github'];
+  const authIndependent = ['/initDB'];
 
-  const theFirst3Items = [0, 3];
-  if (
-    exceptionRoutes.slice(...theFirst3Items).includes(req.path) &&
-    tokensValid
-  ) {
+  const tryingToAuth = authRoutes.includes(req.path);
+  if (tryingToAuth && authenticated) {
     // console.log('redirect to home', exceptionRoutes.slice(theFirst3Items))
     return res.json({ redirect: '/' });
   }
 
-  if (
-    !exceptionRoutes.includes(req.path) &&
-    !req.path.match('^/verifyEmail/') &&
-    !tokensValid
-  ) {
+  const visitingAfterAuthRoutes =
+    !tryingToAuth &&
+    authIndependent.includes(req.path) &&
+    !req.path.match('^/verifyEmail/');
+  if (visitingAfterAuthRoutes && !authenticated) {
     return res.json({ redirect: '/login' });
   }
 

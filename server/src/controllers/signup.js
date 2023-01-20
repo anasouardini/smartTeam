@@ -1,5 +1,5 @@
 const Bcript = require('bcrypt');
-const UserM = require('../models/user');
+const MUser = require('../models/user');
 const { v4: uuid } = require('uuid');
 const mailer = require('./mailer');
 const os = require('os');
@@ -21,7 +21,7 @@ const signup = async (req, res) => {
   }
 
   // check if username is taken
-  const checkUserResponse = await UserM.read({ username });
+  const checkUserResponse = await MUser.read({ username });
   if (!checkUserResponse) {
     throw Error('error while signing up');
   }
@@ -33,7 +33,7 @@ const signup = async (req, res) => {
 
   // craete the new account with hashed password
   const hashedPassword = await Bcript.hash(password, 10);
-  const createUserResponse = await UserM.create({
+  const createUserResponse = await MUser.create({
     username,
     password: hashedPassword,
     email,

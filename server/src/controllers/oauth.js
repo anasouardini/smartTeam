@@ -1,16 +1,59 @@
 require('dotenv').config();
 const OauthLib = require('./oauthLib');
+const MUser = require('../models/user');
 
 // for presisting login
 const fs = require('fs/promises');
 const jwt = require('jsonwebtoken');
 
-const upsertUser = async (oauthAccessToken) => {
-  const { email, email_verified } = oauthAccessToken;
-  // TODO
+const upsertUser = async (req, res, next, method, oauthAccessToken) => {
+
+  let accountInfo = {};
+  if (method == 'github') {
+    const { id } = oauthAccessToken;
+    const accountID = `${method}-${id}`;
+
+    accountInfo = {
+      username: accountID,
+      password: '',
+      email: '',
+      fullname: '',
+      title: '',
+      description: '',
+      avatar: '',
+    };
+  }
+  else if (method == 'google') {
+    const { email} = oauthAccessToken;
+
+    accountInfo = {
+      username: email,
+      password: '',
+      email: '',
+      fullname: '',
+      title: '',
+      description: '',
+      avatar: '',
+    };
+  }
+  const readUserResponse = await MUser.read({ id: accountID });
+
+  if (readUserResponse?.err) {
+    return next('error while checking account existence - upsertUser');
+  }
+
+  const createUserResponse = await MUser.create(accountInfo);
+
+  if (createUserResponse?.err || !createUserResponse[0]?.affectedRows) {
+    return next('error while creating account');
+  }
+
+  // TODO mark as verified
+  // github: github-id
+  // google: email
 };
 
-const presistAuth = async (req, res) => {
+const presistAuth = async (req, res, upsertionData) => {
   // creating the refresh token
   {
     const privKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pem`, {
@@ -53,26 +96,41 @@ const oauth = async (req, res) => {
 
   // check if function exists
   if (!OauthLib[method]) {
-    return res.status(404).json({data: 'this oauth method is not implementd in the server'})
+    return res
+      .status(404)
+      .json({ data: 'this oauth method is not implementd in the server' });
   }
 
+  // start of -- using my oauth lib
   const options = {
-    redirect_uri: process.env.DEV_SERVER_ADDRESS + '/oauth/google',
-    client_id: process.env.AUTH_GOOGLE_ID,
-    client_secret: process.env.AUTH_GOOGLE_SECRET,
+    redirect_uri: process.env.DEV_SERVER_ADDRESS + `/oauth/${method}`,
+    client_id: process.env[`auth_${method}_id`],
+    client_secret: process.env[`auth_${method}_secret`],
 
     onError: (err) => {
-      return res.redirect(`${process.env.DEV_CLIENT_ADDRESS}?error=${err}`);
+      console.log(err);
+      return res.redirect(
+        `${process.env.DEV_CLIENT_ADDRESS}/login?error=${err}`
+      );
     },
   };
 
-  const accessTokenResponse = await OauthLib[method](req, res, method, options);
+  const accessTokenResponse = await OauthLib[method](req, res, options);
+  // end of -- using my oauth lib
 
   // console.log(accessTokenResponse)
   if (accessTokenResponse.status == 'success') {
-    upsertUser(accessTokenResponse);
-    presistAuth(req, res);
-    return res.redirect(`${process.env.DEV_CLIENT_ADDRESS}`);
+    const upsertionData = upsertUser(
+      req,
+      res,
+      next,
+      method,
+      accessTokenResponse
+    );
+
+    if (upsertionData.status == 'success') {
+      presistAuth(req, res, upsertionData);
+    }
   }
 };
 

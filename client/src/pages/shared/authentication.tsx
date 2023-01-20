@@ -23,9 +23,9 @@ export default function Authentication(props: {
     button: 'bg-orange rounded-md bg-primary font-bold',
   };
 
-  const handleOAuth = async (e: any) => {
+  const handleOAuth = async (method:string, e: any) => {
     e.preventDefault();
-    window.location.assign(`${Vars.serverAddress}/oauth/google`);
+    window.location.assign(`${Vars.serverAddress}/oauth/${method}`);
   };
 
   const handleAuth = async (e: any) => {
@@ -103,11 +103,19 @@ export default function Authentication(props: {
                 value={props.label}
               />
               <input
-                onClick={handleOAuth}
+                onClick={(e:any)=>handleOAuth('google', e)}
                 className={`${tailwindClasses.formItem} bg-transparent border-2 border-primary rounded-md`}
                 type='submit'
                 name='submit'
                 value='use google account'
+              />
+
+              <input
+                onClick={(e:any)=>handleOAuth('github', e)}
+                className={`${tailwindClasses.formItem} bg-transparent border-2 border-primary rounded-md`}
+                type='submit'
+                name='submit'
+                value='use github account'
               />
             </form>
           </div>
