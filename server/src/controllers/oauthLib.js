@@ -49,12 +49,10 @@ const google = async (req, res, options) => {
         return { status: 'error' };
       }
 
-
-    if(accessTokenResponse.nonce != process.env.randome_verification_token){
-      options.onError('the verification nonce was altered');
-      return { status: 'error' };
-    }
-
+      if (accessTokenResponse.nonce != process.env.randome_verification_token) {
+        options.onError('the verification nonce was altered');
+        return { status: 'error' };
+      }
 
       return { status: 'success', ...accessTokenResponse };
     } catch (err) {
