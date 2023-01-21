@@ -57,11 +57,11 @@ const checkAuth = async (req, res, next) => {
 
   let accessTokenValid = await checkAccessToken(req.headers?.accesstoken);
   // console.log('accessTokenValid: ', accessTokenValid);
-  if (accessTokenValid) res.userID = accessTokenValid.userID;
 
   let refreshTokenValid = await checkRefreshToken(
     req?.cookies?.[process.env.COOKIE_NAME]
   );
+  if (refreshTokenValid) res.userID = refreshTokenValid.userID;
   // console.log('refreshTokenValid: ', refreshTokenValid);
 
   // refreshing the access token
