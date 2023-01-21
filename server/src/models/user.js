@@ -1,14 +1,25 @@
 const pool = require('./dbPool');
 const { v4: uuid } = require('uuid');
 
-const create = async (userData) => {
+const create = async (userData, explicitID) => {
+  if (userData?.id && !explicitID) {
+    return { err: 'id is provided and explicitID was not specified' };
+  }
+  // TODO: refactore
+
   // this simply resuls in this -> ?, ?, ?, ?... times the length of userData
-  const placeholders = '?, '.repeat(Object.entries(userData).length) + '?';
+  let placeholders =
+    '?, '.repeat(Object.entries(userData).length) + '?';
+  if(explicitID){
+    placeholders = placeholders.slice(0, placeholders.length-3)
+  }
 
   const response = await pool(
-    `insert into users(id, ${Object.keys(userData).join(', ')})
+    `insert into users(${explicitID ? '' : 'id, '}${Object.keys(userData).join(
+      ', '
+    )})
      values(${placeholders});`,
-    [uuid(), ...Object.values(userData)]
+    explicitID ? Object.values(userData) : [uuid(), ...Object.values(userData)]
   );
 
   return response;

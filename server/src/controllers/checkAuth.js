@@ -65,7 +65,7 @@ const checkAuth = async (req, res, next) => {
   // console.log('refreshTokenValid: ', refreshTokenValid);
 
   // refreshing the access token
-  if (!accessTokenValid && refreshTokenValid) {
+  if (!accessTokenValid && refreshTokenValid && !req.path.includes('/oauth/')) {
     return res.json({
       data: 'new access token',
       accessToken: await genNewAccessToken(refreshTokenValid.userID),
@@ -76,10 +76,16 @@ const checkAuth = async (req, res, next) => {
 
   // the client is checking the login session
   if (req.path == '/isLogin') {
-    if (!authenticated) {
+    if (!refreshTokenValid) {
       return res.json({ loginStatus: false });
     }
-    const userResp = await MUser.read({ id: accessTokenValid.userID });
+
+    const userResp = await MUser.read({ id: refreshTokenValid.userID });
+
+    if (!userResp[0].length) {
+      return res.json({ loginStatus: false});
+    }
+
     const userInfo = {
       id: userResp[0][0].id,
       username: userResp[0][0].username,
@@ -97,12 +103,17 @@ const checkAuth = async (req, res, next) => {
   const tryingToAuth = authRoutes.includes(req.path);
   if (tryingToAuth && authenticated) {
     // console.log('redirect to home', exceptionRoutes.slice(theFirst3Items))
-    return res.json({ redirect: '/' });
+    const userResp = await MUser.read({ id: refreshTokenValid.userID });
+
+    if (!userResp[0].length) {
+      return res.json({ redirect: '/login' });
+    }
+    return res.json({ redirect: `user/${userResp[0][0].username}` });
   }
 
   const visitingAfterAuthRoutes =
     !tryingToAuth &&
-    authIndependent.includes(req.path) &&
+    !authIndependent.includes(req.path) &&
     !req.path.match('^/verifyEmail/');
   if (visitingAfterAuthRoutes && !authenticated) {
     return res.json({ redirect: '/login' });

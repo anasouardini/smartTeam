@@ -14,7 +14,7 @@ export default function signup() {
   const [loggedInUserState, setLoggedInUserState] = React.useState<
     loggedInUserT | {}
   >({});
-  const location = useLocation();
+  const rLocation = useLocation();
 
   const checkLogin = async () => {
     const res: {
@@ -34,12 +34,23 @@ export default function signup() {
     checkLogin();
   }, []);
 
+
+  // the server is sending access token as a redirect get request after oauth
+  if(rLocation.search.includes('?AT')){
+    const data = new URLSearchParams(rLocation.search);
+    console.log('access token get request ', data.get('AT'));
+    console.log('access token get request ', data.get('username'));
+    localStorage.setItem('accessToken', 'sdlkfjsdljk');
+
+    // window.location.assign('/');
+  }
+
   // redirecting
   const authenticating: boolean =
-    location.pathname == '/login' || location.pathname == '/signup';
+    rLocation.pathname == '/login' || rLocation.pathname == '/signup';
   if (isLoggedInState != undefined) {
     if (isLoggedInState && authenticating) {
-      return <Navigate to='/'></Navigate>;
+      return <Navigate to={`/${loggedInUserState?.username}`}></Navigate>;
     }
 
     if (!isLoggedInState && !authenticating) {

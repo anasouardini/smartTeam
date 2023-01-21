@@ -7,7 +7,7 @@ const initQueries = {
                       username varchar(20),
                       password varchar(60),
                       email varchar(30),
-                      avatar varchar(30),
+                      avatar varchar(100),
                       fullname varchar(30),
                       title varchar(30),
                       description varchar(30),

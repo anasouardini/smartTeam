@@ -7,91 +7,84 @@ const fs = require('fs/promises');
 const jwt = require('jsonwebtoken');
 
 const upsertUser = async (req, res, next, method, oauthAccessToken) => {
+  // console.log(oauthAccessToken);
 
   let accountInfo = {};
   if (method == 'github') {
-    const { id } = oauthAccessToken;
+    const { id, login, avatar_url, name } = oauthAccessToken;
     const accountID = `${method}-${id}`;
 
     accountInfo = {
-      username: accountID,
+      id: accountID,
+      username: login,
       password: '',
       email: '',
-      fullname: '',
+      verified: 1,
+      fullname: name,
       title: '',
       description: '',
-      avatar: '',
+      avatar: avatar_url,
     };
-  }
-  else if (method == 'google') {
-    const { email} = oauthAccessToken;
+  } else if (method == 'google') {
+    const { email, name, picture } = oauthAccessToken;
+    const accountID = `${method}-${email.split('@')[0]}`;
 
     accountInfo = {
-      username: email,
+      id: accountID,
+      username: accountID,
       password: '',
-      email: '',
-      fullname: '',
+      email: email,
+      verified: 1,
+      fullname: name,
       title: '',
       description: '',
-      avatar: '',
+      avatar: picture,
     };
   }
-  const readUserResponse = await MUser.read({ id: accountID });
+  const readUserResponse = await MUser.read({ id: accountInfo.id });
 
   if (readUserResponse?.err) {
     return next('error while checking account existence - upsertUser');
   }
 
-  const createUserResponse = await MUser.create(accountInfo);
+  if (readUserResponse[0].length) {
+    return { status: 'success', accountInfo };
+  }
+
+  const createUserResponse = await MUser.create(accountInfo, true);
 
   if (createUserResponse?.err || !createUserResponse[0]?.affectedRows) {
     return next('error while creating account');
   }
 
-  // TODO mark as verified
-  // github: github-id
-  // google: email
+  return { status: 'success', accountInfo };
 };
 
 const presistAuth = async (req, res, upsertionData) => {
   // creating the refresh token
-  {
-    const privKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pem`, {
-      encoding: 'utf8',
-    });
-    const jwtOptions = { algorithm: 'RS256', expiresIn: '1h' };
-    const refreshToken = jwt.sign(
-      { userID: checkUserResponse[0][0].id },
-      privKey,
-      jwtOptions
-    );
+  const privKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pem`, {
+    encoding: 'utf8',
+  });
 
-    res.cookie(process.env.COOKIE_NAME, refreshToken, {
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24, // 24h
-    });
-  }
-  // creating the access token
-  {
-    const privKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pem`, {
-      encoding: 'utf8',
-    });
-    const jwtOptions = { algorithm: 'RS256', expiresIn: '1h' };
-    const accessToken = jwt.sign(
-      { userID: checkUserResponse[0][0].id },
-      privKey,
-      jwtOptions
-    );
+  // console.log('refresh token data', upsertionData);
+  const jwtOptions = { algorithm: 'RS256', expiresIn: '24h' };
+  const refreshToken = jwt.sign(
+    { userID: upsertionData.accountInfo.id },
+    privKey,
+    jwtOptions
+  );
 
-    return res.json({
-      data: 'logged in successfully',
-      accessToken,
-      redirect: `/user/${req.body?.username}`,
-    });
-  }
+  res.cookie(process.env.COOKIE_NAME, refreshToken, {
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24, // 24h
+  });
+
+  return res.redirect(
+    `${process.env.DEV_CLIENT_ADDRESS}/user/${upsertionData.accountInfo.username}`
+  );
 };
 
-const oauth = async (req, res) => {
+const oauth = async (req, res, next) => {
   const method = req.params.method;
 
   // check if function exists
@@ -120,7 +113,7 @@ const oauth = async (req, res) => {
 
   // console.log(accessTokenResponse)
   if (accessTokenResponse.status == 'success') {
-    const upsertionData = upsertUser(
+    const upsertionData = await upsertUser(
       req,
       res,
       next,

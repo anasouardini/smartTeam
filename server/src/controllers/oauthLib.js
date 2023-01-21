@@ -18,18 +18,11 @@ const google = async (req, res, options) => {
   };
 
   if (req.query?.code) {
-
-    // google does not return my nonce back!!!
-    // if(req.query.nonce != process.env.randome_verification_token){
-    //   options.onError('the verification nonce was altered');
-    //   return { status: 'error' };
-    // }
-
     const accessTokenRequest = {
       redirect_uri: options.redirect_uri,
       client_id: options.client_id,
       client_secret: options.client_secret,
-      // grant_type: 'authorization_code',
+      grant_type: 'authorization_code',
       code: req.query.code,
     };
     const response = await axios
@@ -37,10 +30,13 @@ const google = async (req, res, options) => {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       })
       .then((res) => res.data)
-      .catch((error) => ({ error: error.response.data.error }));
+      .catch((error) => {
+        console.log('err: oauth requesting accessToken - google ', error);
+        return { error: error.response.data.error };
+      });
 
     if (response?.error) {
-      options.onError('oauth server error');
+      options.onError('google oauth server error');
       return { status: 'error' };
     }
 
@@ -53,10 +49,18 @@ const google = async (req, res, options) => {
         return { status: 'error' };
       }
 
+
+    if(accessTokenResponse.nonce != process.env.randome_verification_token){
+      options.onError('the verification nonce was altered');
+      return { status: 'error' };
+    }
+
+
       return { status: 'success', ...accessTokenResponse };
     } catch (err) {
       options.onError('google auth server sent an invalid access token');
 
+      console.log('oauth server err: ', err);
       return { status: 'error' };
     }
   }
@@ -106,7 +110,10 @@ const github = async (req, res, options) => {
         },
       })
       .then((res) => res.data)
-      .catch((error) => ({ error: error.response.data.error }));
+      .catch((error) => {
+        console.log('err: requesting accessToken - github', error);
+        return { error: error.response.data.error };
+      });
 
     if (response?.error) {
       options.onError('oauth server error');
@@ -122,7 +129,10 @@ const github = async (req, res, options) => {
         },
       })
       .then((res) => res.data)
-      .catch((error) => ({ error: error.response.data.error }));
+      .catch((error) => {
+        console.log('err: requesting user info - github', error);
+        return { error: error.response.data.error };
+      });
 
     return { status: 'success', ...userInfoResponse };
   }
