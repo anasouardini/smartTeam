@@ -13,10 +13,10 @@ router.get('/oauth/:method', controllers.oauth);
 
 router.get('/verifyEmail/:token', controllers.verifyEmail);
 
-router.post('/user/:user', controllers.user.read);
+router.post('/user/:user', controllers.user.create);
 router.get('/user/:user', controllers.user.read);
-router.put('/user/:user', controllers.user.read);
-router.delete('/user/:user', controllers.user.read);
+router.put('/user/:user', controllers.user.update);
+router.delete('/user/:user', controllers.user.remove);
 
 router.post('/initDB', controllers.db.init);
 

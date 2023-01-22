@@ -1,27 +1,72 @@
 const MUser = require('../models/user');
 
-const read = async (req, res) =>{
+const create = async (req, res) => {};
 
-  const readUserResponse = await MUser.read({id: res.userID});
-  if(readUserResponse?.err){
+const read = async (req, res) => {
+  const readUserResponse = await MUser.read({ id: res.userID });
+  if (readUserResponse?.err) {
     return next('something went bad in the server while getting user info');
   }
 
-  if(!readUserResponse[0].length){
-    return res.status(404).json({error: 'there is no such user'});
+  if (!readUserResponse[0].length) {
+    return res.status(404).json({ error: 'there is no such user' });
   }
 
-  const {id, username, email, fullname, title, description, avatar, createDate} = readUserResponse[0][0];
+  const {
+    id,
+    username,
+    email,
+    fullname,
+    title,
+    description,
+    avatar,
+    createDate,
+  } = readUserResponse[0][0];
 
-  res.json({data: {id, username, email, fullname, title, description, avatar, createDate}});
-}
+  res.json({
+    data: {
+      id,
+      username,
+      email,
+      fullname,
+      title,
+      description,
+      avatar,
+      createDate,
+    },
+  });
+};
 
-const update = async (req, res)=>{
+const update = async (req, res, next) => {
+  const editableFiels = [
+    'username',
+    'title',
+    'email',
+    'fullname',
+    'description',
+  ];
+  const newData = req.body;
+  
+  Object.keys(newData).forEach((fieldKey) =>{
+    if(!editableFiels.includes(fieldKey)) delete newData[fieldKey];
+  });
 
-}
+  const updateUserResp = await MUser.update(
+    { username: req.params.user },
+    newData
+  );
 
-const remove = async (req, res)=>{
+  if(updateUserResp?.err){
+    next('error while update user info')
+  }
 
-}
+  if(!updateUserResp[0]?.affectedRows){
+    next('error: cannot update user info')
+  }
 
-module.exports = {read, update, remove}
+  return res.json({data: `The field(s): ${Object.keys(newData).join(', ')} updated successfully`})
+};
+
+const remove = async (req, res) => {};
+
+module.exports = { create, read, update, remove };

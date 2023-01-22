@@ -21,7 +21,7 @@ export default function signup() {
       err?: any;
       loginStatus: boolean;
       loggedInUser: loggedInUserT;
-    } = await Bridge('get', 'isLogin');
+    } = await Bridge('read', 'isLogin');
     if (!res?.err) {
       setIsLoginState(res.loginStatus);
       setLoggedInUserState(res.loggedInUser);

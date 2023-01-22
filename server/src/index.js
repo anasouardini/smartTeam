@@ -20,7 +20,7 @@ app.use(express.urlencoded());
 
 app.use('/', require('./router'));
 
-app.use('*', (_, res) => {
+app.use('*', (req, res) => {
   return res.status(404).json({ data: 'nothing to see here' });
 });
 

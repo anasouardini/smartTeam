@@ -34,7 +34,7 @@ const methods = {
       })
       .catch(() => false),
 
-  get: (route: string) =>
+  read: (route: string) =>
     fetch(`${server.url}/${route}`, server.options('get'))
       .then(async (res) => {
         return {
@@ -64,8 +64,9 @@ const methods = {
       })
       .catch((err) => false),
 
-  update: (route: string, body?: {}) =>
-    fetch(`${server.url}/${route}`, server.options('put', body))
+  update: (route: string, body?: {}) =>{
+      // console.log('update route', route)
+    return fetch(`${server.url}/${route}`, server.options('put', body))
       .then(async (res) => {
         return {
           ...(await res
@@ -75,7 +76,8 @@ const methods = {
           status: res.status,
         };
       })
-      .catch((err) => false),
+      .catch((err) => false)
+  },
 
   remove: (route: string, body?: {}) =>
     fetch(`${server.url}/${route}`, server.options('delete', body))
@@ -92,10 +94,14 @@ const methods = {
 };
 
 const handleRequest = async (
-  method: 'post' | 'get' | 'update' | 'updateFile' | 'remove',
+  method: 'post' | 'read' | 'update' | 'updateFile' | 'remove',
   route: string,
   body?: {}
 ) => {
+
+  // this makes it "unpure" function. but still a clean solution
+  if(route[0] == '/'){route = route.slice(1);}
+
 
   let accessTokenRenewal = false;
   let response = null;
