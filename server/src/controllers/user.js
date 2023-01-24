@@ -3,7 +3,7 @@ const MUser = require('../models/user');
 const create = async (req, res) => {};
 
 const read = async (req, res) => {
-  const readUserResponse = await MUser.read({ id: res.userID });
+  const readUserResponse = await MUser.read({ id: req.userID });
   if (readUserResponse?.err) {
     return next('something went bad in the server while getting user info');
   }

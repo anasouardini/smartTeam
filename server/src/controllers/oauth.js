@@ -42,6 +42,7 @@ const upsertUser = async (req, res, next, method, oauthAccessToken) => {
     };
   }
   const readUserResponse = await MUser.read({ id: accountInfo.id });
+  
 
   if (readUserResponse?.err) {
     return next('error while checking account existence - upsertUser');
@@ -52,7 +53,6 @@ const upsertUser = async (req, res, next, method, oauthAccessToken) => {
   }
 
   const createUserResponse = await MUser.create(accountInfo, true);
-
   if (createUserResponse?.err || !createUserResponse[0]?.affectedRows) {
     return next('error while creating account');
   }

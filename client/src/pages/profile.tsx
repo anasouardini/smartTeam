@@ -1,4 +1,3 @@
-import { TextareaHTMLAttributes, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
 
@@ -19,7 +18,7 @@ export default function Profile() {
   // }
 
 
-  const handleFiledBlur = async (
+  const updateField = async (
     e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const value = e.target.value;
@@ -56,7 +55,7 @@ export default function Profile() {
           className={`flex flex-col justify-center gap-3 ml-5 max-w-[18rem]`}
         >
           <input
-            onBlur={handleFiledBlur}
+            onBlur={updateField}
             name='fullname'
             aria-label='full name'
             type='text'
@@ -64,7 +63,7 @@ export default function Profile() {
             className={`${TClasses.input} ${TClasses.border} text-2xl font-semibold`}
           />
           <input
-            onBlur={handleFiledBlur}
+            onBlur={updateField}
             name='title'
             aria-label='professional title'
             type='text'
@@ -78,7 +77,7 @@ export default function Profile() {
       </section>
       <section aria-label='description' className={`mt-10`}>
         <textarea
-          onBlur={handleFiledBlur}
+          onBlur={updateField}
           name='description'
           {...{
             defaultValue: userInfoQuery.data.description,
@@ -93,7 +92,7 @@ export default function Profile() {
         <label className={`${TClasses.inputLabel}`}>
           username:
           <input
-            onBlur={handleFiledBlur}
+            onBlur={updateField}
             name='username'
             aria-label='username'
             type='text'
@@ -104,7 +103,7 @@ export default function Profile() {
         <label className={`${TClasses.inputLabel}`}>
           email:
           <input
-            onBlur={handleFiledBlur}
+            onBlur={updateField}
             name='email'
             type='email'
             {...{

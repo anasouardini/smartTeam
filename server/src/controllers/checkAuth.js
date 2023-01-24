@@ -63,7 +63,7 @@ const checkAuth = async (req, res, next) => {
   let refreshTokenValid = await checkRefreshToken(
     req?.cookies?.[process.env.COOKIE_NAME]
   );
-  if (refreshTokenValid) res.userID = refreshTokenValid.userID;
+  if (refreshTokenValid) req.userID = refreshTokenValid.userID;
   // console.log('refreshTokenValid: ', refreshTokenValid);
 
   // refreshing the access token
