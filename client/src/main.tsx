@@ -6,6 +6,7 @@ import Authentication from './pages/shared/authentication';
 // import Login from './pages/login';
 // import Signup from './pages/signup';
 import Profile from './pages/profile';
+import Portfolios from './pages/portfolios';
 import SharedLayout from './components/sharedLayout';
 
 const MyRouter = () => (
@@ -41,6 +42,7 @@ const MyRouter = () => (
           }
         />
         <Route path='/user/:user' element={<Profile />} />
+        <Route path='/portfolios' element={<Portfolios />} />
       </Route>
     </Routes>
   </BrowserRouter>

@@ -76,6 +76,11 @@ export default function signup() {
               profile
             </NavLink>
           </li>
+          <li>
+            <NavLink to={`/portfolios`} className={activeLink}>
+              portfolios
+            </NavLink>
+          </li>
           {isLoggedInState ? (
             <></>
           ) : (
