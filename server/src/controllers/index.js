@@ -1,5 +1,6 @@
 module.exports = {
   user: require('./user'),
+  portfolio: require('./portfolio'),
   login: require('./login'),
   signup: require('./signup'),
   checkAuth: require('./checkAuth'),

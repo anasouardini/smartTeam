@@ -16,8 +16,11 @@ const initQueries = {
                     )`,
   createPorfoliosTable: `create table portfolios(
                       id varchar(50) primary key,
+                      ownerID varchar(50),
                       title varchar(50),
                       description varchar(200),
+                      projectsNumber int,
+                      doneProjectsNumber int,
                       bgImg varchar(100),
                       createDate dateTime default current_timestamp,
                       progress int,
