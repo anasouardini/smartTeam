@@ -1,5 +1,6 @@
 import { useQuery } from 'react-query';
 import Bridge from '../tools/bridge';
+import Genid from '../tools/genid';
 import Portfolio from '../components/portfolio';
 
 export default function Portfolios() {
@@ -46,7 +47,8 @@ export default function Portfolios() {
 
   const listPortfolios = () => {
     return portfoliosQuery.data.map((portfolioItem:porfoliosResponseT) => {
-      return <Portfolio key={portfolioItem.title} portfolioItem={portfolioItem} refetch={portfoliosQuery.refetch} />;
+      // randome key to keep the UI from staling
+      return <Portfolio key={`${Genid(20)}`} portfolioItem={portfolioItem} refetch={portfoliosQuery.refetch} />;
     });
   };
 

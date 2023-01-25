@@ -14,9 +14,10 @@ router.get('/oauth/:method', controllers.oauth);
 router.get('/verifyEmail/:token', controllers.verifyEmail);
 
 router.post('/portfolio', controllers.portfolio.create);
-router.put('/portfolio', controllers.portfolio.update);
 router.get('/portfolio/all', controllers.portfolio.readAll);
 router.get('/portfolio/:id', controllers.portfolio.readSingle);
+router.put('/portfolio', controllers.portfolio.update);
+router.delete('/portfolio', controllers.portfolio.remove);
 
 router.post('/user/:user', controllers.user.create);
 router.get('/user/:user', controllers.user.read);

@@ -16,7 +16,7 @@ const create = (table, newData)=>{
   });
   // delete the first comma and space then close the list
   query += tmpQueryValues.slice(2) + ')';
-  console.log(query)
+  // console.log(query)
 
   return {query, vars}
 }
