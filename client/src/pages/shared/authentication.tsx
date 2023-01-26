@@ -69,7 +69,7 @@ export default function Authentication(props: {
                     before:via-red-900 before:to-orange-900
 
                     text-white h-[100vh]
-                    flex items-center justify-center`}
+                    grow flex items-center justify-center`}
       >
         <div
           aria-label={`${props.label} card`}

@@ -7,6 +7,7 @@ router.use(controllers.checkAuth);
 
 router.post('/login', controllers.login);
 router.post('/signup', controllers.signup);
+router.post('/logout', controllers.logout);
 
 // oauthServer example: google, instagram
 router.get('/oauth/:method', controllers.oauth);

@@ -1,6 +1,16 @@
 import React from 'react';
 import { Outlet, NavLink, useLocation, Navigate } from 'react-router-dom';
 import Bridge from '../tools/bridge';
+import {
+  FaUser,
+  FaUserPlus,
+  FaSignInAlt,
+  FaSignOutAlt,
+  FaSuitcase,
+  FaLightbulb,
+  FaList,
+  FaHatWizard
+} from 'react-icons/fa';
 
 type loggedInUserT = {
   username: string;
@@ -27,20 +37,19 @@ export default function signup() {
       setLoggedInUserState(res.loggedInUser);
       return;
     }
-      setIsLoginState(false);
+    setIsLoginState(false);
   };
 
   React.useEffect(() => {
     checkLogin();
   }, []);
 
-
   // redirecting
   const authenticating: boolean =
     rLocation.pathname == '/login' || rLocation.pathname == '/signup';
   if (isLoggedInState != undefined) {
     if (isLoggedInState && authenticating) {
-      return <Navigate to={`/${loggedInUserState?.username}`}></Navigate>;
+      return <Navigate to={`/user/${loggedInUserState?.username}`}></Navigate>;
     }
 
     if (!isLoggedInState && !authenticating) {
@@ -53,9 +62,16 @@ export default function signup() {
     console.log(res);
   };
 
+
+  const logout = async () => {
+    const res = await Bridge('post', 'logout');
+    console.log(res);
+  };
+
   const tailwindClasses = {
-    linkHover: 'hover:pb-1 hover:border-b-2 hover:border-b-primary',
-    linkActive: 'pb-1 border-b-2 border-b-primary',
+    link: 'text-white hover:bg-white hover:text-primary',
+    linkActive: 'bg-white text-primary',
+    navItem: 'pb-1 flex gap-2 items-center px-2 py-1',
   };
 
   const activeLink = ({
@@ -63,45 +79,95 @@ export default function signup() {
   }: {
     isActive: boolean;
     isPending: boolean;
-  }) => (isActive ? tailwindClasses.linkActive : tailwindClasses.linkHover);
+  }) => (isActive 
+      ? `${tailwindClasses.navItem} ${tailwindClasses.linkActive}` 
+      : `${tailwindClasses.navItem} ${tailwindClasses.link}`
+  );
 
-  // don't render the shared layout wheither the state is ready or false
-  return isLoggedInState != undefined ? (
-    <>
-      <style>{`.active{color: red}`}</style>
-      <header className='fixed top-0 right-0 left-0 z-10 text-white'>
-        <ul className='backdrop-blur-xl h-[3rem] flex items-center gap-3 px-5'>
-          <li className='ml-auto'>
-            <NavLink to={`/user/${loggedInUserState?.username}`} className={activeLink}>
+  const listNavItems = () => {
+    if (isLoggedInState) {
+      return (
+        <>
+          <li>
+            <NavLink
+              to={`/user/${loggedInUserState?.username}`}
+              className={activeLink}
+            >
+              <FaUser />
               profile
             </NavLink>
           </li>
           <li>
-            <NavLink to={`/portfolios`} className={activeLink}>
+            <NavLink to={`/portfolios`} 
+              className={activeLink}
+            >
+              <FaSuitcase />
               portfolios
             </NavLink>
           </li>
-          {isLoggedInState ? (
-            <></>
-          ) : (
-            <>
-              <li>
-                <NavLink to='/login' className={activeLink}>
-                  login
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to='/signup' className={activeLink}>
-                  signup
-                </NavLink>
-              </li>
-            </>
-          )}
+          <li>
+            <NavLink to={`/projects`}
+              className={activeLink}
+            >
+              <FaLightbulb />
+             projects 
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to={`/tasks`}
+              className={activeLink}
+            >
+              <FaList />
+              tasks
+            </NavLink>
+          </li>
+          <li>
+            <button
+              onClick={logout}
+              className={`${tailwindClasses.navItem}`}
+            >
+              <FaSignOutAlt />
+              logout
+            </button>
+          </li>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <li>
+          <NavLink to='/login'
+              className={activeLink}
+            >
+            <FaSignInAlt />
+            login
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to='/signup'
+              className={activeLink}
+            >
+            <FaUserPlus />
+            signup
+          </NavLink>
+        </li>
+      </>
+    );
+  };
+
+  return isLoggedInState != undefined ? (
+    <>
+      <header className='py-5 bg-primary text-white w-[10rem]'>
+        <ul className='backdrop-blur-xl h-[3rem] flex flex-col gap-3'>
+          {listNavItems()}
+
           <li>
             <button
               onClick={initDB}
-              className='border-2 border-primary rounded-lg p-1'
+              className={`${tailwindClasses.navItem}`}
             >
+              <FaHatWizard/>
               initDB
             </button>
           </li>

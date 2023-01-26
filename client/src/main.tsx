@@ -52,7 +52,14 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: true } },
 });
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+
+document.getElementById('root')?.remove();
+const rootElm = document.createElement('div');
+rootElm.setAttribute('id', 'root');
+rootElm.setAttribute('class', 'flex min-h-[100vh]');
+document.body.appendChild(rootElm);
+
+ReactDOM.createRoot(rootElm as HTMLElement).render(
   <QueryClientProvider client={queryClient}>
     <MyRouter />
   </QueryClientProvider>
