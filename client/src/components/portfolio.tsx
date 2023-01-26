@@ -18,67 +18,63 @@ export default function Portfolio(props: {
   portfolioItem: porfoliosResponseT;
   refetch: () => void;
 }) {
-  const [portfolioItemState, setPortfolioItemState] = React.useState(
-    props.portfolioItem
-  );
 
-  const [popupState, setPopupState] = React.useState({ form: { show: false, mode: 'edit' } });
+  const [state, setState] = React.useState({
+    // just in case decided I need to change some parent-passed data
+    item: props.portfolioItem,
+    popup: { form: { show: false, mode: 'edit' } },
+  });
+  const stateActions = {
+    form: {
+      show: () => {
+        const stateCpy = { ...state }; // tricking react with a shallow copy
+        stateCpy.popup.form.show = true;
+        setState(stateCpy);
+      },
+      hide: () => {
+        const stateCpy = { ...state}; // tricking react with a shallow copy
+        stateCpy.popup.form.show = false;
+        setState(stateCpy);
+      },
+    },
+  };
+
   const formFieldsRef = React.useRef({
     title: {
-      value: portfolioItemState.title,
+      value: state.item.title,
       tagName: 'input',
       type: 'string',
     },
     description: {
-      value: portfolioItemState.description,
+      value: state.item.description,
       tagName: 'textarea',
       type: 'string',
     },
     bgImg: {
-      value: portfolioItemState.bgImg,
+      value: state.item.bgImg,
       tagName: 'input',
       type: 'string',
     },
     status: {
-      value: portfolioItemState.status,
+      value: state.item.status,
       tagName: 'select',
       type: 'list',
     },
   }).current;
-  const popupCancle = ()=>{
-    const popupStateCpy = {...popupState};// tricking react with a shallow copy
-    popupStateCpy.form.show = false;
-    setPopupState(popupStateCpy);
-  }
+
 
   const editPortfolio = async () => {
-    const popupStateCpy = {...popupState};// tricking react with a shallow copy
-    popupStateCpy.form.show = true;
-    setPopupState(popupStateCpy);
-
-    // const resp = await Bridge('update', `portfolio`, {
-    //   id: portfolioItemState.id,
-    //   title: 'new portfolio new',
-    //   description: 'portfolio item description new',
-    //   bgImg: '',
-    //   status: 'in progress',
-    // });
-    //
-    // if (!resp.err) {
-    //   console.log(resp);
-    // }
-    //
-    // props.refetch();
+    stateActions.form.show();
   };
 
   const removePortfolio = async () => {
-
     const resp = await Bridge('remove', `portfolio`, {
-      id: portfolioItemState.id,
+      id: state.item.id,
     });
 
-    if (!resp.err) {
+    if (resp.err) {
       console.log(resp);
+      return;
     }
 
     props.refetch();
@@ -107,15 +103,20 @@ export default function Portfolio(props: {
           <FaPen />
         </button>
         <span aria-label='number of projects'>
-          {portfolioItemState.doneProjectsNumber}/
-          {portfolioItemState.projectsNumber}
+          {state.item.doneProjectsNumber}/{state.item.projectsNumber}
         </span>
       </div>
-      <h2 className='mt-3 text-xl'>{portfolioItemState.title}</h2>
-      <p className='text-gray-800'>{portfolioItemState.description}</p>
+      <h2 className='mt-3 text-xl'>{state.item.title}</h2>
+      <p className='text-gray-800'>{state.item.description}</p>
 
-      {popupState.form.show ? (
-        <Form fields={formFieldsRef} mode={popupState.form.mode} refetch={props.refetch} cancel={popupCancle} />
+      {state.popup.form.show ? (
+        <Form
+          fields={formFieldsRef}
+          mode={state.popup.form.mode}
+          refetch={props.refetch}
+          itemID={state.item.id}
+          hideForm={stateActions.form.hide}
+        />
       ) : (
         <></>
       )}

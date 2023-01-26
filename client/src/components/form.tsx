@@ -1,5 +1,6 @@
 import React from 'react';
 import { z } from 'zod';
+import Bridge from '../tools/bridge';
 
 type propsT = {
   fields: {
@@ -11,7 +12,8 @@ type propsT = {
   };
   mode: string;
   refetch: () => void;
-  cancel: () => void;
+  itemID?: string;
+  hideForm: () => void;
 };
 
 export default function Form(props: propsT) {
@@ -19,24 +21,60 @@ export default function Form(props: propsT) {
   const [parentState, setParentState] = React.useState({
     fields: props.fields,
     mode: props.mode,
-    cancel: props.cancel,
   });
 
-  const fieldsRefs = React.useRef<{ [key: string]: string }>({}).current;
+  const fieldsRefs = React.useRef<{
+    [key: string]: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+  }>({}).current;
 
+  const parseFields = () => {
+    const newData = Object.keys(parentState.fields).reduce(
+      (acc: { [key: string]: string }, fieldKey) => {
+        acc[fieldKey] = fieldsRefs[fieldKey].value;
+        return acc;
+      },
+      {}
+    );
+    return newData;
+  };
   type formActionT = {
     [key: string]: (e: React.MouseEvent<HTMLElement>) => void;
   };
   const formAction: formActionT = {
-    edit: (e) => {
+    edit: async (e) => {
       e.preventDefault();
+
+      const resp = await Bridge('update', `portfolio`, {
+        id: props.itemID,
+        ...parseFields(),
+      });
+
+      if (resp.err) {
+        console.log(resp);
+      }else{
+        props.refetch();
+      }
+
+      props.hideForm();
     },
-    create: (e) => {
+    create: async (e) => {
       e.preventDefault();
+
+      const resp = await Bridge('post', `portfolio`, {
+        ...parseFields(),
+      });
+
+      if (resp.err) {
+        console.log(resp);
+      }else{
+        props.refetch();
+      }
+
+      props.hideForm();
     },
     cancel: (e) => {
       if (e.target != e.currentTarget) return;
-      parentState.cancel();
+      props.hideForm();
     },
   };
 
@@ -46,11 +84,13 @@ export default function Form(props: propsT) {
       const TagName = field.tagName;
       return (
         <TagName
+          key={fieldKey}
           ref={(el) => {
             fieldsRefs[fieldKey] = el;
           }}
+          // TODO: spreading the attributes would be better
           type={field.type}
-          value={field.value}
+          defaultValue={field.value}
           className='border-b-2 border-b-primary px-2 py-1'
         />
       );
@@ -69,6 +109,7 @@ export default function Form(props: propsT) {
         <form className='flex flex-col gap-4 border-primary border-2 rounded-md p-5'>
           {listFields()}
           <button
+            className={`cursor-pointer`}
             onClick={formAction[parentState.mode]}
             name={parentState.mode}
           >

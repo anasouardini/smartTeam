@@ -93,6 +93,8 @@ const methods = {
       .catch((err) => false),
 };
 
+
+// I could've used a proxy but this is so much easier
 const handleRequest = async (
   method: 'post' | 'read' | 'update' | 'updateFile' | 'remove',
   route: string,

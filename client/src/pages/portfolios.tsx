@@ -1,17 +1,58 @@
+import React from 'react';
 import { useQuery } from 'react-query';
 import Bridge from '../tools/bridge';
 import Genid from '../tools/genid';
 import Portfolio from '../components/portfolio';
+import Form from '../components/form';
 
 export default function Portfolios() {
+
+  
+  const [state, setState] = React.useState({
+    popup: { form: { show: false, mode: 'create' } },
+  });
+  const stateActions = {
+    form: {
+      show: () => {
+        const stateCpy = { ...state }; // tricking react with a shallow copy
+        stateCpy.popup.form.show = true;
+        setState(stateCpy);
+      },
+      hide: () => {
+        const stateCpy = { ...state}; // tricking react with a shallow copy
+        stateCpy.popup.form.show = false;
+        setState(stateCpy);
+      },
+    },
+  };
+
+  const formFieldsRef = React.useRef({
+    title: {
+      value: '',
+      tagName: 'input',
+      type: 'string',
+    },
+    description: {
+      value: '',
+      tagName: 'textarea',
+      type: 'string',
+    },
+    bgImg: {
+      value: '',
+      tagName: 'input',
+      type: 'string',
+    },
+    status: {
+      value: '',
+      tagName: 'select',
+      type: 'list',
+    },
+  }).current;
+
   const portfoliosQuery = useQuery('portfolios', async () => {
     const response = await Bridge('read', `portfolio/all`);
     return response?.err == 'serverError' ? false : response.data;
   });
-
-  if (portfoliosQuery.status == 'success') {
-    // console.log(portfoliosQuery.data)
-  }
 
   type porfoliosResponseT = {
     id: string,
@@ -25,18 +66,7 @@ export default function Portfolios() {
   };
 
   const createNewPortfolio = async () => {
-    const resp = await Bridge('post', `portfolio`, {
-      title: 'new portfolio',
-      description: 'portfolio item description',
-      bgImg: '',
-      status: 'todo',
-    });
-
-    if (!resp.err) {
-      console.log(resp);
-    }
-
-    portfoliosQuery.refetch();
+    stateActions.form.show();
   };
 
   const tailwindClx = {
@@ -66,6 +96,17 @@ export default function Portfolios() {
       >
         +
       </button>
+
+      {state.popup.form.show ? (
+        <Form
+          fields={formFieldsRef}
+          mode={state.popup.form.mode}
+          refetch={portfoliosQuery.refetch}
+          hideForm={stateActions.form.hide}
+        />
+      ) : (
+        <></>
+      )}
     </main>
   );
 }
