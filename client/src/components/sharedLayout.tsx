@@ -70,7 +70,16 @@ export default function signup() {
 
   const tailwindClasses = {
     link: 'text-white hover:bg-white hover:text-primary',
-    linkActive: 'bg-white text-primary',
+    // the pseudo is temperary
+    linkActive: `bg-white text-primary 
+                relative before:absolute after:absolute
+                before:border-[15px] before:border-r-white before:border-b-transparent
+                before:border-t-transparent before:border-l-transparent
+                before:top-0 before:right-0 before:translate-y-[-50%] before:translate-x-[20%]
+                after:border-[15px] after:border-t-white after:border-b-transparent
+                after:border-r-transparent after:border-l-transparent
+                after:bottom-0 after:right-0 after:translate-y-[100%] after:translate-x-[70%]
+                `,
     navItem: 'pb-1 flex gap-2 items-center px-2 py-1',
   };
 
