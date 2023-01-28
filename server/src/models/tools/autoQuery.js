@@ -21,8 +21,8 @@ const create = (table, newData)=>{
   return {query, vars}
 }
 
-const read = (table, filter)=>{
-  let query = `select * from ${table}`;
+const read = (table, filter, fields)=>{
+  let query = `select ${fields ? fields.join(' ') : '*'} from ${table}`;
   let vars = [];
 
   query += ' where 1=1';

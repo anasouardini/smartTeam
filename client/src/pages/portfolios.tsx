@@ -4,10 +4,9 @@ import Bridge from '../tools/bridge';
 import Genid from '../tools/genid';
 import Portfolio from '../components/portfolio';
 import Form from '../components/form';
+import FormFields from '../components/formFields';
 
 export default function Portfolios() {
-
-  
   const [state, setState] = React.useState({
     popup: { form: { show: false, mode: 'create' } },
   });
@@ -19,35 +18,21 @@ export default function Portfolios() {
         setState(stateCpy);
       },
       hide: () => {
-        const stateCpy = { ...state}; // tricking react with a shallow copy
+        const stateCpy = { ...state }; // tricking react with a shallow copy
         stateCpy.popup.form.show = false;
         setState(stateCpy);
       },
     },
   };
 
-  const formFieldsRef = React.useRef({
-    title: {
-      value: '',
-      tagName: 'input',
-      type: 'string',
-    },
-    description: {
-      value: '',
-      tagName: 'textarea',
-      type: 'string',
-    },
-    bgImg: {
-      value: '',
-      tagName: 'input',
-      type: 'string',
-    },
-    status: {
-      value: '',
-      tagName: 'select',
-      type: 'list',
-    },
-  }).current;
+  const formFieldsRef = React.useRef(
+    FormFields('portfolio', {
+      title: 'default',
+      description: 'default',
+      bgImg: 'default',
+      status: 'default',
+    })
+  ).current;
 
   const portfoliosQuery = useQuery('portfolios', async () => {
     const response = await Bridge('read', `portfolio/all`);
@@ -55,14 +40,14 @@ export default function Portfolios() {
   });
 
   type porfoliosResponseT = {
-    id: string,
+    id: string;
     projectsNumber: number;
     doneProjectsNumber: number;
     title: string;
     description: string;
     bgImg: string;
     status: 'todo' | 'in progress' | 'done';
-    progress: number
+    progress: number;
   };
 
   const createNewPortfolio = async () => {
@@ -76,9 +61,15 @@ export default function Portfolios() {
   };
 
   const listPortfolios = () => {
-    return portfoliosQuery.data.map((portfolioItem:porfoliosResponseT) => {
+    return portfoliosQuery.data.map((portfolioItem: porfoliosResponseT) => {
       // randome key to keep the UI from staling
-      return <Portfolio key={`${Genid(20)}`} portfolioItem={portfolioItem} refetch={portfoliosQuery.refetch} />;
+      return (
+        <Portfolio
+          key={`${Genid(20)}`}
+          portfolioItem={portfolioItem}
+          refetch={portfoliosQuery.refetch}
+        />
+      );
     });
   };
 
@@ -101,6 +92,7 @@ export default function Portfolios() {
         <Form
           fields={formFieldsRef}
           mode={state.popup.form.mode}
+          route={'portfolio'}
           refetch={portfoliosQuery.refetch}
           hideForm={stateActions.form.hide}
         />

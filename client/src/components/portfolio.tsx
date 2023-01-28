@@ -2,6 +2,7 @@ import React from 'react';
 import Bridge from '../tools/bridge';
 import { FaPen, FaTrash } from 'react-icons/fa';
 import Form from './form';
+import FormFields from '../components/formFields';
 
 type porfoliosResponseT = {
   id: string;
@@ -39,28 +40,14 @@ export default function Portfolio(props: {
     },
   };
 
-  const formFieldsRef = React.useRef({
-    title: {
-      value: state.item.title,
-      tagName: 'input',
-      type: 'string',
-    },
-    description: {
-      value: state.item.description,
-      tagName: 'textarea',
-      type: 'string',
-    },
-    bgImg: {
-      value: state.item.bgImg,
-      tagName: 'input',
-      type: 'string',
-    },
-    status: {
-      value: state.item.status,
-      tagName: 'select',
-      type: 'list',
-    },
-  }).current;
+  const formFieldsRef = React.useRef(
+    FormFields('portfolio', {
+      title: 'default',
+      description: 'default',
+      bgImg: 'default',
+      status: 'default',
+    })
+  ).current;
 
 
   const editPortfolio = async () => {
@@ -106,7 +93,7 @@ export default function Portfolio(props: {
           {state.item.doneProjectsNumber}/{state.item.projectsNumber}
         </span>
       </div>
-      <h2 className='mt-3 text-xl'>{state.item.title}</h2>
+      <a href={`/portfolios/${state.item.id}`} className='mt-3 text-xl block'>{state.item.title}</a>
       <p className='text-gray-800'>{state.item.description}</p>
 
       {state.popup.form.show ? (

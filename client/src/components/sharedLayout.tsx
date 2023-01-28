@@ -88,7 +88,7 @@ export default function signup() {
   }: {
     isActive: boolean;
     isPending: boolean;
-  }) => (isActive 
+  }) => (isActive
       ? `${tailwindClasses.navItem} ${tailwindClasses.linkActive}` 
       : `${tailwindClasses.navItem} ${tailwindClasses.link}`
   );
@@ -133,7 +133,7 @@ export default function signup() {
           <li>
             <button
               onClick={logout}
-              className={`${tailwindClasses.navItem}`}
+              className={`${tailwindClasses.navItem} ${tailwindClasses.link} w-full`}
             >
               <FaSignOutAlt />
               logout
@@ -174,7 +174,7 @@ export default function signup() {
           <li>
             <button
               onClick={initDB}
-              className={`${tailwindClasses.navItem}`}
+              className={`${tailwindClasses.navItem} ${tailwindClasses.link} w-full`}
             >
               <FaHatWizard/>
               initDB

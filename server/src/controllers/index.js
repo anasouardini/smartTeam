@@ -1,6 +1,7 @@
 module.exports = {
   user: require('./user'),
   portfolio: require('./portfolio'),
+  project: require('./project'),
   login: require('./login'),
   signup: require('./signup'),
   logout: require('./logout'),

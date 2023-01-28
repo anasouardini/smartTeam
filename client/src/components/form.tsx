@@ -7,10 +7,11 @@ type propsT = {
     [key: string]: {
       value: string;
       tagName: string;
-      type: string;
+      props: {[key:string]:string};
     };
   };
   mode: string;
+  route: string;
   refetch: () => void;
   itemID?: string;
   hideForm: () => void;
@@ -44,7 +45,7 @@ export default function Form(props: propsT) {
     edit: async (e) => {
       e.preventDefault();
 
-      const resp = await Bridge('update', `portfolio`, {
+      const resp = await Bridge('update', props.route, {
         id: props.itemID,
         ...parseFields(),
       });
@@ -60,7 +61,7 @@ export default function Form(props: propsT) {
     create: async (e) => {
       e.preventDefault();
 
-      const resp = await Bridge('post', `portfolio`, {
+      const resp = await Bridge('post', props.route, {
         ...parseFields(),
       });
 
@@ -89,9 +90,8 @@ export default function Form(props: propsT) {
             fieldsRefs[fieldKey] = el;
           }}
           // TODO: spreading the attributes would be better
-          type={field.type}
+          {...field.props}
           defaultValue={field.value}
-          className='border-b-2 border-b-primary px-2 py-1'
         />
       );
     });

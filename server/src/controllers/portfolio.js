@@ -10,6 +10,16 @@ const readAll = async (req, res, next) => {
   return res.json({ data: portfoliosResp[0] });
 };
 
+const list = async (req, res, next) => {
+  const portfoliosResp = await MPortfolio.read({ ownerID: req.userID }, ['id', 'title']);
+
+  if (portfoliosResp.err) {
+    return next('err while listing all portfolios');
+  }
+
+  return res.json({ data: portfoliosResp[0] });
+};
+
 const readSingle = async (req, res) => {};
 
 const create = async (req, res, next) => {
@@ -76,4 +86,4 @@ const remove = async (req, res, next) => {
   return res.json({ data: 'portfolio removed successfully' });
 };
 
-module.exports = { readSingle, readAll, create, update, remove };
+module.exports = { readSingle, list, readAll, create, update, remove };
