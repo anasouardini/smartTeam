@@ -15,57 +15,52 @@ export default function Projects() {
   const [state, setState] = React.useState({
     popup: { form: { show: false, mode: 'create' } },
   });
-  // const stateActions = {
-  //   form: {
-  //     show: () => {
-  //       const stateCpy = { ...state }; // tricking react with a shallow copy
-  //       stateCpy.popup.form.show = true;
-  //       setState(stateCpy);
-  //     },
-  //     hide: () => {
-  //       const stateCpy = { ...state }; // tricking react with a shallow copy
-  //       stateCpy.popup.form.show = false;
-  //       setState(stateCpy);
-  //     },
-  //   },
-  // };
-
-  // const portfolio_fkSelectRef = React.useRef<HTMLSelectElement|null>(null);
-  // const formFieldsRef = React.useRef<{}|null>(null);
-  //
-  // const projectsQuery = useQuery('projects', async () => {
-  //   const response = await Bridge('read', `project/all`);
-  //   return response?.err == 'serverError' ? false : response.data;
-  // });
-  // if (projectsQuery.status == 'success') {
-  //   console.log(projectsQuery.data);
-  // }
-  //
-  // const portfoliosListQuery = useQuery('portfolio list', async () => {
-  //   const response = await Bridge('read', `portfolio/list`);
-  //   return response?.err == 'serverError' ? false : response.data;
-  // });
-
-    console.log('rendering')
-  const createNewProject = async () => {
-    // formFieldsRef.current = FormFields('project', {
-    //   portfolio_fk: { props: { defaultValue: portfolio_fkSelectRef.current?.value, readOnly: true } },
-    //   title: 'default',
-    //   description: 'default',
-    //   bgColor: 'default',
-    //   dueDate: 'default',
-    //   status: 'default',
-    //   milestone: 'default',
-    //   budget: 'default',
-    //   expense: 'default',
-    // });
-
-        setState({form:{show:true, mode:'sdlfkj'}});
-    console.log('create')
-    // stateActions.form.show();
+  const stateActions = {
+    form: {
+      show: () => {
+        const stateCpy = { ...state }; // tricking react with a shallow copy
+        stateCpy.popup.form.show = true;
+        setState(stateCpy);
+      },
+      hide: () => {
+        const stateCpy = { ...state }; // tricking react with a shallow copy
+        stateCpy.popup.form.show = false;
+        setState(stateCpy);
+      },
+    },
   };
 
-  return <button onClick={createNewProject}>create project</button>
+  const portfolio_fkSelectRef = React.useRef<HTMLSelectElement|null>(null);
+  const formFieldsRef = React.useRef<{}|null>(null);
+
+  const projectsQuery = useQuery('projects', async () => {
+    const response = await Bridge('read', `project/all`);
+    return response?.err == 'serverError' ? false : response.data;
+  });
+  if (projectsQuery.status == 'success') {
+    console.log(projectsQuery.data);
+  }
+
+  const portfoliosListQuery = useQuery('portfolio list', async () => {
+    const response = await Bridge('read', `portfolio/list`);
+    return response?.err == 'serverError' ? false : response.data;
+  });
+
+  const createNewProject = async () => {
+    formFieldsRef.current = FormFields('project', {
+      portfolio_fk: { props: { defaultValue: portfolio_fkSelectRef.current?.value, readOnly: true } },
+      title: 'default',
+      description: 'default',
+      bgColor: 'default',
+      dueDate: 'default',
+      status: 'default',
+      milestone: 'default',
+      budget: 'default',
+      expense: 'default',
+    });
+
+    stateActions.form.show();
+  };
 
   const tailwindClx = {
     projectBorder: 'border-2 border-primary rounded-md',
@@ -131,7 +126,7 @@ export default function Projects() {
   };
 
   if (projectsQuery.isLoading || portfoliosListQuery.isLoading) {
-    return <p>Loading......</p>;
+    return <></>;
   }
 
   return (
