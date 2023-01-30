@@ -33,7 +33,7 @@ const initQueries = {
                       description varchar(200),
                       bgColor varchar(100),
                       createDate dateTime default current_timestamp,
-                      dueDate dateTime default current_timestamp,
+                      dueDate dateTime null,
                       status varchar(20),
                       progress int,
                       milestone varchar(20),

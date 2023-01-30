@@ -13,16 +13,18 @@ const readAll = async (req, res, next) => {
 const readSingle = async (req, res) => {};
 
 const create = async (req, res, next) => {
-  const { title, description, bgImg, status } = req.body;
+  const {portfolio_fk, title, description, dueDate, bgColor, status, milestone, progress, budget, expense } = req.body;
   const projectsResp = await MProject.create({
-    ownerID: req.userID,
+    portfolio_fk,
     title,
     description,
-    bgImg,
+    bgColor,
+    dueDate: dueDate ? dueDate : null,
     status,
-    progress: 0,
-    projectsNumber: 0,
-    doneProjectsNumber: 0,
+    progress,
+    milestone,
+    budget,
+    expense,
   });
 
   if (projectsResp.err) {

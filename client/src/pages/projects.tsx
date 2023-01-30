@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 // import { useParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import Bridge from '../tools/bridge';
@@ -15,58 +15,57 @@ export default function Projects() {
   const [state, setState] = React.useState({
     popup: { form: { show: false, mode: 'create' } },
   });
-  const stateActions = {
-    form: {
-      show: () => {
-        const stateCpy = { ...state }; // tricking react with a shallow copy
-        stateCpy.popup.form.show = true;
-        setState(stateCpy);
-      },
-      hide: () => {
-        const stateCpy = { ...state }; // tricking react with a shallow copy
-        stateCpy.popup.form.show = false;
-        setState(stateCpy);
-      },
-    },
-  };
+  // const stateActions = {
+  //   form: {
+  //     show: () => {
+  //       const stateCpy = { ...state }; // tricking react with a shallow copy
+  //       stateCpy.popup.form.show = true;
+  //       setState(stateCpy);
+  //     },
+  //     hide: () => {
+  //       const stateCpy = { ...state }; // tricking react with a shallow copy
+  //       stateCpy.popup.form.show = false;
+  //       setState(stateCpy);
+  //     },
+  //   },
+  // };
 
-  // TODO: specify readonly for portfolioID
-  const formFieldsRef = React.useRef(
-    FormFields('project', {
-      title: 'default',
-      description: 'default',
-      bgColor: 'default',
-      dueDate: 'default',
-      status: 'default',
-      milestone: 'default',
-      budget: 'default',
-      expense: 'default',
-    })
-  ).current;
+  // const portfolio_fkSelectRef = React.useRef<HTMLSelectElement|null>(null);
+  // const formFieldsRef = React.useRef<{}|null>(null);
+  //
+  // const projectsQuery = useQuery('projects', async () => {
+  //   const response = await Bridge('read', `project/all`);
+  //   return response?.err == 'serverError' ? false : response.data;
+  // });
+  // if (projectsQuery.status == 'success') {
+  //   console.log(projectsQuery.data);
+  // }
+  //
+  // const portfoliosListQuery = useQuery('portfolio list', async () => {
+  //   const response = await Bridge('read', `portfolio/list`);
+  //   return response?.err == 'serverError' ? false : response.data;
+  // });
 
-  const projectsQuery = useQuery('projects', async () => {
-    const response = await Bridge('read', `project/all`);
-    return response?.err == 'serverError' ? false : response.data;
-  });
-  const portfoliosListQuery = useQuery('portfolio list', async () => {
-    const response = await Bridge('read', `portfolio/list`);
-    return response?.err == 'serverError' ? false : response.data;
-  });
-
-  type projectsResponseT = {
-    id: string;
-    projectsNumber: number;
-    doneProjectsNumber: number;
-    title: string;
-    description: string;
-    bgImg: string;
-    status: 'todo' | 'in progress' | 'done';
-    progress: number;
-  };
-
+    console.log('rendering')
   const createNewProject = async () => {
-    stateActions.form.show();
+    // formFieldsRef.current = FormFields('project', {
+    //   portfolio_fk: { props: { defaultValue: portfolio_fkSelectRef.current?.value, readOnly: true } },
+    //   title: 'default',
+    //   description: 'default',
+    //   bgColor: 'default',
+    //   dueDate: 'default',
+    //   status: 'default',
+    //   milestone: 'default',
+    //   budget: 'default',
+    //   expense: 'default',
+    // });
+
+        setState({form:{show:true, mode:'sdlfkj'}});
+    console.log('create')
+    // stateActions.form.show();
   };
+
+  return <button onClick={createNewProject}>create project</button>
 
   const tailwindClx = {
     projectBorder: 'border-2 border-primary rounded-md',
@@ -76,9 +75,9 @@ export default function Projects() {
 
   const columns = React.useMemo(
     () => [
-      { Header: 'sldfkj', accessor: 'key' },
-      { Header: 'sldfkj2', accessor: 'key1' },
-      { Header: 'button', accessor: 'key3' },
+      { Header: 'title' },
+      { Header: 'description' },
+      { Header: 'status' },
     ],
     []
   );
@@ -132,7 +131,7 @@ export default function Projects() {
   };
 
   if (projectsQuery.isLoading || portfoliosListQuery.isLoading) {
-    return <></>;
+    return <p>Loading......</p>;
   }
 
   return (
@@ -140,7 +139,7 @@ export default function Projects() {
       aria-label='projects'
       className='text-black mt-[7rem] px-10 gap-6 grow'
     >
-      <select>
+      <select ref={portfolio_fkSelectRef}>
         {portfoliosListQuery.data.map(
           (portfolio: { id: string; title: string }) => (
             <option value={portfolio.id}>{portfolio.title}</option>

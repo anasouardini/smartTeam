@@ -9,7 +9,6 @@ body::scrollbar,
     width: 6px;
     background-color: rgb(249 115 22);
 }
-
 body::scrollbar:horizontal,
 .scrollbar::scrollbar:horizontal {
     width: 6px;
@@ -20,13 +19,17 @@ body::-webkit-scrollbar,
 .scrollbar::-webkit-scrollbar {
     width: 6px;
 }
-
 body::-webkit-scrollbar:horizontal,
 .scrollbar::-webkit-scrollbar:horizontal {
     width: 6px;
 }
 
 body::-webkit-scrollbar-thumb,
+.scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background-color: rgb(249 115 22);
+}
+body::-webkit-scrollbar-thumb:horizontal
 .scrollbar::-webkit-scrollbar-thumb {
     border-radius: 5px;
     background-color: rgb(249 115 22);

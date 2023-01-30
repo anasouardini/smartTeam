@@ -82,6 +82,7 @@ export default function Form(props: propsT) {
   const listFields = () => {
     return Object.keys(parentState.fields).map((fieldKey) => {
       const field = parentState.fields[fieldKey];
+      // console.log(parentState.fields[fieldKey])
       const TagName = field.tagName;
       return (
         <TagName
@@ -89,9 +90,7 @@ export default function Form(props: propsT) {
           ref={(el) => {
             fieldsRefs[fieldKey] = el;
           }}
-          // TODO: spreading the attributes would be better
           {...field.props}
-          defaultValue={field.value}
         />
       );
     });
