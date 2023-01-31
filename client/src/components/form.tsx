@@ -79,6 +79,7 @@ export default function Form(props: propsT) {
     },
   };
 
+console.log(props.fields)
   const listFields = () => {
     return Object.keys(parentState.fields).map((fieldKey) => {
       const field = parentState.fields[fieldKey];

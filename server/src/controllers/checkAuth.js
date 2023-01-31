@@ -84,7 +84,7 @@ const checkAuth = async (req, res, next) => {
 
     const userResp = await MUser.read({ id: refreshTokenValid.userID });
 
-    if (!userResp[0].length) {
+    if (userResp.err || !userResp[0]?.length) {
       return res.json({ loginStatus: false});
     }
 
