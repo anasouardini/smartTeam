@@ -3,8 +3,8 @@ import React from 'react';
 import { useQuery } from 'react-query';
 import Bridge from '../tools/bridge';
 import Genid from '../tools/genid';
-import Project from '../components/project';
 import Form from '../components/form';
+import { FaPen, FaTrash } from 'react-icons/fa';
 import { useTable } from 'react-table';
 import FormFields from '../components/formFields';
 
@@ -18,12 +18,20 @@ type propsT = { portfoliosListQuery: queryT };
 
 const AfterQueryPrep = (props: propsT) => {
   const [state, setState] = React.useState({
-    popup: { form: { show: false, mode: 'create' } },
+    popup: { form: { show: false, mode: 'create', itemID: '' } },
   });
   const stateActions = {
     form: {
-      show: () => {
+      show: (itemID?:string, mode?: 'edit' | 'create') => {
         const stateCpy = { ...state }; // tricking react with a shallow copy
+
+        if (mode == 'edit') {
+          if(!itemID){return console.log('err: forgot to include the item id for editing')}
+          stateCpy.popup.form.mode = mode;
+          stateCpy.popup.form.itemID = itemID;
+        }
+
+
         stateCpy.popup.form.show = true;
         setState(stateCpy);
       },
@@ -59,7 +67,7 @@ const AfterQueryPrep = (props: propsT) => {
                   h-[7rem] text-primary text-2xl`,
   };
 
-  const createNewProject = async () => {
+  const createNewProject = () => {
     formFieldsRef.current = FormFields('project', {
       portfolio_fk: {
         props: {
@@ -80,18 +88,62 @@ const AfterQueryPrep = (props: propsT) => {
     stateActions.form.show();
   };
 
+  const editProject = (project: { [key: string]: any }) => {
+    formFieldsRef.current = FormFields('project', {
+      portfolio_fk: {
+        props: {
+          defaultValue: portfolio_fkSelectRef.current?.value,
+          readOnly: true,
+        },
+      },
+      title: { props: { defaultValue: project.title } },
+      description: { props: { defaultValue: project.description } },
+      bgColor: { props: { defaultValue: project.bgColor } },
+      dueDate: { props: { defaultValue: project.dueDate } },
+      status: { props: { defaultValue: project.status } },
+      milestone: { props: { defaultValue: project.milestone } },
+      budget: { props: { defaultValue: project.budget } },
+      expense: { props: { defaultValue: project.expense } },
+    });
+
+    stateActions.form.show(project.id, 'edit');
+  };
+
+  const removeProject = async (id: string) => {
+    const resp = await Bridge('remove', `project`, {
+      id,
+    });
+
+    if (resp.err) {
+      console.log(resp);
+      return;
+    }
+
+    projectsQuery.refetch();
+  };
+
   let columns = React.useMemo(() => {
     if (projectsQuery.status == 'success') {
       // console.log('query', projectsQuery.data);
       if (projectsQuery.data.length) {
-        return Object.keys(projectsQuery.data[0])
+        const cols = Object.keys(projectsQuery.data[0])
           .filter((projectKey) =>
-            projectKey != 'id' && projectKey != 'portfolio_fk' ? true : false
+            projectKey != 'id' &&
+            projectKey != 'portfolio_fk' &&
+            projectKey != 'ownerID'
+              ? true
+              : false
           )
           .map((projectKey) => ({
             Header: projectKey,
             accessor: projectKey,
           }));
+
+        return [
+          ...cols,
+          { Header: 'edit', accessor: 'edit' },
+          { Header: 'delete', accessor: 'delete' },
+        ];
       }
       return [{ Header: 'no data to list', accessor: 'key' }];
     }
@@ -101,13 +153,36 @@ const AfterQueryPrep = (props: propsT) => {
 
   let data = React.useMemo(() => {
     if (projectsQuery.status == 'success') {
-      return projectsQuery.data.map((project: { [key: string]: any }) => {
+      const dt = projectsQuery.data.map((project: { [key: string]: any }) => {
         const newProject = { ...project };
-        delete newProject.id;
-        delete newProject.portfolio_fk;
+
+        // no reason to delete these
+        // delete newProject.id;
+        // delete newProject.ownerID;
+        // delete newProject.portfolio_fk;
+
+        newProject.edit = (
+          <button>
+            <FaPen
+              className='text-primary mx-auto'
+              onClick={() => editProject(project)}
+            />
+          </button>
+        );
+        newProject.delete = (
+          <button>
+            <FaTrash
+              className='text-primary mx-auto'
+              onClick={() => removeProject(project.id)}
+            />
+          </button>
+        );
+
         newProject.createDate = new Date(newProject.createDate).toDateString();
         return newProject;
       });
+
+      return dt;
     }
 
     return [{ key: 'pending...' }];
@@ -139,11 +214,19 @@ const AfterQueryPrep = (props: propsT) => {
           {rows.map((row) => {
             prepareRow(row);
             return (
-              <Project
-                key={`${Genid(20)}`}
-                row={row}
-                refetch={projectsQuery.refetch}
-              />
+              <tr
+                {...row.getRowProps()}
+                className={`border(2,primary) bg-gray-300/90`}
+              >
+                {row.cells.map((cell) => (
+                  <td
+                    {...cell.getCellProps()}
+                    className={`px-4 py-3 text-center`}
+                  >
+                    {cell.render('Cell')}
+                  </td>
+                ))}
+              </tr>
             );
           })}
         </tbody>
@@ -151,12 +234,14 @@ const AfterQueryPrep = (props: propsT) => {
     );
   };
 
+
+  // TODO: set default selected item to the last visited one
   return (
     <main
       aria-label='projects'
       className='text-black mt-[7rem] px-10 gap-6 grow flex flex-col items-center'
     >
-      <select ref={portfolio_fkSelectRef} className={`w-max`}>
+      <select ref={portfolio_fkSelectRef} onChange={projectsQuery.refetch} className={`w-max`}>
         {props.portfoliosListQuery.data.map(
           (portfolio: { id: string; title: string }) => (
             <option value={portfolio.id}>{portfolio.title}</option>
@@ -178,8 +263,9 @@ const AfterQueryPrep = (props: propsT) => {
         <Form
           fields={formFieldsRef.current}
           mode={state.popup.form.mode}
+          itemID={state.popup.form.itemID}
           route={'project'}
-          refetch={() => projectsQuery.refetch}
+          refetch={projectsQuery.refetch}
           hideForm={stateActions.form.hide}
         />
       ) : (

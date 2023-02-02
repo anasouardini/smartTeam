@@ -1,7 +1,7 @@
 import ObjMerge from '../tools/objMerge';
 
 const commonValues = {
-  props: { type: 'text', className: 'border-b-2 border-b-primary px-2 py-1' },
+  props: { type: 'text', className: 'border-b-2 border-b-primary px-2 py-1 bg-transparent' },
 };
 
 const commonFields = {

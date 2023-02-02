@@ -22,7 +22,8 @@ const create = (table, newData)=>{
 }
 
 const read = (table, filter, fields)=>{
-  let query = `select ${fields ? fields.join(' ') : '*'} from ${table}`;
+  let query = `select ${fields ? fields.join(', ') : '*'} from ${table}`;
+  // console.log(query)
   let vars = [];
 
   query += ' where 1=1';

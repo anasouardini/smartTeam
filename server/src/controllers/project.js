@@ -15,6 +15,7 @@ const readSingle = async (req, res) => {};
 const create = async (req, res, next) => {
   const {portfolio_fk, title, description, dueDate, bgColor, status, milestone, progress, budget, expense } = req.body;
   const projectsResp = await MProject.create({
+    ownerID: req.userID,
     portfolio_fk,
     title,
     description,
@@ -39,20 +40,24 @@ const create = async (req, res, next) => {
 };
 
 const update = async (req, res, next) => {
-  const { id, title, description, bgImg, status } = req.body;
+  const {portfolio_fk, id, title, description, bgColor, dueDate, status, progress, milestone, budget, expense } = req.body;
+  // console.log(req.body)
   const projectsResp = await MProject.update(
     {
       ownerID: req.userID,
+      portfolio_fk,
       id,
     },
     {
       title,
       description,
-      bgImg,
+      bgColor,
+      dueDate: dueDate ? dueDate : null,
       status,
-      progress: 0,
-      projectsNumber: 0,
-      doneProjectsNumber: 0,
+      progress,
+      milestone,
+      budget,
+      expense,
     }
   );
 

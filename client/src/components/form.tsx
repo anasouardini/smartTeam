@@ -19,7 +19,7 @@ type propsT = {
 
 export default function Form(props: propsT) {
   // just in case decided I need to change some parent-passed data
-  const [parentState, setParentState] = React.useState({
+  const [parentState, _] = React.useState({
     fields: props.fields,
     mode: props.mode,
   });
@@ -79,7 +79,7 @@ export default function Form(props: propsT) {
     },
   };
 
-console.log(props.fields)
+// console.log(props.fields)
   const listFields = () => {
     return Object.keys(parentState.fields).map((fieldKey) => {
       const field = parentState.fields[fieldKey];
@@ -104,7 +104,7 @@ console.log(props.fields)
         onClick={formAction['cancel']}
         className={`fixed top-0 bottom-0 right-0 left-0
              flex items-center justify-center
-             backdrop-blur-sm`}
+             backdrop-blur-md`}
       >
         <form className='flex flex-col gap-4 border-primary border-2 rounded-md p-5'>
           {listFields()}

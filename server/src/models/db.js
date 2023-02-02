@@ -27,7 +27,8 @@ const initQueries = {
                       status varchar(20)
                     )`,
   createProjectsTable: `create table projects(
-                      id varchar(50) primary key,
+                      id varchar(50),
+                      ownerID varchar(50),
                       portfolio_fk varchar(50),
                       title varchar(50),
                       description varchar(200),
@@ -39,10 +40,12 @@ const initQueries = {
                       milestone varchar(20),
                       budget int,
                       expense int,
+                      primary key(id, ownerID, portfolio_fk),
                       foreign key(portfolio_fk) references portfolios(id)
                     )`,
   createTasksTable: `create table tasks(
                       id varchar(50) primary key,
+                      ownerID varchar(50),
                       project_fk varchar(50),
                       assignee_fk varchar(50),
                       title varchar(50),

@@ -17,6 +17,7 @@ const list = async (req, res, next) => {
     return next('err while listing all portfolios');
   }
 
+  // console.log(portfoliosResp[0])
   return res.json({ data: portfoliosResp[0] });
 };
 
