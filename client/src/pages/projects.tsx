@@ -7,6 +7,7 @@ import Form from '../components/form';
 import { FaPen, FaTrash } from 'react-icons/fa';
 import { useTable } from 'react-table';
 import FormFields from '../components/formFields';
+import Filter from '../components/filter';
 
 type queryT = {
   status: string;
@@ -22,15 +23,18 @@ const AfterQueryPrep = (props: propsT) => {
   });
   const stateActions = {
     form: {
-      show: (itemID?:string, mode?: 'edit' | 'create') => {
+      show: (itemID?: string, mode?: 'edit' | 'create') => {
         const stateCpy = { ...state }; // tricking react with a shallow copy
 
         if (mode == 'edit') {
-          if(!itemID){return console.log('err: forgot to include the item id for editing')}
+          if (!itemID) {
+            return console.log(
+              'err: forgot to include the item id for editing'
+            );
+          }
           stateCpy.popup.form.mode = mode;
           stateCpy.popup.form.itemID = itemID;
         }
-
 
         stateCpy.popup.form.show = true;
         setState(stateCpy);
@@ -44,7 +48,15 @@ const AfterQueryPrep = (props: propsT) => {
   };
 
   const portfolio_fkSelectRef = React.useRef<HTMLSelectElement | null>(null);
-  const formFieldsRef = React.useRef<{} | null>(null);
+  // the minimal initial ref value is just for the filter header
+  const formFieldsRef = React.useRef<{}>(FormFields('project', {
+      title: 'default',
+      dueDate: 'default',
+      status: 'default',
+      milestone: 'default',
+      budget: 'default',
+      expense: 'default',
+    }));
 
   // TODO: extract this to a seperate component
   const projectsQuery = useQuery('projects', async () => {
@@ -234,44 +246,55 @@ const AfterQueryPrep = (props: propsT) => {
     );
   };
 
-
   // TODO: set default selected item to the last visited one
+
   return (
-    <main
-      aria-label='projects'
-      className='text-black mt-[7rem] px-10 gap-6 grow flex flex-col items-center'
-    >
-      <select ref={portfolio_fkSelectRef} onChange={projectsQuery.refetch} className={`w-max`}>
-        {props.portfoliosListQuery.data.map(
-          (portfolio: { id: string; title: string }) => (
-            <option value={portfolio.id}>{portfolio.title}</option>
-          )
-        )}
-      </select>
-
-      {mountProjectsTable()}
-
-      {/* new project button*/}
-      <button
-        onClick={createNewProject}
-        className={`${tailwindClx.projectBorder} w-max px-3 py-1 text-primary text-lg capitalize`}
-      >
-        <span className='text-2xl'>+</span> add new project
-      </button>
-
-      {state.popup.form.show ? (
-        <Form
-          fields={formFieldsRef.current}
-          mode={state.popup.form.mode}
-          itemID={state.popup.form.itemID}
-          route={'project'}
-          refetch={projectsQuery.refetch}
-          hideForm={stateActions.form.hide}
-        />
-      ) : (
+    <div aria-label='container' className={`grow flex flex-col`}>
+      {formFieldsRef.current == null ? (
         <></>
+      ) : (
+        <Filter fields={formFieldsRef.current} />
       )}
-    </main>
+      <main
+        aria-label='projects'
+        className='text-black mt-[7rem] px-10 gap-6 grow flex flex-col items-center'
+      >
+        <select
+          ref={portfolio_fkSelectRef}
+          onChange={projectsQuery.refetch}
+          className={`w-max`}
+        >
+          {props.portfoliosListQuery.data.map(
+            (portfolio: { id: string; title: string }) => (
+              <option value={portfolio.id}>{portfolio.title}</option>
+            )
+          )}
+        </select>
+
+        {mountProjectsTable()}
+
+        {/* new project button*/}
+        <button
+          onClick={createNewProject}
+          className={`${tailwindClx.projectBorder} w-max px-3 py-1 text-primary text-lg capitalize`}
+        >
+          <span className='text-2xl'>+</span> add new project
+        </button>
+
+        {state.popup.form.show && formFieldsRef.current != null ? (
+          <Form
+            fields={formFieldsRef.current}
+            mode={state.popup.form.mode}
+            itemID={state.popup.form.itemID}
+            route={'project'}
+            refetch={projectsQuery.refetch}
+            hideForm={stateActions.form.hide}
+          />
+        ) : (
+          <></>
+        )}
+      </main>
+    </div>
   );
 };
 
@@ -284,4 +307,6 @@ export default function Projects() {
 
   if (portfoliosListQuery.status == 'success')
     return <AfterQueryPrep portfoliosListQuery={portfoliosListQuery} />;
+
+  return <></>;
 }

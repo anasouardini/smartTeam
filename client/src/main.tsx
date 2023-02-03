@@ -8,6 +8,8 @@ import Authentication from './pages/shared/authentication';
 import Profile from './pages/profile';
 import Portfolios from './pages/portfolios';
 import Projects from './pages/projects';
+import Tasks from './pages/tasks';
+
 import SharedLayout from './components/sharedLayout';
 
 const MyRouter = () => (
@@ -45,6 +47,7 @@ const MyRouter = () => (
         <Route path='/user/:user' element={<Profile />} />
         <Route path='/portfolios' element={<Portfolios />} />
         <Route path='/projects' element={<Projects />} />
+        <Route path='/tasks' element={<Tasks />} />
       </Route>
     </Routes>
   </BrowserRouter>
@@ -55,14 +58,10 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: true } },
 });
 
-document.getElementById('root')?.remove();
-const rootElm = document.createElement('div');
-rootElm.setAttribute('id', 'root');
-rootElm.setAttribute('class', 'flex min-h-[100vh]');
-document.body.appendChild(rootElm);
-
-ReactDOM.createRoot(rootElm as HTMLElement).render(
+ReactDOM.createRoot(document.body).render(
   <QueryClientProvider client={queryClient}>
-    <MyRouter />
+    <div id='root' className='flex min-h-[100vh]'>
+      <MyRouter />
+    </div>
   </QueryClientProvider>
 );

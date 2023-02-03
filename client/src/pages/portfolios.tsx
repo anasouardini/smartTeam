@@ -5,6 +5,7 @@ import Genid from '../tools/genid';
 import Portfolio from '../components/portfolio';
 import Form from '../components/form';
 import FormFields from '../components/formFields';
+import Filter from '../components/filter';
 
 export default function Portfolios() {
   const [state, setState] = React.useState({
@@ -73,32 +74,36 @@ export default function Portfolios() {
     });
   };
 
+
   return (
-    <main
-      aria-label='portfolios'
-      className='text-black mt-[7rem] pl-20 flex gap-6'
-    >
-      {portfoliosQuery.status == 'success' ? listPortfolios() : <></>}
-
-      {/* new portfolio button*/}
-      <button
-        onClick={createNewPortfolio}
-        className={`${tailwindClx.portfolioBorder} ${tailwindClx.portfolioItem}`}
+    <div aria-label='container' className={`grow flex flex-col`}>
+      <Filter fields={formFieldsRef} />
+      <main
+        aria-label='portfolios'
+        className='text-black mt-[7rem] pl-20 flex gap-6'
       >
-        +
-      </button>
+        {portfoliosQuery.status == 'success' ? listPortfolios() : <></>}
 
-      {state.popup.form.show ? (
-        <Form
-          fields={formFieldsRef}
-          mode={state.popup.form.mode}
-          route={'portfolio'}
-          refetch={portfoliosQuery.refetch}
-          hideForm={stateActions.form.hide}
-        />
-      ) : (
-        <></>
-      )}
-    </main>
+        {/* new portfolio button*/}
+        <button
+          onClick={createNewPortfolio}
+          className={`${tailwindClx.portfolioBorder} ${tailwindClx.portfolioItem}`}
+        >
+          +
+        </button>
+
+        {state.popup.form.show ? (
+          <Form
+            fields={formFieldsRef}
+            mode={state.popup.form.mode}
+            route={'portfolio'}
+            refetch={portfoliosQuery.refetch}
+            hideForm={stateActions.form.hide}
+          />
+        ) : (
+          <></>
+        )}
+      </main>
+    </div>
   );
 }

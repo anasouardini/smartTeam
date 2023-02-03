@@ -1,7 +1,8 @@
 const pool = require('./dbPool');
 
 const initQueries = {
-  clearDB: `drop table if exists users, portfolios, projects, tasks, projectPrivileges, portfolioPrivileges`,
+  clearDB: `drop table if exists users, portfolios, projects,
+            tasks, projectPrivileges, portfolioPrivileges`,
   createUsersTable: `create table users(
                       id varchar(50) primary key,
                       username varchar(20),
@@ -15,7 +16,7 @@ const initQueries = {
                       verified tinyint default 0
                     )`,
   createPorfoliosTable: `create table portfolios(
-                      id varchar(50) primary key,
+                      id varchar(50),
                       ownerID varchar(50),
                       title varchar(50),
                       description varchar(200),
@@ -24,7 +25,8 @@ const initQueries = {
                       bgImg varchar(100),
                       createDate dateTime default current_timestamp,
                       progress int,
-                      status varchar(20)
+                      status varchar(20),
+                      primary key(id, ownerID)
                     )`,
   createProjectsTable: `create table projects(
                       id varchar(50),
@@ -44,7 +46,7 @@ const initQueries = {
                       foreign key(portfolio_fk) references portfolios(id)
                     )`,
   createTasksTable: `create table tasks(
-                      id varchar(50) primary key,
+                      id varchar(50),
                       ownerID varchar(50),
                       project_fk varchar(50),
                       assignee_fk varchar(50),
@@ -53,6 +55,7 @@ const initQueries = {
                       bgColor varchar(100),
                       createDate dateTime default current_timestamp,
                       status varchar(20),
+                      primary key(id, ownerID, project_fk),
                       foreign key(project_fk) references projects(id),
                       foreign key(assignee_fk) references users(id)
                     )`,
