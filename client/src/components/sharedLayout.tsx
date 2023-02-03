@@ -167,7 +167,8 @@ export default function signup() {
 
   return isLoggedInState != undefined ? (
     <>
-      <header className='py-5 bg-primary text-white w-[10rem]'>
+      <nav className='bg-primary text-white w-[8rem]'>
+        <div className='text-2xl text-center py-4'>LOGO</div>
         <ul className='backdrop-blur-xl h-[3rem] flex flex-col gap-3'>
           {listNavItems()}
 
@@ -181,13 +182,12 @@ export default function signup() {
             </button>
           </li>
         </ul>
-      </header>
+      </nav>
       {/*
        */}
       <Outlet context={{ isLoggedIn: isLoggedInState }} />
-      <div aria-label='footer'></div>
     </>
   ) : (
-    <>redirecting to home</>
+    <>fetching data</>
   );
 }
