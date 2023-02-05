@@ -15,7 +15,7 @@ type queryT = {
   data: { [key: string]: any };
   refetch: () => void;
 };
-type propsT = { portfoliosListQuery: queryT };
+type propsT = { portfoliosListQuery: queryT; projectsListQuery: queryT };
 
 const AfterQueryPrep = (props: propsT) => {
   const [state, setState] = React.useState({
@@ -23,15 +23,18 @@ const AfterQueryPrep = (props: propsT) => {
   });
   const stateActions = {
     form: {
-      show: (itemID?:string, mode?: 'edit' | 'create') => {
+      show: (itemID?: string, mode?: 'edit' | 'create') => {
         const stateCpy = { ...state }; // tricking react with a shallow copy
 
         if (mode == 'edit') {
-          if(!itemID){return console.log('err: forgot to include the item id for editing')}
+          if (!itemID) {
+            return console.log(
+              'err: forgot to include the item id for editing'
+            );
+          }
           stateCpy.popup.form.mode = mode;
           stateCpy.popup.form.itemID = itemID;
         }
-
 
         stateCpy.popup.form.show = true;
         setState(stateCpy);
@@ -45,15 +48,18 @@ const AfterQueryPrep = (props: propsT) => {
   };
 
   const portfolio_fkSelectRef = React.useRef<HTMLSelectElement | null>(null);
+  const project_fkSelectRef = React.useRef<HTMLSelectElement | null>(null);
   const formFieldsRef = React.useRef<{} | null>(null);
 
   // TODO: extract this to a seperate component
-  const projectsQuery = useQuery('projects', async () => {
+  const tasksQuery = useQuery('projects', async () => {
     const response = await Bridge(
       'read',
       `project/all?portfolio_fk=${
         portfolio_fkSelectRef.current?.value ??
         props.portfoliosListQuery.data[0]
+      }&project_fk=${
+        project_fkSelectRef.current?.value ?? props.projectsListQuery.data[0]
       }`
     );
     return response?.err == 'serverError' ? false : response.data;
@@ -76,6 +82,12 @@ const AfterQueryPrep = (props: propsT) => {
           readOnly: true,
         },
       },
+      project_fk: {
+        props: {
+          defaultValue: project_fkSelectRef.current?.value,
+          readOnly: true,
+        },
+      },
       title: 'default',
       description: 'default',
       bgColor: 'default',
@@ -94,6 +106,12 @@ const AfterQueryPrep = (props: propsT) => {
       portfolio_fk: {
         props: {
           defaultValue: portfolio_fkSelectRef.current?.value,
+          readOnly: true,
+        },
+      },
+      project_fk: {
+        props: {
+          defaultValue: project_fkSelectRef.current?.value,
           readOnly: true,
         },
       },
@@ -120,46 +138,63 @@ const AfterQueryPrep = (props: propsT) => {
       return;
     }
 
-    projectsQuery.refetch();
+    tasksQuery.refetch();
   };
 
   // TODO: set default selected item to the last visited one
   return (
     <div aria-label='container' className={`grow flex flex-col`}>
-      <Filter fields={formFieldsRef} />
-    <main
-      aria-label='projects'
-      className='text-black mt-[7rem] px-10 gap-6 grow flex flex-col items-center'
-    >
-      <select ref={portfolio_fkSelectRef} onChange={projectsQuery.refetch} className={`w-max`}>
-        {props.portfoliosListQuery.data.map(
-          (portfolio: { id: string; title: string }) => (
-            <option value={portfolio.id}>{portfolio.title}</option>
-          )
-        )}
-      </select>
-
-      {/* new project button*/}
-      <button
-        onClick={createNewProject}
-        className={`${tailwindClx.projectBorder} w-max px-3 py-1 text-primary text-lg capitalize`}
+      {/*
+        <Filter fields={formFieldsRef} />
+      */}
+      <main
+        aria-label='projects'
+        className='text-black mt-[7rem] px-10 gap-6 grow flex flex-col items-center'
       >
-        <span className='text-2xl'>+</span> add new project
-      </button>
+        <select
+          ref={portfolio_fkSelectRef}
+          onChange={tasksQuery.refetch}
+          className={`w-max`}
+        >
+          {props.portfoliosListQuery.data.map(
+            (portfolio: { id: string; title: string }) => (
+              <option value={portfolio.id}>{portfolio.title}</option>
+            )
+          )}
+        </select>
+        <select
+          ref={project_fkSelectRef}
+          onChange={tasksQuery.refetch}
+          className={`w-max`}
+        >
+          {props.projectsListQuery.data.map(
+            (project: { id: string; title: string }) => (
+              <option value={project.id}>{project.title}</option>
+            )
+          )}
+        </select>
 
-      {state.popup.form.show ? (
-        <Form
-          fields={formFieldsRef.current}
-          mode={state.popup.form.mode}
-          itemID={state.popup.form.itemID}
-          route={'project'}
-          refetch={projectsQuery.refetch}
-          hideForm={stateActions.form.hide}
-        />
-      ) : (
-        <></>
-      )}
-    </main>
+        {/* new project button*/}
+        <button
+          onClick={createNewProject}
+          className={`${tailwindClx.projectBorder} w-max px-3 py-1 text-primary text-lg capitalize`}
+        >
+          <span className='text-2xl'>+</span> add new project
+        </button>
+
+        {state.popup.form.show ? (
+          <Form
+            fields={formFieldsRef.current}
+            mode={state.popup.form.mode}
+            itemID={state.popup.form.itemID}
+            route={'project'}
+            refetch={tasksQuery.refetch}
+            hideForm={stateActions.form.hide}
+          />
+        ) : (
+          <></>
+        )}
+      </main>
     </div>
   );
 };
@@ -171,8 +206,24 @@ export default function Projects() {
     return response?.err == 'serverError' ? false : response.data;
   });
 
-  if (portfoliosListQuery.status == 'success')
-    return <AfterQueryPrep portfoliosListQuery={portfoliosListQuery} />;
+  const projectsListQuery = useQuery('project list', async () => {
+    const response = await Bridge('read', `project/list`);
+    return response?.err == 'serverError' ? false : response.data;
+  });
+
+  console.log(portfoliosListQuery.status == 'success');
+  console.log(projectsListQuery.status == 'success');
+
+  if (
+    portfoliosListQuery.status == 'success' &&
+    projectsListQuery.status == 'success'
+  )
+    return (
+      <AfterQueryPrep
+        portfoliosListQuery={portfoliosListQuery}
+        projectsListQuery={projectsListQuery}
+      />
+    );
 
   return <></>;
 }

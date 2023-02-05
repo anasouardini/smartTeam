@@ -23,9 +23,16 @@ router.delete('/portfolio', controllers.portfolio.remove);
 
 router.post('/project', controllers.project.create);
 router.get('/project/all', controllers.project.readAll);
+router.get('/project/list', controllers.project.list);
 router.get('/project/:id', controllers.project.readSingle);
 router.put('/project', controllers.project.update);
 router.delete('/project', controllers.project.remove);
+
+router.post('/task', controllers.task.create);
+router.get('/task/all', controllers.task.readAll);
+router.get('/task/:id', controllers.task.readSingle);
+router.put('/task', controllers.task.update);
+router.delete('/task', controllers.task.remove);
 
 router.post('/user/:user', controllers.user.create);
 router.get('/user/:user', controllers.user.read);

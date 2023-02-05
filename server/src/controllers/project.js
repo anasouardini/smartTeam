@@ -1,7 +1,10 @@
 const MProject = require('../models/project');
 
 const readAll = async (req, res, next) => {
-  const projectsResp = await MProject.read({ portfolio_fk: req.query.portfolio_fk });
+  const projectsResp = await MProject.read({
+    portfolio_fk: req.query.portfolio_fk,
+    ownerID: req.userID,
+  });
 
   if (projectsResp.err) {
     return next('err while reading all projects');
@@ -10,10 +13,32 @@ const readAll = async (req, res, next) => {
   return res.json({ data: projectsResp[0] });
 };
 
+const list = async (req, res, next) => {
+  const tasksResp = await MProject.read({ ownerID: req.userID }, ['id', 'title']);
+
+  if (tasksResp.err) {
+    return next('err while listing all projects');
+  }
+
+  // console.log(tasksResp[0])
+  return res.json({ data: tasksResp[0] });
+};
+
 const readSingle = async (req, res) => {};
 
 const create = async (req, res, next) => {
-  const {portfolio_fk, title, description, dueDate, bgColor, status, milestone, progress, budget, expense } = req.body;
+  const {
+    portfolio_fk,
+    title,
+    description,
+    dueDate,
+    bgColor,
+    status,
+    milestone,
+    progress,
+    budget,
+    expense,
+  } = req.body;
   const projectsResp = await MProject.create({
     ownerID: req.userID,
     portfolio_fk,
@@ -40,7 +65,19 @@ const create = async (req, res, next) => {
 };
 
 const update = async (req, res, next) => {
-  const {portfolio_fk, id, title, description, bgColor, dueDate, status, progress, milestone, budget, expense } = req.body;
+  const {
+    portfolio_fk,
+    id,
+    title,
+    description,
+    bgColor,
+    dueDate,
+    status,
+    progress,
+    milestone,
+    budget,
+    expense,
+  } = req.body;
   // console.log(req.body)
   const projectsResp = await MProject.update(
     {
@@ -83,4 +120,4 @@ const remove = async (req, res, next) => {
   return res.json({ data: 'project removed successfully' });
 };
 
-module.exports = { readSingle, readAll, create, update, remove };
+module.exports = { readSingle, readAll, list, create, update, remove };

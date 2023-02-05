@@ -1,3 +1,4 @@
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 
@@ -58,10 +59,10 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: true } },
 });
 
-ReactDOM.createRoot(document.body).render(
-  <QueryClientProvider client={queryClient}>
-    <div id='root' className='flex min-h-[100vh]'>
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
       <MyRouter />
-    </div>
-  </QueryClientProvider>
+    </QueryClientProvider>
+  </React.StrictMode>
 );
