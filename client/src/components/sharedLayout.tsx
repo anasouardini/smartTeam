@@ -17,7 +17,7 @@ type loggedInUserT = {
   id: string;
 };
 
-export default function signup() {
+export default function sharedLayout() {
   const [isLoggedInState, setIsLoginState] = React.useState<
     undefined | boolean
   >(undefined);
