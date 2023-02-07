@@ -185,7 +185,7 @@ export default function sharedLayout() {
       </nav>
       {/*
        */}
-      <Outlet context={{ isLoggedIn: isLoggedInState }} />
+      <Outlet context={{ isLoggedIn: isLoggedInState, loggedInUser: loggedInUserState }} />
     </>
   ) : (
     <>fetching data</>

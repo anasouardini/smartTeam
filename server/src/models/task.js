@@ -8,14 +8,14 @@ const create = async (newData) => {
   }
   newData.id = uuid();
 
-  const autoQuery = AutoQuery.create('portfolios', newData);
+  const autoQuery = AutoQuery.create('tasks', newData);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
   return response;
 };
 
 const read = async (filter, fields) => {
-  const autoQuery = AutoQuery.read('portfolios', filter, fields);
+  const autoQuery = AutoQuery.read('tasks', filter, fields);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
   return response;
@@ -26,14 +26,14 @@ const update = async (filter, newData) => {
     return { err: 'no data is provided' };
   }
 
-  const autoQuery = AutoQuery.update('portfolios', filter, newData);
+  const autoQuery = AutoQuery.update('tasks', filter, newData);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
   return response;
 };
 
 const remove = async (filter) => {
-  const autoQuery = AutoQuery.remove('portfolios', filter);
+  const autoQuery = AutoQuery.remove('tasks', filter);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
   return response;

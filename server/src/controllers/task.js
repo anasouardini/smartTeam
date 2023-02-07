@@ -1,7 +1,11 @@
 const MTask = require('../models/task');
 
 const readAll = async (req, res, next) => {
-  const tasksResp = await MTask.read({ project_fk: req.query.project_fk,ownerID: req.userID });
+  const tasksResp = await MTask.read({
+    project_fk: req.query.project_fk,
+    portfolio_fk: req.query.portfolio_fk,
+    ownerID: req.userID,
+  });
 
   if (tasksResp.err) {
     return next('err while reading all tasks');
@@ -24,14 +28,17 @@ const list = async (req, res, next) => {
 const readSingle = async (req, res) => {};
 
 const create = async (req, res, next) => {
-  const { project_fk, title, description, bgColor, status } = req.body;
+  const {portfolio_fk, project_fk, assignee_fk, title, description, bgColor, status, dueDate } = req.body;
   const tasksResp = await MTask.create({
     ownerID: req.userID,
+    portfolio_fk,
     project_fk,
+    assignee_fk,
     title,
     description,
     bgColor,
     status,
+    dueDate,
   });
 
   if (tasksResp.err) {

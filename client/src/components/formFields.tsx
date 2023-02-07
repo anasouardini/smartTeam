@@ -1,7 +1,10 @@
 import ObjMerge from '../tools/objMerge';
 
 const commonValues = {
-  props: { type: 'text', className: 'border-b-2 border-b-primary px-2 py-1 bg-transparent' },
+  props: {
+    type: 'text',
+    className: 'border-b-2 border-b-primary px-2 py-1 bg-transparent',
+  },
 };
 
 const commonFields = {
@@ -23,20 +26,20 @@ const commonFields = {
       placeholder: 'description',
     },
   },
+  status: {
+    tagName: 'select',
+    props: {
+      defaultValue: '',
+      type: 'string',
+      className: commonValues.props.className,
+    },
+  },
 };
 
 type fieldsT = { [key: string]: { [key: string]: {} } };
 const fields: fieldsT = {
   portfolio: {
     ...commonFields,
-    status: {
-      tagName: 'input',
-      props: {
-        defaultValue: '',
-        type: 'text',
-        className: commonValues.props.className,
-      },
-    },
     bgImg: {
       tagName: 'input',
       props: {
@@ -55,7 +58,6 @@ const fields: fieldsT = {
         defaultValue: '',
         type: 'date',
         className: commonValues.props.className,
-        placeholder: 'due date',
       },
     },
     portfolio_fk: {
@@ -73,14 +75,6 @@ const fields: fieldsT = {
         type: 'string',
         className: commonValues.props.className,
         placeholder: 'background color',
-      },
-    },
-    status: {
-      tagName: 'select',
-      props: {
-        defaultValue: '',
-        type: 'string',
-        className: commonValues.props.className,
       },
     },
     milestone: {
@@ -111,6 +105,53 @@ const fields: fieldsT = {
       },
     },
   },
+  task: {
+    ...commonFields,
+    portfolio_fk: {
+      tagName: 'input',
+      props: {
+        defaultValue: '',
+        type: 'string',
+        className: commonValues.props.className,
+        placeholder: 'portfolio_fk',
+      },
+    },
+    project_fk: {
+      tagName: 'input',
+      props: {
+        defaultValue: '',
+        type: 'string',
+        className: commonValues.props.className,
+        placeholder: 'project_fk',
+      },
+    },
+    assignee_fk: {
+      tagName: 'input',
+      props: {
+        defaultValue: '',
+        type: 'string',
+        className: commonValues.props.className,
+        placeholder: 'assignee_fk',
+      },
+    },
+    bgColor: {
+      tagName: 'input',
+      props: {
+        defaultValue: '',
+        type: 'string',
+        className: commonValues.props.className,
+        placeholder: 'bgColor',
+      },
+    },
+    dueDate: {
+      tagName: 'input',
+      props: {
+        defaultValue: '',
+        type: 'date',
+        className: commonValues.props.className,
+      },
+    },
+  },
 };
 
 const genFields = (
@@ -122,7 +163,11 @@ const genFields = (
       if (!fields[item][fieldKey]) {
         acc[fieldKey] = {
           tagName: 'input',
-          props: { type: '', className: 'border-2 border-red-500', defaultValue: `unknown fields key "${fieldKey}"`},
+          props: {
+            type: '',
+            className: 'border-2 border-red-500',
+            defaultValue: `unknown fields key "${fieldKey}"`,
+          },
         };
         return acc;
       }
@@ -131,9 +176,7 @@ const genFields = (
         acc[fieldKey] = fields[item][fieldKey];
       } else {
         acc[fieldKey] = {
-          ...ObjMerge(
-            fields[item][fieldKey],selectedFields[fieldKey],
-          )
+          ...ObjMerge(fields[item][fieldKey], selectedFields[fieldKey]),
         };
       }
 
