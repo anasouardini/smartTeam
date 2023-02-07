@@ -7,7 +7,6 @@ import Form from '../components/form';
 import { FaPen, FaTrash } from 'react-icons/fa';
 import { useTable } from 'react-table';
 import FormFields from '../components/formFields';
-import Filter from '../components/filter';
 
 type queryT = {
   status: string;
@@ -49,7 +48,9 @@ const AfterQueryPrep = (props: propsT) => {
 
   const portfolio_fkSelectRef = React.useRef<HTMLSelectElement | null>(null);
   // the minimal initial ref value is just for the filter header
-  const formFieldsRef = React.useRef<{}>(FormFields('project', {
+  const formFieldsRef = React.useRef<{
+    [key: string]: { tagName: string; props: { [key: string]: string } };
+  }>(FormFields('project', {
       title: 'default',
       dueDate: 'default',
       status: 'default',
@@ -248,17 +249,19 @@ const AfterQueryPrep = (props: propsT) => {
 
   // TODO: set default selected item to the last visited one
 
+  const listFields = () => {
+    const fields = formFieldsRef.current;
+    return Object.keys(fields).map((fieldKey) => {
+      let TagName = fields[fieldKey].tagName;
+      if (TagName == 'textarea') {
+        TagName = 'input';
+      }
+      return <TagName key={fieldKey} {...fields[fieldKey].props} />;
+    });
+  };
   return (
     <div aria-label='container' className={`grow flex flex-col`}>
-      {formFieldsRef.current == null ? (
-        <></>
-      ) : (
-        <Filter fields={formFieldsRef.current} />
-      )}
-      <main
-        aria-label='projects'
-        className='text-black mt-[7rem] px-10 gap-6 grow flex flex-col items-center'
-      >
+      <header aria-label='filters' className={`px-6 py-4 flex flex-wrap gap-4`}>
         <select
           ref={portfolio_fkSelectRef}
           onChange={projectsQuery.refetch}
@@ -270,6 +273,15 @@ const AfterQueryPrep = (props: propsT) => {
             )
           )}
         </select>
+        {listFields()}
+        <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
+          Filter
+        </button>
+      </header>
+      <main
+        aria-label='projects'
+        className='text-black mt-[7rem] px-10 gap-6 grow flex flex-col items-center'
+      >
 
         {mountProjectsTable()}
 

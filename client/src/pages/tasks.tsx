@@ -1,5 +1,6 @@
 import React from 'react';
 // import { useParams } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import Bridge from '../tools/bridge';
 import Genid from '../tools/genid';
@@ -7,7 +8,6 @@ import Form from '../components/form';
 import { FaPen, FaTrash } from 'react-icons/fa';
 import { useTable } from 'react-table';
 import FormFields from '../components/formFields';
-import Filter from '../components/filter';
 
 type queryT = {
   status: string;
@@ -18,6 +18,11 @@ type queryT = {
 type propsT = { portfoliosListQuery: queryT; projectsListQuery: queryT };
 
 const AfterQueryPrep = (props: propsT) => {
+  const { loggedInUser } = useOutletContext<{
+    loggedInUser: { username: string; id: string };
+    isLoggedIn: boolean;
+  }>();
+
   const [state, setState] = React.useState({
     popup: { form: { show: false, mode: 'create', itemID: '' } },
   });
@@ -49,13 +54,29 @@ const AfterQueryPrep = (props: propsT) => {
 
   const portfolio_fkSelectRef = React.useRef<HTMLSelectElement | null>(null);
   const project_fkSelectRef = React.useRef<HTMLSelectElement | null>(null);
-  const formFieldsRef = React.useRef<{} | null>(null);
+  const formFieldsRef = React.useRef<{
+    [key: string]: { tagName: string; props: { [key: string]: string } };
+  }>(
+    FormFields('task', {
+      // assignee_fk:{
+      //   props: {
+      //     defaultValue: loggedInUser.id,
+      //     readOnly: true,
+      //   },
+      // },
+      title: 'default',
+      description: 'default',
+      bgColor: 'default',
+      dueDate: 'default',
+      status: 'default',
+    })
+  );
 
   // TODO: extract this to a seperate component
   const tasksQuery = useQuery('projects', async () => {
     const response = await Bridge(
       'read',
-      `project/all?portfolio_fk=${
+      `task/all?portfolio_fk=${
         portfolio_fkSelectRef.current?.value ??
         props.portfoliosListQuery.data[0]
       }&project_fk=${
@@ -64,18 +85,14 @@ const AfterQueryPrep = (props: propsT) => {
     );
     return response?.err == 'serverError' ? false : response.data;
   });
-  // if (projectsQuery.status == 'success') {
-  //   console.log(projectsQuery.data);
+  // if (tasksQuery.status == 'success') {
+  //   console.log(tasksQuery.data);
   // }
 
-  const tailwindClx = {
-    projectBorder: 'border-2 border-primary rounded-md',
-    projectItem: `flex items-center justify-center w-[12rem]
-                  h-[7rem] text-primary text-2xl`,
-  };
+  const tailwindClx = {};
 
-  const createNewProject = () => {
-    formFieldsRef.current = FormFields('project', {
+  const createNewTask = () => {
+    formFieldsRef.current = FormFields('task', {
       portfolio_fk: {
         props: {
           defaultValue: portfolio_fkSelectRef.current?.value,
@@ -85,6 +102,12 @@ const AfterQueryPrep = (props: propsT) => {
       project_fk: {
         props: {
           defaultValue: project_fkSelectRef.current?.value,
+          readOnly: true,
+        },
+      },
+      assignee_fk: {
+        props: {
+          defaultValue: loggedInUser.id,
           readOnly: true,
         },
       },
@@ -93,26 +116,21 @@ const AfterQueryPrep = (props: propsT) => {
       bgColor: 'default',
       dueDate: 'default',
       status: 'default',
-      milestone: 'default',
-      budget: 'default',
-      expense: 'default',
     });
 
     stateActions.form.show();
   };
 
-  const editProject = (project: { [key: string]: any }) => {
+  const editTask = (project: { [key: string]: any }) => {
     formFieldsRef.current = FormFields('project', {
       portfolio_fk: {
         props: {
           defaultValue: portfolio_fkSelectRef.current?.value,
-          readOnly: true,
         },
       },
       project_fk: {
         props: {
           defaultValue: project_fkSelectRef.current?.value,
-          readOnly: true,
         },
       },
       title: { props: { defaultValue: project.title } },
@@ -128,7 +146,7 @@ const AfterQueryPrep = (props: propsT) => {
     stateActions.form.show(project.id, 'edit');
   };
 
-  const removeProject = async (id: string) => {
+  const removeTask = async (id: string) => {
     const resp = await Bridge('remove', `project`, {
       id,
     });
@@ -141,61 +159,108 @@ const AfterQueryPrep = (props: propsT) => {
     tasksQuery.refetch();
   };
 
+  const listFields = () => {
+    const fields = formFieldsRef.current;
+    return Object.keys(fields).map((fieldKey) => {
+      let TagName = fields[fieldKey].tagName;
+      if (TagName == 'textarea') {
+        TagName = 'input';
+      }
+      return <TagName key={fieldKey} {...fields[fieldKey].props} />;
+    });
+  };
+
   // TODO: set default selected item to the last visited one
   return (
-    <div aria-label='container' className={`grow flex flex-col`}>
-      {/*
-        <Filter fields={formFieldsRef} />
-      */}
-      <main
-        aria-label='projects'
-        className='text-black mt-[7rem] px-10 gap-6 grow flex flex-col items-center'
-      >
-        <select
-          ref={portfolio_fkSelectRef}
-          onChange={tasksQuery.refetch}
-          className={`w-max`}
+    <>
+      <div aria-label='container' className={`grow flex flex-col`}>
+        <header
+          aria-label='filters'
+          className={`px-6 py-4 flex flex-wrap gap-4`}
         >
-          {props.portfoliosListQuery.data.map(
-            (portfolio: { id: string; title: string }) => (
-              <option value={portfolio.id}>{portfolio.title}</option>
-            )
-          )}
-        </select>
-        <select
-          ref={project_fkSelectRef}
-          onChange={tasksQuery.refetch}
-          className={`w-max`}
+          <select
+            ref={portfolio_fkSelectRef}
+            onChange={tasksQuery.refetch}
+            className={`w-max`}
+          >
+            {props.portfoliosListQuery.data.map(
+              (portfolio: { id: string; title: string }) => (
+                <option key={portfolio.id} value={portfolio.id}>
+                  {portfolio.title}
+                </option>
+              )
+            )}
+          </select>
+          <select
+            ref={project_fkSelectRef}
+            onChange={tasksQuery.refetch}
+            className={`w-max`}
+          >
+            {props.projectsListQuery.data.map(
+              (project: { id: string; title: string }) => (
+                <option key={project.id} value={project.id}>
+                  {project.title}
+                </option>
+              )
+            )}
+          </select>
+          {listFields()}
+          <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
+            Filter
+          </button>
+        </header>
+        <main
+          aria-label='projects'
+          className='text-black px-10 gap-6 grow flex justify-between'
         >
-          {props.projectsListQuery.data.map(
-            (project: { id: string; title: string }) => (
-              <option value={project.id}>{project.title}</option>
-            )
-          )}
-        </select>
+          <section
+            aria-label='tasks list'
+            className='grow pt-[5rem] flex flex-col'
+          >
+            {tasksQuery.status == 'success' ? (
+              tasksQuery.data.map((task, index) => {
+                return (
+                  <h3 key={index} className='mt-4'>
+                    Task: {task.title}
+                  </h3>
+                );
+              })
+            ) : (
+              <></>
+            )}
 
-        {/* new project button*/}
-        <button
-          onClick={createNewProject}
-          className={`${tailwindClx.projectBorder} w-max px-3 py-1 text-primary text-lg capitalize`}
-        >
-          <span className='text-2xl'>+</span> add new project
-        </button>
+            {/* new task button*/}
+            <button
+              onClick={createNewTask}
+              className={`mt-3 w-max pb-1 text-primary text-md capitalize`}
+            >
+              <span className='text-xl'>+</span> add new task
+            </button>
+          </section>
 
-        {state.popup.form.show ? (
-          <Form
-            fields={formFieldsRef.current}
-            mode={state.popup.form.mode}
-            itemID={state.popup.form.itemID}
-            route={'project'}
-            refetch={tasksQuery.refetch}
-            hideForm={stateActions.form.hide}
-          />
-        ) : (
-          <></>
-        )}
-      </main>
-    </div>
+          <section
+            aria-label='task info'
+            className='grow pt-[5rem] pl-4 border-l-primary border-l-2'
+          >
+            <h2 aria-label='taks title' className={`text-xl`}>
+              task title
+            </h2>
+          </section>
+          {state.popup.form.show ? (
+            <Form
+              fields={formFieldsRef.current}
+              mode={state.popup.form.mode}
+              itemID={state.popup.form.itemID}
+              route={'task'}
+              refetch={tasksQuery.refetch}
+              hideForm={stateActions.form.hide}
+            />
+          ) : (
+            <></>
+          )}
+        </main>
+      </div>
+    </>
   );
 };
 
@@ -211,8 +276,8 @@ export default function Projects() {
     return response?.err == 'serverError' ? false : response.data;
   });
 
-  console.log(portfoliosListQuery.status == 'success');
-  console.log(projectsListQuery.status == 'success');
+  // console.log(portfoliosListQuery.status == 'success');
+  // console.log(projectsListQuery.status == 'success');
 
   if (
     portfoliosListQuery.status == 'success' &&

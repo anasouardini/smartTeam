@@ -5,7 +5,6 @@ import Genid from '../tools/genid';
 import Portfolio from '../components/portfolio';
 import Form from '../components/form';
 import FormFields from '../components/formFields';
-import Filter from '../components/filter';
 
 export default function Portfolios() {
   const [state, setState] = React.useState({
@@ -26,7 +25,9 @@ export default function Portfolios() {
     },
   };
 
-  const formFieldsRef = React.useRef(
+  const formFieldsRef = React.useRef<{
+    [key: string]: { tagName: string; props: { [key: string]: string } }
+  }>(
     FormFields('portfolio', {
       title: 'default',
       description: 'default',
@@ -74,10 +75,26 @@ export default function Portfolios() {
     });
   };
 
+  const listFields = () => {
+    const fields = formFieldsRef;
+    return Object.keys(fields).map((fieldKey) => {
+      let TagName = fields[fieldKey].tagName;
+      if (TagName == 'textarea') {
+        TagName = 'input';
+      }
+      return <TagName key={fieldKey} {...fields[fieldKey].props} />;
+    });
+  };
+
 
   return (
     <div aria-label='container' className={`grow flex flex-col`}>
-      <Filter fields={formFieldsRef} />
+      <header aria-label='filters' className={`px-6 py-4 flex flex-wrap gap-4`}>
+        {listFields()}
+        <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
+          Filter
+        </button>
+      </header>
       <main
         aria-label='portfolios'
         className='text-black mt-[7rem] pl-20 flex gap-6'
