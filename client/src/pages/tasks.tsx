@@ -24,11 +24,11 @@ const AfterQueryPrep = (props: propsT) => {
   }>();
 
   const [state, setState] = React.useState({
-    popup: { form: { show: false, mode: 'create', itemID: '' } },
+    popup: { sideForm: { show: true, mode: 'create', itemIndex: 0 } },
   });
   const stateActions = {
     form: {
-      show: (itemID?: string, mode?: 'edit' | 'create') => {
+      show: (itemID?: number, mode?: 'edit' | 'create') => {
         const stateCpy = { ...state }; // tricking react with a shallow copy
 
         if (mode == 'edit') {
@@ -37,16 +37,16 @@ const AfterQueryPrep = (props: propsT) => {
               'err: forgot to include the item id for editing'
             );
           }
-          stateCpy.popup.form.mode = mode;
-          stateCpy.popup.form.itemID = itemID;
+          stateCpy.popup.sideForm.mode = mode;
+          stateCpy.popup.sideForm.itemIndex = itemID;
         }
 
-        stateCpy.popup.form.show = true;
+        stateCpy.popup.sideForm.show = true;
         setState(stateCpy);
       },
       hide: () => {
         const stateCpy = { ...state }; // tricking react with a shallow copy
-        stateCpy.popup.form.show = false;
+        stateCpy.popup.sideForm.show = false;
         setState(stateCpy);
       },
     },
@@ -54,23 +54,11 @@ const AfterQueryPrep = (props: propsT) => {
 
   const portfolio_fkSelectRef = React.useRef<HTMLSelectElement | null>(null);
   const project_fkSelectRef = React.useRef<HTMLSelectElement | null>(null);
-  const formFieldsRef = React.useRef<{
+
+  //TODO: needs to be passed separately to the filter header
+  const formFieldsRef = React.useRef<null | {
     [key: string]: { tagName: string; props: { [key: string]: string } };
-  }>(
-    FormFields('task', {
-      // assignee_fk:{
-      //   props: {
-      //     defaultValue: loggedInUser.id,
-      //     readOnly: true,
-      //   },
-      // },
-      title: 'default',
-      description: 'default',
-      bgColor: 'default',
-      dueDate: 'default',
-      status: 'default',
-    })
-  );
+  }>(null);
 
   // TODO: extract this to a seperate component
   const tasksQuery = useQuery('projects', async () => {
@@ -146,6 +134,33 @@ const AfterQueryPrep = (props: propsT) => {
     stateActions.form.show(project.id, 'edit');
   };
 
+  const editTaskField = async (
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    let value = e.target.value;
+    const name = e.target.name;
+
+    if (name == 'dueDate') {
+      value += ':00';
+    }
+
+    console.log(value);
+
+    const index = state.popup.sideForm.itemIndex;
+    const currentTask = tasksQuery.data[index];
+
+    // if the value hasn't changed just abort
+    if (currentTask[name] == value) {
+      return;
+    }
+
+    const userUpdateResp = await Bridge('update', `task`, {
+      id: currentTask.id,
+      [name]: value,
+    });
+    console.log(userUpdateResp);
+  };
+
   const removeTask = async (id: string) => {
     const resp = await Bridge('remove', `project`, {
       id,
@@ -160,7 +175,20 @@ const AfterQueryPrep = (props: propsT) => {
   };
 
   const listFields = () => {
-    const fields = formFieldsRef.current;
+    const fields = FormFields('task', {
+      // assignee_fk:{
+      //   props: {
+      //     defaultValue: loggedInUser.id,
+      //     readOnly: true,
+      //   },
+      // },
+      title: 'default',
+      description: 'default',
+      bgColor: 'default',
+      dueDate: 'default',
+      status: 'default',
+    });
+
     return Object.keys(fields).map((fieldKey) => {
       let TagName = fields[fieldKey].tagName;
       if (TagName == 'textarea') {
@@ -168,6 +196,124 @@ const AfterQueryPrep = (props: propsT) => {
       }
       return <TagName key={fieldKey} {...fields[fieldKey].props} />;
     });
+  };
+
+  const listSideTaskFields = () => {
+    const index = state.popup.sideForm.itemIndex;
+    const currentTask = tasksQuery.data[index];
+    // console.log(currentTask);
+
+    // mysql2 misses dates by addin gone hour. hence this mess
+    // basically adding an hour to the date using string manupulation
+    // because JS handles dates poorly
+    const newDate: { [key: string]: string } = {};
+    Object.keys(currentTask).forEach((itemKey) => {
+      if (itemKey.includes('Date') || itemKey.includes('date')) {
+        // console.log(currentTask[itemKey], '--------')
+        const hourPlusOne =
+          parseInt(currentTask[itemKey].split('T')[1].split(':')[0]) + 1;
+        const item = currentTask[itemKey];
+        const firstPart = item.slice(0, item.indexOf('T') + 1);
+        const secondPart = item.slice(item.indexOf(':'));
+        const result = `${firstPart}${`0${hourPlusOne}`.slice(
+          -2
+        )}${secondPart}`;
+
+        // console.log(hourPlusOne)
+        // console.log(result)
+        newDate[itemKey] = result.split('.')[0];
+        // currentTask[itemKey] = result;
+      }
+    });
+
+    // console.log(newDate.dueDate, 'last');
+
+    return (
+      <section
+        aria-label='task info'
+        className='grow mt-[2rem] py-3 px-2 border-gray-300 border-2 rounded-md'
+      >
+        <>
+          <div className={`flex flex-col gap-6`}>
+            <label className={`max-w-max`}>
+              title:
+              <input
+                onBlur={editTaskField}
+                name='title'
+                type='text'
+                className='ml-5 px-2 py-1 border-b-2 border-b-primary'
+                defaultValue={currentTask.title}
+              />
+            </label>
+            <label className={`max-w-max`}>
+              background color:
+              <input
+                onBlur={editTaskField}
+                name='bgColor'
+                type='color'
+                className='ml-5 px-2 py-1'
+                defaultValue={currentTask.bgColor}
+              />
+            </label>
+            <label className={`max-w-max`}>
+              due date:
+              <input
+                onBlur={editTaskField}
+                name='dueDate'
+                type='datetime-local'
+                className='ml-5 px-2 py-1'
+                defaultValue={newDate.dueDate}
+              />
+            </label>
+            <label>
+              description:
+              <textarea
+                onBlur={editTaskField}
+                name='description'
+                className='mt-4 px-2 py-1 border-[1px] border-gray-300 block w-full'
+                defaultValue={currentTask.description}
+              />
+            </label>
+          </div>
+        </>
+      </section>
+    );
+  };
+
+  // tables suck, falling back to DIVs
+  //TODO: use grid instead of a table
+  const showTaksTale = () => {
+    return (
+      <div aria-label='tasks table' className='text-left flex flex-col gap-2'>
+        <div className={`flex`}>
+          <div className={``}>
+            <button
+              className={`text-md text-white bg-primary rounded-md px-2 py-[2px]`}
+            >
+              New Task
+            </button>
+          </div>
+        </div>
+        {tasksQuery.data.map((task, index) => {
+          return (
+            <div className={`hover:border-primary border-[1px] rounded-md`}>
+              {tasksQuery.data.map((task, index) => {
+                return (
+                  <>
+                    <input
+                      type='text'
+                      key={index}
+                      className='px-2 py-1'
+                      defaultValue={task.title}
+                    />
+                  </>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    );
   };
 
   // TODO: set default selected item to the last visited one
@@ -209,25 +355,13 @@ const AfterQueryPrep = (props: propsT) => {
             Filter
           </button>
         </header>
-        <main
-          aria-label='projects'
-          className='text-black px-10 gap-6 grow flex justify-between'
-        >
+
+        <main aria-label='projects' className='text-black px-2 gap-3 grow flex'>
           <section
             aria-label='tasks list'
-            className='grow pt-[5rem] flex flex-col'
+            className='grow mt-[2rem] py-4 flex flex-col border-gray-300 border-2 rounded-md px-2'
           >
-            {tasksQuery.status == 'success' ? (
-              tasksQuery.data.map((task, index) => {
-                return (
-                  <h3 key={index} className='mt-4'>
-                    Task: {task.title}
-                  </h3>
-                );
-              })
-            ) : (
-              <></>
-            )}
+            {tasksQuery.status == 'success' ? showTaksTale() : <></>}
 
             {/* new task button*/}
             <button
@@ -238,23 +372,10 @@ const AfterQueryPrep = (props: propsT) => {
             </button>
           </section>
 
-          <section
-            aria-label='task info'
-            className='grow pt-[5rem] pl-4 border-l-primary border-l-2'
-          >
-            <h2 aria-label='taks title' className={`text-xl`}>
-              task title
-            </h2>
-          </section>
-          {state.popup.form.show ? (
-            <Form
-              fields={formFieldsRef.current}
-              mode={state.popup.form.mode}
-              itemID={state.popup.form.itemID}
-              route={'task'}
-              refetch={tasksQuery.refetch}
-              hideForm={stateActions.form.hide}
-            />
+          {state.popup.sideForm.show &&
+          tasksQuery.status == 'success' &&
+          tasksQuery.data.length ? (
+            listSideTaskFields()
           ) : (
             <></>
           )}
