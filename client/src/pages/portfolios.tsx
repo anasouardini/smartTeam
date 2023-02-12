@@ -28,7 +28,7 @@ export default function Portfolios() {
   const formFieldsRef = React.useRef<{
     [key: string]: { tagName: string; props: { [key: string]: string } }
   }>(
-    FormFields('portfolio', {
+   FormFields('portfolio', {
       title: 'default',
       description: 'default',
       bgImg: 'default',
@@ -76,7 +76,12 @@ export default function Portfolios() {
   };
 
   const listFields = () => {
-    const fields = formFieldsRef;
+    const fields =  FormFields('portfolio', {
+      title: 'default',
+      description: 'default',
+      bgImg: 'default',
+      status: 'default',
+    });
     return Object.keys(fields).map((fieldKey) => {
       let TagName = fields[fieldKey].tagName;
       if (TagName == 'textarea') {
