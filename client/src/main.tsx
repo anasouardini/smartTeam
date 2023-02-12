@@ -59,7 +59,8 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: true } },
 });
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+// ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+ReactDOM.createRoot(window.root as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <MyRouter />
