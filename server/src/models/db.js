@@ -26,7 +26,8 @@ const initQueries = {
                       createDate dateTime default current_timestamp,
                       progress int,
                       status varchar(20),
-                      primary key(id, ownerID)
+                      primary key(id, ownerID),
+                      foreign key(ownerID) references users(id) on delete cascade
                     )`,
   createProjectsTable: `create table projects(
                       id varchar(50),
@@ -43,7 +44,7 @@ const initQueries = {
                       budget int,
                       expense int,
                       primary key(id, ownerID, portfolio_fk),
-                      foreign key(portfolio_fk) references portfolios(id)
+                      foreign key(portfolio_fk) references portfolios(id) on delete cascade
                     )`,
   createTasksTable: `create table tasks(
                       id varchar(50),
@@ -58,8 +59,8 @@ const initQueries = {
                       dueDate dateTime null,
                       status varchar(20),
                       primary key(id, ownerID, project_fk),
-                      foreign key(project_fk) references projects(id),
-                      foreign key(assignee_fk) references users(id)
+                      foreign key(project_fk) references projects(id) on delete cascade,
+                      foreign key(assignee_fk) references users(id) on delete cascade
                     )`,
   createPortfolioPrivilegesTable: `create table portfolioPrivileges(
                       id varchar(50) primary key,
@@ -70,8 +71,8 @@ const initQueries = {
                       readAccess tinyint,
                       updateAccess tinyint,
                       removeAccess tinyint,
-                      foreign key(portfolio_fk) references portfolios(id),
-                      foreign key(manager_fk) references users(id)
+                      foreign key(portfolio_fk) references portfolios(id) on delete cascade,
+                      foreign key(manager_fk) references users(id) on delete cascade
                     )`,
   createProjectPrivilegesTable: `create table projectPrivileges(
                       id varchar(50) primary key,
@@ -82,8 +83,8 @@ const initQueries = {
                       readAccess tinyint,
                       updateAccess tinyint,
                       removeAccess tinyint,
-                      foreign key(project_fk) references projects(id),
-                      foreign key(manager_fk) references users(id)
+                      foreign key(project_fk) references projects(id) on delete cascade,
+                      foreign key(manager_fk) references users(id) on delete cascade
                     )`,
 };
 
