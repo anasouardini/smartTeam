@@ -17,7 +17,6 @@ export default function Profile() {
   //   console.log('RQ.data: ', userInfoQuery.data);
   // }
 
-
   const updateField = async (
     e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {

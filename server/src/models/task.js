@@ -18,6 +18,7 @@ const read = async (filter, fields) => {
   const autoQuery = AutoQuery.read('tasks', filter, fields);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
+  console.log(response[0]);
   return response;
 };
 
