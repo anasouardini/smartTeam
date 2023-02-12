@@ -47,10 +47,16 @@ export default function Portfolio(props: {
       bgImg: 'default',
       status: 'default',
     })
-  ).current;
+  );
 
 
   const editPortfolio = async () => {
+    formFieldsRef.current = FormFields('portfolio', {
+      title: {props:{defaultValue: state.item.title}},
+      description: {props:{defaultValue: state.item.description}},
+      bgImg: {props:{defaultValue: state.item.bgImg}},
+      status: {props:{defaultValue: state.item.status}},
+    })
     stateActions.form.show();
   };
 
@@ -98,7 +104,8 @@ export default function Portfolio(props: {
 
       {state.popup.form.show ? (
         <Form
-          fields={formFieldsRef}
+          fields={formFieldsRef.current}
+          route={'portfolio'}
           mode={state.popup.form.mode}
           refetch={props.refetch}
           itemID={state.item.id}
