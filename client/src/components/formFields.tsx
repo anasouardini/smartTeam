@@ -56,7 +56,7 @@ const fields: fieldsT = {
       tagName: 'input',
       props: {
         defaultValue: '',
-        type: 'date',
+        type: 'dateuime-local',
         className: commonValues.props.className,
       },
     },
@@ -147,7 +147,7 @@ const fields: fieldsT = {
       tagName: 'input',
       props: {
         defaultValue: '',
-        type: 'date',
+        type: 'datetime-local',
         className: commonValues.props.className,
       },
     },
@@ -173,7 +173,7 @@ const genFields = (
       }
 
       if (selectedFields[fieldKey] == 'default') {
-        acc[fieldKey] = fields[item][fieldKey];
+        acc[fieldKey] = structuredClone(fields[item][fieldKey]);
       } else {
         acc[fieldKey] = {
           ...ObjMerge(fields[item][fieldKey], selectedFields[fieldKey]),
