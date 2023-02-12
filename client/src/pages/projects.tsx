@@ -16,6 +16,7 @@ type queryT = {
 };
 type propsT = { portfoliosListQuery: queryT };
 
+//TODO: this global state and state actions is better used as a global hook
 const AfterQueryPrep = (props: propsT) => {
   const [state, setState] = React.useState({
     popup: { form: { show: false, mode: 'create', itemID: '' } },
@@ -48,16 +49,9 @@ const AfterQueryPrep = (props: propsT) => {
 
   const portfolio_fkSelectRef = React.useRef<HTMLSelectElement | null>(null);
   // the minimal initial ref value is just for the filter header
-  const formFieldsRef = React.useRef<{
+  const formFieldsRef = React.useRef<null|{
     [key: string]: { tagName: string; props: { [key: string]: string } };
-  }>(FormFields('project', {
-      title: 'default',
-      dueDate: 'default',
-      status: 'default',
-      milestone: 'default',
-      budget: 'default',
-      expense: 'default',
-    }));
+  }>(null);
 
   // TODO: extract this to a seperate component
   const projectsQuery = useQuery('projects', async () => {
@@ -248,9 +242,16 @@ const AfterQueryPrep = (props: propsT) => {
   };
 
   // TODO: set default selected item to the last visited one
-
   const listFields = () => {
-    const fields = formFieldsRef.current;
+    const fields = FormFields('project', {
+      title: 'default',
+      dueDate: 'default',
+      status: 'default',
+      milestone: 'default',
+      budget: 'default',
+      expense: 'default',
+    })
+
     return Object.keys(fields).map((fieldKey) => {
       let TagName = fields[fieldKey].tagName;
       if (TagName == 'textarea') {
