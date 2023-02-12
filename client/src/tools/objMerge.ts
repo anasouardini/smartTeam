@@ -13,7 +13,7 @@ const merger = (obj:{[key:string]:any}, newObj:{[key:string]:any}) => {
 };
 
 const objMerge = (obj:{}, newObj:{}) => {
-    const stateRef = obj;
+    const stateRef = structuredClone(obj);
 
     merger(stateRef, newObj);
     return stateRef;
