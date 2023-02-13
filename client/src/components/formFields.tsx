@@ -1,15 +1,23 @@
 import ObjMerge from '../tools/objMerge';
 
+// TODO: abstract certain fields by their category since
+// nb: make sure you won't revert this after doing it
+// they don't change e.g a task is always going to have
+// the same fields all the time
+// the empty ones should be abstracted down to one function call
+// the others could be a function call with an array
+
 const commonValues = {
   props: {
     type: 'text',
-    className: 'border-b-2 border-b-primary px-2 py-1 bg-transparent',
+    className: 'border-b-2 border-b-primary px-2 py-1 bg-transparent block text-gray-500',
   },
 };
 
 const commonFields = {
   title: {
     tagName: 'input',
+    label: 'title',
     props: {
       defaultValue: '',
       type: 'text',
@@ -19,6 +27,7 @@ const commonFields = {
   },
   description: {
     tagName: 'textarea',
+    label: 'description',
     props: {
       defaultValue: '',
       type: 'text',
@@ -28,6 +37,7 @@ const commonFields = {
   },
   status: {
     tagName: 'select',
+    label: 'status',
     props: {
       defaultValue: '',
       type: 'string',
@@ -41,10 +51,10 @@ const fields: fieldsT = {
   portfolio: {
     ...commonFields,
     bgImg: {
-      tagName: 'input',
+      label: 'bgImg',
+      tagName: 'img',
       props: {
         defaultValue: '',
-        type: 'text',
         className: commonValues.props.className,
         placeholder: 'background image',
       },
@@ -53,6 +63,7 @@ const fields: fieldsT = {
   project: {
     ...commonFields,
     dueDate: {
+      label: 'due date',
       tagName: 'input',
       props: {
         defaultValue: '',
@@ -61,7 +72,9 @@ const fields: fieldsT = {
       },
     },
     portfolio_fk: {
-      tagName: 'input',
+      tagName: 'select',
+      label: 'portfolio',
+      children: [],
       props: {
         defaultValue: '',
         type: 'string',
@@ -70,15 +83,17 @@ const fields: fieldsT = {
     },
     bgColor: {
       tagName: 'input',
+      label: 'background color',
       props: {
         defaultValue: '',
-        type: 'string',
+        type: 'color',
         className: commonValues.props.className,
         placeholder: 'background color',
       },
     },
     milestone: {
       tagName: 'input',
+      label: 'milestone',
       props: {
         defaultValue: '',
         type: 'string',
@@ -88,6 +103,7 @@ const fields: fieldsT = {
     },
     budget: {
       tagName: 'input',
+      label: 'budget',
       props: {
         defaultValue: '',
         type: 'string',
@@ -96,6 +112,7 @@ const fields: fieldsT = {
       },
     },
     expense: {
+      label: 'expense',
       tagName: 'input',
       props: {
         defaultValue: '',
@@ -108,7 +125,9 @@ const fields: fieldsT = {
   task: {
     ...commonFields,
     portfolio_fk: {
-      tagName: 'input',
+      label: 'portfolio',
+      tagName: 'select',
+      children: [],
       props: {
         defaultValue: '',
         type: 'string',
@@ -117,7 +136,9 @@ const fields: fieldsT = {
       },
     },
     project_fk: {
-      tagName: 'input',
+      label: 'project',
+      tagName: 'select',
+      children: [],
       props: {
         defaultValue: '',
         type: 'string',
@@ -126,7 +147,9 @@ const fields: fieldsT = {
       },
     },
     assignee_fk: {
-      tagName: 'input',
+      label: 'assignee',
+      tagName: 'select',
+      children: [],
       props: {
         defaultValue: '',
         type: 'string',
@@ -135,15 +158,17 @@ const fields: fieldsT = {
       },
     },
     bgColor: {
+      label: 'background color',
       tagName: 'input',
       props: {
         defaultValue: '',
-        type: 'string',
+        type: 'color',
         className: commonValues.props.className,
         placeholder: 'bgColor',
       },
     },
     dueDate: {
+      label: 'dueDate',
       tagName: 'input',
       props: {
         defaultValue: '',
