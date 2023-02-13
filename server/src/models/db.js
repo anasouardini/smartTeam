@@ -60,6 +60,7 @@ const initQueries = {
                       status varchar(20),
                       primary key(id, ownerID, project_fk),
                       foreign key(project_fk) references projects(id) on delete cascade,
+                      foreign key(portfolio_fk) references portfolios(id) on delete cascade,
                       foreign key(assignee_fk) references users(id) on delete cascade
                     )`,
   createPortfolioPrivilegesTable: `create table portfolioPrivileges(

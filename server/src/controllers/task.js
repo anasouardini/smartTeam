@@ -64,6 +64,7 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   const newData = req.body;
+  // console.log(newData)
   const editableFiels = ['title', 'description', 'bgColor', 'dueDate'];
   const query = [
     {
