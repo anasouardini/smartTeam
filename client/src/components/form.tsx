@@ -1,5 +1,6 @@
 import React from 'react';
 import { z } from 'zod';
+import Genid from '../tools/genid';
 import Bridge from '../tools/bridge';
 
 type propsT = {
@@ -83,17 +84,42 @@ export default function Form(props: propsT) {
   const listFields = () => {
     return Object.keys(parentState.fields).map((fieldKey) => {
       const field = parentState.fields[fieldKey];
-      // console.log(parentState.fields[fieldKey])
+      console.log(parentState.fields[fieldKey])
       const TagName = field.tagName;
+
+      const randomKey = Genid(10);
       return (
-        <TagName
-          key={fieldKey}
-          ref={(el) => {
-            fieldsRefs[fieldKey] = el;
-          }}
-          {...field.props}
-        />
+        <label key={fieldKey + randomKey} className={`text-black`}>
+          {' '}
+          {field.label}:
+          {field?.children ? (
+            <TagName
+              key={fieldKey + randomKey}
+              ref={(el) => {
+                fieldsRefs[fieldKey] = el;
+              }}
+              {...field.props}
+            >
+              {field?.children ? (
+                field.children.map((child) => (
+                  <option key={child[0]} value={child[0]}>{child[1]}</option>
+                ))
+              ) : (
+                <></>
+              )}
+            </TagName>
+          ) : (
+            <TagName
+              key={fieldKey + randomKey}
+              ref={(el) => {
+                fieldsRefs[fieldKey] = el;
+              }}
+              {...field.props}
+            />
+          )}
+        </label>
       );
+
     });
   };
 
