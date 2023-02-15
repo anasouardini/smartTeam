@@ -63,11 +63,11 @@ const fields: fieldsT = {
   project: {
     ...commonFields,
     dueDate: {
-      label: 'due date',
+      label: 'duedate',
       tagName: 'input',
       props: {
         defaultValue: '',
-        type: 'dateuime-local',
+        type: 'datetime-local',
         className: commonValues.props.className,
       },
     },
