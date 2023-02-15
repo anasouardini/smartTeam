@@ -9,6 +9,7 @@ import {
   FaSuitcase,
   FaLightbulb,
   FaList,
+  FaKey,
   FaHatWizard
 } from 'react-icons/fa';
 
@@ -128,6 +129,14 @@ export default function sharedLayout() {
             >
               <FaList />
               tasks
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to={`/privileges`}
+              className={activeLink}
+            >
+              <FaKey />
+              privileges
             </NavLink>
           </li>
           <li>

@@ -14,7 +14,7 @@ type queryT = {
   data: { [key: string]: any };
   refetch: () => void;
 };
-type propsT = { portfoliosListQuery: queryT };
+type propsT = { itemsListQuery: queryT };
 
 //TODO: this global state and state actions is better used as a global hook
 const AfterQueryPrep = (props: propsT) => {
@@ -49,7 +49,7 @@ const AfterQueryPrep = (props: propsT) => {
 
   const portfolio_fkSelectRef = React.useRef<HTMLSelectElement | null>(null);
   // the minimal initial ref value is just for the filter header
-  const formFieldsRef = React.useRef<null|{
+  const formFieldsRef = React.useRef<null | {
     [key: string]: { tagName: string; props: { [key: string]: string } };
   }>(null);
 
@@ -59,7 +59,7 @@ const AfterQueryPrep = (props: propsT) => {
       'read',
       `project/all?portfolio_fk=${
         portfolio_fkSelectRef.current?.value ??
-        props.portfoliosListQuery.data[0]
+        props.itemsListQuery.data.portfolios[0]
       }`
     );
     return response?.err == 'serverError' ? false : response.data;
@@ -77,6 +77,12 @@ const AfterQueryPrep = (props: propsT) => {
   const createNewProject = () => {
     formFieldsRef.current = FormFields('project', {
       portfolio_fk: {
+        children: [
+          [
+            portfolio_fkSelectRef.current?.value,
+            portfolio_fkSelectRef.current?.innerText,
+          ],
+        ],
         props: {
           defaultValue: portfolio_fkSelectRef.current?.value,
           readOnly: true,
@@ -250,7 +256,7 @@ const AfterQueryPrep = (props: propsT) => {
       milestone: 'default',
       budget: 'default',
       expense: 'default',
-    })
+    });
 
     return Object.keys(fields).map((fieldKey) => {
       let TagName = fields[fieldKey].tagName;
@@ -268,7 +274,7 @@ const AfterQueryPrep = (props: propsT) => {
           onChange={projectsQuery.refetch}
           className={`w-max`}
         >
-          {props.portfoliosListQuery.data.map(
+          {props.itemsListQuery.data.portfolios.map(
             (portfolio: { id: string; title: string }) => (
               <option value={portfolio.id}>{portfolio.title}</option>
             )
@@ -283,7 +289,6 @@ const AfterQueryPrep = (props: propsT) => {
         aria-label='projects'
         className='text-black mt-[7rem] px-10 gap-6 grow flex flex-col items-center'
       >
-
         {mountProjectsTable()}
 
         {/* new project button*/}
@@ -313,13 +318,13 @@ const AfterQueryPrep = (props: propsT) => {
 
 // react/re-render is making it hard that is why I need to split dependent react-query calls
 export default function Projects() {
-  const portfoliosListQuery = useQuery('portfolio list', async () => {
-    const response = await Bridge('read', `portfolio/list`);
+  const itemsListQuery = useQuery('portfolio list', async () => {
+    const response = await Bridge('read', `itemsList?item=portfolios`);
     return response?.err == 'serverError' ? false : response.data;
   });
 
-  if (portfoliosListQuery.status == 'success')
-    return <AfterQueryPrep portfoliosListQuery={portfoliosListQuery} />;
+  if (itemsListQuery.status == 'success')
+    return <AfterQueryPrep itemsListQuery={itemsListQuery} />;
 
   return <></>;
 }

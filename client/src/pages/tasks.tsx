@@ -12,10 +12,13 @@ import FormFields from '../components/formFields';
 type queryT = {
   status: string;
   isLoading: boolean;
-  data: { [key: string]: any };
+  data: {
+    portfolios: { [key: string]: any };
+    projects: { [key: string]: any };
+  };
   refetch: () => void;
 };
-type propsT = { portfoliosListQuery: queryT; projectsListQuery: queryT };
+type propsT = { itemsListQuery: queryT };
 const AfterQueryPrep = (props: propsT) => {
   const { loggedInUser } = useOutletContext<{
     loggedInUser: { username: string; id: string };
@@ -70,9 +73,10 @@ const AfterQueryPrep = (props: propsT) => {
       'read',
       `task/all?portfolio_fk=${
         portfolio_fkSelectRef.current?.value ??
-        props.portfoliosListQuery.data[0]
+        props.itemsListQuery.data.portfolios[0]
       }&project_fk=${
-        project_fkSelectRef.current?.value ?? props.projectsListQuery.data[0]
+        project_fkSelectRef.current?.value ??
+        props.itemsListQuery.data.projects[0]
       }`
     );
     return response?.err == 'serverError' ? false : response.data;
@@ -177,7 +181,10 @@ const AfterQueryPrep = (props: propsT) => {
     stateActions.sideForm.show(task.id, 'edit');
   };
 
-  const removeTask = async (id: string, e:React.MouseEvent<HTMLButtonElement>) => {
+  const removeTask = async (
+    id: string,
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     e.stopPropagation();
 
     const resp = await Bridge('remove', `task`, {
@@ -256,7 +263,7 @@ const AfterQueryPrep = (props: propsT) => {
             onChange={tasksQuery.refetch}
             className={`w-max`}
           >
-            {props.portfoliosListQuery.data.map(
+            {props.itemsListQuery.data.portfolios.map(
               (portfolio: { id: string; title: string }) => (
                 <option key={portfolio.id} value={portfolio.id}>
                   {portfolio.title}
@@ -269,7 +276,7 @@ const AfterQueryPrep = (props: propsT) => {
             onChange={tasksQuery.refetch}
             className={`w-max`}
           >
-            {props.projectsListQuery.data.map(
+            {props.itemsListQuery.data.projects.map(
               (project: { id: string; title: string }) => (
                 <option key={project.id} value={project.id}>
                   {project.title}
@@ -301,8 +308,7 @@ const AfterQueryPrep = (props: propsT) => {
             {tasksQuery.status == 'success' ? showTaksTable() : <></>}
           </section>
 
-          {state.popup.sideForm.show &&
-          tasksQuery.status == 'success' ? (
+          {state.popup.sideForm.show && tasksQuery.status == 'success' ? (
             <SideForm
               fields={formFieldsRef.current}
               mode={state.popup.sideForm.mode}
@@ -322,29 +328,19 @@ const AfterQueryPrep = (props: propsT) => {
 
 // react/re-render is making it hard that is why I need to split dependent react-query calls
 export default function Tasks() {
-  const portfoliosListQuery = useQuery('portfolio list', async () => {
-    const response = await Bridge('read', `portfolio/list`);
-    return response?.err == 'serverError' ? false : response.data;
-  });
-
-  const projectsListQuery = useQuery('project list', async () => {
-    const response = await Bridge('read', `project/list`);
+  const itemsListQuery = useQuery('portfolios&projects list', async () => {
+    const response = await Bridge(
+      'read',
+      `itemsList?item1=portfolios&item2=projects`
+    );
     return response?.err == 'serverError' ? false : response.data;
   });
 
   // console.log(portfoliosListQuery.status == 'success');
   // console.log(projectsListQuery.status == 'success');
 
-  if (
-    portfoliosListQuery.status == 'success' &&
-    projectsListQuery.status == 'success'
-  )
-    return (
-      <AfterQueryPrep
-        portfoliosListQuery={portfoliosListQuery}
-        projectsListQuery={projectsListQuery}
-      />
-    );
+  if (itemsListQuery.status == 'success')
+    return <AfterQueryPrep itemsListQuery={itemsListQuery} />;
 
   return <></>;
 }

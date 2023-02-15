@@ -22,6 +22,13 @@ const read = async (filter, fields) => {
   return response;
 };
 
+const list = async (filter) => {
+  const autoQuery = AutoQuery.read('tasks', filter, ['id', 'title']);
+  const response = await Pool(autoQuery.query, autoQuery.vars);
+
+  return response;
+};
+
 const update = async (filter, newData) => {
   if (!newData || Object.keys(newData).length == 0) {
     return { err: 'no data is provided' };
@@ -40,4 +47,4 @@ const remove = async (filter) => {
   return response;
 };
 
-module.exports = { create, read, update, remove };
+module.exports = { create, read, list, update, remove };
