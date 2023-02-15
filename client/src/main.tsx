@@ -10,6 +10,7 @@ import Profile from './pages/profile';
 import Portfolios from './pages/portfolios';
 import Projects from './pages/projects';
 import Tasks from './pages/tasks';
+import Privileges from './pages/privileges';
 
 import SharedLayout from './components/sharedLayout';
 
@@ -49,6 +50,7 @@ const MyRouter = () => (
         <Route path='/portfolios' element={<Portfolios />} />
         <Route path='/projects' element={<Projects />} />
         <Route path='/tasks' element={<Tasks />} />
+        <Route path='/privileges' element={<Privileges />} />
       </Route>
     </Routes>
   </BrowserRouter>

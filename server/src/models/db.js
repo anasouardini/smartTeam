@@ -1,7 +1,7 @@
 const pool = require('./dbPool');
 
 const initQueries = {
-  clearDB: `drop table if exists users, portfolios, projects,
+  clearDB: `drop table if exists users, portfolios, projects, privilegesCategories, privileges,
             tasks, projectPrivileges, portfolioPrivileges`,
   createUsersTable: `create table users(
                       id varchar(50) primary key,
@@ -63,41 +63,34 @@ const initQueries = {
                       foreign key(portfolio_fk) references portfolios(id) on delete cascade,
                       foreign key(assignee_fk) references users(id) on delete cascade
                     )`,
-  createPortfolioPrivilegesTable: `create table portfolioPrivileges(
-                      id varchar(50) primary key,
-                      manager_fk varchar(50),
-                      portfolio_fk varchar(50),
-                      createDate dateTime default current_timestamp,
-                      createAccess tinyint,
-                      readAccess tinyint,
-                      updateAccess tinyint,
-                      removeAccess tinyint,
-                      foreign key(portfolio_fk) references portfolios(id) on delete cascade,
-                      foreign key(manager_fk) references users(id) on delete cascade
+  createPrivilegesTable: `create table privileges(
+                      user varchar(50),
+                      itemID varchar(50),
+                      ownerID varchar(50),
+                      privCat varchar(50),
+                      foreign key(user) references users(id) on delete cascade,
+                      unique(user, itemID, privCat)
                     )`,
-  createProjectPrivilegesTable: `create table projectPrivileges(
-                      id varchar(50) primary key,
-                      manager_fk varchar(50),
-                      project_fk varchar(50),
-                      createDate dateTime default current_timestamp,
-                      createAccess tinyint,
-                      readAccess tinyint,
-                      updateAccess tinyint,
-                      removeAccess tinyint,
-                      foreign key(project_fk) references projects(id) on delete cascade,
-                      foreign key(manager_fk) references users(id) on delete cascade
+  createPriviCategoriesTable: `create table privilegesCategories(
+                      privCat varchar(50),
+                      itemType varchar(10),
+                      priv json,
+                      primary key(privCat, itemType)
                     )`,
+  insertPriviCategories: `insert into privilegesCategories(privCat, itemType, priv)
+                          values ('manager', 'portfolio', {'create': true, 'read': true, 'update': true, 'remove'; false})
+                        `,
 };
 
-const initi = async () => {
-  const queries = Object.entries(initQueries);
-  for (let i = 0; i < queries.length; i++) {
-    let res = await pool(queries[i][1]);
+const init = async () => {
+  const queryEntries = Object.entries(initQueries);
+  for (let i = 0; i < queryEntries.length; i++) {
+    let res = await pool(queryEntries[i][1]);
     // console.log(res[0]);
     if (!res || res?.errno) {
       console.log(['=============================================================']);
       console.log(['error happened while initialising the db: (l80-90 models/db.ts)']);
-      console.log(`query: ${queries[i][0]}\n`);
+      console.log(`query: ${queryEntries[i][0]}\n`);
       console.log(res);
       return false;
     }
@@ -106,4 +99,4 @@ const initi = async () => {
   return true;
 };
 
-module.exports = { initi };
+module.exports = { init };

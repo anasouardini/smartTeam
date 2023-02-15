@@ -1,7 +1,7 @@
 const Db = require('../models/db')
 
 const init = async (req, res)=>{
-  const response = await Db.initi();
+  const response = await Db.init();
 
   if(response){
     return res.json({data: 'database re-initialized successfully'})
