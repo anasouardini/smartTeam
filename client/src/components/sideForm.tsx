@@ -8,17 +8,17 @@ import Genid from '../tools/genid';
 type propsT = {
   fields: {
     [key: string]: {
-      children?: string[][],
-      label: string,
-      tagName: string,
-      props: { [key: string]: string },
-    },
-  },
-  mode: string,
-  route: string,
-  refetch: () => void,
-  itemID?: string,
-  hideForm: () => void,
+      children?: string[][];
+      label: string;
+      tagName: string;
+      props: { [key: string]: string };
+    };
+  };
+  mode: string;
+  route: string;
+  refetch: () => void;
+  itemID?: string;
+  hideForm: () => void;
 };
 
 export default function Form(props: propsT) {
@@ -26,13 +26,13 @@ export default function Form(props: propsT) {
   let parentStateRef = React.useRef<{
     fields: {
       [key: string]: {
-        tagName: string,
-        label: string,
-        children?: string[][],
-        props: { [key: string]: string },
-      },
-    },
-    mode: string,
+        tagName: string;
+        label: string;
+        children?: string[][];
+        props: { [key: string]: string };
+      };
+    };
+    mode: string;
   }>({
     fields: {},
     mode: '',
@@ -127,35 +127,38 @@ export default function Form(props: propsT) {
       }
       // console.log(parentState.fields[fieldKey])
       const TagName = field.tagName;
-      return <label className={`text-black`}> {field.label}:
-          {
-            field?.children ? (
-              <TagName
-                key={fieldKey + Genid(10)}
-                ref={(el) => {
-                  fieldsRefs[fieldKey] = el;
-                }}
-                {...field.props}
-              >
-                {field?.children ? (
-                  field.children.map((child) => (
-                    <option value={child[0]}>{child[1]}</option>
-                  ))
-                ) : (
-                  <></>
-                )}
-              </TagName>
-            ) : (
-              <TagName
-                key={fieldKey + Genid(10)}
-                ref={(el) => {
-                  fieldsRefs[fieldKey] = el;
-                }}
-                {...field.props}
-              />
-            )
-          }
-      </label>;
+      const randomKey = Genid(10);
+      return (
+        <label key={fieldKey + randomKey} className={`text-black`}>
+          {' '}
+          {field.label}:
+          {field?.children ? (
+            <TagName
+              key={fieldKey + randomKey}
+              ref={(el) => {
+                fieldsRefs[fieldKey] = el;
+              }}
+              {...field.props}
+            >
+              {field?.children ? (
+                field.children.map((child) => (
+                  <option key={child[0]} value={child[0]}>{child[1]}</option>
+                ))
+              ) : (
+                <></>
+              )}
+            </TagName>
+          ) : (
+            <TagName
+              key={fieldKey + randomKey}
+              ref={(el) => {
+                fieldsRefs[fieldKey] = el;
+              }}
+              {...field.props}
+            />
+          )}
+        </label>
+      );
     });
   };
 
