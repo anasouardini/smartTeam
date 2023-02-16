@@ -2,7 +2,7 @@ const MProject = require('../models/project');
 
 const readAll = async (req, res, next) => {
   const projectsResp = await MProject.read({
-    portfolio_fk: req.query.portfolio_fk,
+    portfolio: req.query.portfolio,
     ownerID: req.userID,
   });
 
@@ -28,7 +28,7 @@ const readSingle = async (req, res) => {};
 
 const create = async (req, res, next) => {
   const {
-    portfolio_fk,
+    portfolio,
     title,
     description,
     dueDate,
@@ -41,7 +41,7 @@ const create = async (req, res, next) => {
   } = req.body;
   const projectsResp = await MProject.create({
     ownerID: req.userID,
-    portfolio_fk,
+    portfolio,
     title,
     description,
     bgColor,
@@ -66,7 +66,7 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   const {
-    portfolio_fk,
+    portfolio,
     id,
     title,
     description,
@@ -82,7 +82,7 @@ const update = async (req, res, next) => {
   const projectsResp = await MProject.update(
     {
       ownerID: req.userID,
-      portfolio_fk,
+      portfolio,
       id,
     },
     {

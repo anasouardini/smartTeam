@@ -3,7 +3,8 @@ import { z } from 'zod';
 import Bridge from '../tools/bridge';
 import Genid from '../tools/genid';
 
-// TODO: after editing and refetching, the form should update it's COPY of the item
+// TODO: [BUG] after editing and refetching, the form should update it's COPY of the item
+// TODO: change the style of form.tsx instead of use this one
 
 type propsT = {
   fields: {

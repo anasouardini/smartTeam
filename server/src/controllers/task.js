@@ -2,8 +2,8 @@ const MTask = require('../models/task');
 
 const readAll = async (req, res, next) => {
   const tasksResp = await MTask.read({
-    project_fk: req.query.project_fk,
-    portfolio_fk: req.query.portfolio_fk,
+    project: req.query.project,
+    portfolio: req.query.portfolio,
     ownerID: req.userID,
   });
 
@@ -30,9 +30,9 @@ const readSingle = async (req, res) => {};
 
 const create = async (req, res, next) => {
   const {
-    portfolio_fk,
-    project_fk,
-    assignee_fk,
+    portfolio,
+    project,
+    assignee,
     title,
     description,
     bgColor,
@@ -41,9 +41,9 @@ const create = async (req, res, next) => {
   } = req.body;
   const tasksResp = await MTask.create({
     ownerID: req.userID,
-    portfolio_fk,
-    project_fk,
-    assignee_fk,
+    portfolio,
+    project,
+    assignee,
     title,
     description,
     bgColor,

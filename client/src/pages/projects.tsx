@@ -47,7 +47,7 @@ const AfterQueryPrep = (props: propsT) => {
     },
   };
 
-  const portfolio_fkSelectRef = React.useRef<HTMLSelectElement | null>(null);
+  const portfolioSelectRef = React.useRef<HTMLSelectElement | null>(null);
   // the minimal initial ref value is just for the filter header
   const formFieldsRef = React.useRef<null | {
     [key: string]: { tagName: string; props: { [key: string]: string } };
@@ -57,8 +57,8 @@ const AfterQueryPrep = (props: propsT) => {
   const projectsQuery = useQuery('projects', async () => {
     const response = await Bridge(
       'read',
-      `project/all?portfolio_fk=${
-        portfolio_fkSelectRef.current?.value ??
+      `project/all?portfolio=${
+        portfolioSelectRef.current?.value ??
         props.itemsListQuery.data.portfolios[0]
       }`
     );
@@ -76,26 +76,18 @@ const AfterQueryPrep = (props: propsT) => {
 
   const createNewProject = () => {
     formFieldsRef.current = FormFields('project', {
-      portfolio_fk: {
+      portfolio: {
         children: [
           [
-            portfolio_fkSelectRef.current?.value,
-            portfolio_fkSelectRef.current?.innerText,
+            portfolioSelectRef.current?.value,
+            portfolioSelectRef.current?.innerText,
           ],
         ],
         props: {
-          defaultValue: portfolio_fkSelectRef.current?.value,
+          defaultValue: portfolioSelectRef.current?.value,
           readOnly: true,
         },
-      },
-      title: 'default',
-      description: 'default',
-      bgColor: 'default',
-      dueDate: 'default',
-      status: 'default',
-      milestone: 'default',
-      budget: 'default',
-      expense: 'default',
+      }
     });
 
     stateActions.form.show();
@@ -103,9 +95,9 @@ const AfterQueryPrep = (props: propsT) => {
 
   const editProject = (project: { [key: string]: any }) => {
     formFieldsRef.current = FormFields('project', {
-      portfolio_fk: {
+      portfolio: {
         props: {
-          defaultValue: portfolio_fkSelectRef.current?.value,
+          defaultValue: portfolioSelectRef.current?.value,
           readOnly: true,
         },
       },
@@ -142,7 +134,7 @@ const AfterQueryPrep = (props: propsT) => {
         const cols = Object.keys(projectsQuery.data[0])
           .filter((projectKey) =>
             projectKey != 'id' &&
-            projectKey != 'portfolio_fk' &&
+            projectKey != 'portfolio' &&
             projectKey != 'ownerID'
               ? true
               : false
@@ -172,7 +164,7 @@ const AfterQueryPrep = (props: propsT) => {
         // no reason to delete these
         // delete newProject.id;
         // delete newProject.ownerID;
-        // delete newProject.portfolio_fk;
+        // delete newProject.portfolio;
 
         newProject.edit = (
           <button>
@@ -249,14 +241,7 @@ const AfterQueryPrep = (props: propsT) => {
 
   // TODO: set default selected item to the last visited one
   const listFields = () => {
-    const fields = FormFields('project', {
-      title: 'default',
-      dueDate: 'default',
-      status: 'default',
-      milestone: 'default',
-      budget: 'default',
-      expense: 'default',
-    });
+    const fields = FormFields('project');
 
     return Object.keys(fields).map((fieldKey) => {
       let TagName = fields[fieldKey].tagName;
@@ -270,7 +255,7 @@ const AfterQueryPrep = (props: propsT) => {
     <div aria-label='container' className={`grow flex flex-col`}>
       <header aria-label='filters' className={`px-6 py-4 flex flex-wrap gap-4`}>
         <select
-          ref={portfolio_fkSelectRef}
+          ref={portfolioSelectRef}
           onChange={projectsQuery.refetch}
           className={`w-max`}
         >

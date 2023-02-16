@@ -28,12 +28,7 @@ export default function Portfolios() {
   const formFieldsRef = React.useRef<{
     [key: string]: { tagName: string; props: { [key: string]: string } }
   }>(
-   FormFields('portfolio', {
-      title: 'default',
-      description: 'default',
-      bgImg: 'default',
-      status: 'default',
-    })
+   FormFields('portfolio')
   ).current;
 
   const portfoliosQuery = useQuery('portfolios', async () => {
@@ -76,12 +71,7 @@ export default function Portfolios() {
   };
 
   const listFields = () => {
-    const fields =  FormFields('portfolio', {
-      title: 'default',
-      description: 'default',
-      bgImg: 'default',
-      status: 'default',
-    });
+    const fields =  FormFields('portfolio');
     return Object.keys(fields).map((fieldKey) => {
       let TagName = fields[fieldKey].tagName;
       if (TagName == 'textarea') {

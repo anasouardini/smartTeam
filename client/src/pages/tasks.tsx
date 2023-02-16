@@ -59,8 +59,8 @@ const AfterQueryPrep = (props: propsT) => {
     },
   };
 
-  const portfolio_fkSelectRef = React.useRef<HTMLSelectElement | null>(null);
-  const project_fkSelectRef = React.useRef<HTMLSelectElement | null>(null);
+  const portfolioSelectRef = React.useRef<HTMLSelectElement | null>(null);
+  const projectSelectRef = React.useRef<HTMLSelectElement | null>(null);
 
   //TODO: needs to be passed separately to the filter header
   const formFieldsRef = React.useRef<null | {
@@ -71,11 +71,11 @@ const AfterQueryPrep = (props: propsT) => {
   const tasksQuery = useQuery('projects', async () => {
     const response = await Bridge(
       'read',
-      `task/all?portfolio_fk=${
-        portfolio_fkSelectRef.current?.value ??
+      `task/all?portfolio=${
+        portfolioSelectRef.current?.value ??
         props.itemsListQuery.data.portfolios[0]
-      }&project_fk=${
-        project_fkSelectRef.current?.value ??
+      }&project=${
+        projectSelectRef.current?.value ??
         props.itemsListQuery.data.projects[0]
       }`
     );
@@ -85,51 +85,41 @@ const AfterQueryPrep = (props: propsT) => {
   //   console.log(tasksQuery.data);
   // }
 
-  const tailwindClx = {};
-
   const createNewTask = () => {
     formFieldsRef.current = FormFields('task', {
-      portfolio_fk: {
+      portfolio: {
         children: [
           [
-            portfolio_fkSelectRef.current?.value,
-            portfolio_fkSelectRef.current?.innerText,
+            portfolioSelectRef.current?.value,
+            portfolioSelectRef.current?.innerText,
           ],
-          ['key2', 'value2'],
         ],
         props: {
-          defaultValue: portfolio_fkSelectRef.current?.innerText,
+          defaultValue: portfolioSelectRef.current?.innerText,
           readOnly: true,
         },
       },
-      project_fk: {
+      project: {
         children: [
           [
-            project_fkSelectRef.current?.value,
-            project_fkSelectRef.current?.innerText,
+            projectSelectRef.current?.value,
+            projectSelectRef.current?.innerText,
           ],
-          ['key2', 'value2'],
         ],
         props: {
-          defaultValue: project_fkSelectRef.current?.innerText,
+          defaultValue: projectSelectRef.current?.innerText,
           readOnly: true,
         },
       },
-      assignee_fk: {
+      assignee: {
         children: [
           [loggedInUser.id, loggedInUser.username],
-          ['key2', 'value2'],
         ],
         props: {
           defaultValue: loggedInUser.id,
           readOnly: true,
         },
-      },
-      title: 'default',
-      description: 'default',
-      bgColor: 'default',
-      dueDate: 'default',
-      status: 'default',
+      }
     });
 
     stateActions.sideForm.show(undefined, 'create');
@@ -137,34 +127,31 @@ const AfterQueryPrep = (props: propsT) => {
 
   const editTask = async (task: { [key: string]: any }) => {
     formFieldsRef.current = FormFields('task', {
-      portfolio_fk: {
+      portfolio: {
         children: [
           [
-            portfolio_fkSelectRef.current?.value,
-            portfolio_fkSelectRef.current?.innerText,
+            portfolioSelectRef.current?.value,
+            portfolioSelectRef.current?.innerText,
           ],
-          ['key2', 'value2'],
         ],
         props: {
-          defaultValue: portfolio_fkSelectRef.current?.innerText,
+          defaultValue: portfolioSelectRef.current?.innerText,
         },
       },
-      project_fk: {
+      project: {
         children: [
           [
-            project_fkSelectRef.current?.value,
-            project_fkSelectRef.current?.innerText,
+            projectSelectRef.current?.value,
+            projectSelectRef.current?.innerText,
           ],
-          ['key2', 'value2'],
         ],
         props: {
-          defaultValue: project_fkSelectRef.current?.innerText,
+          defaultValue: projectSelectRef.current?.innerText,
         },
       },
-      assignee_fk: {
+      assignee: {
         children: [
           [loggedInUser.id, loggedInUser.username],
-          ['key2', 'value2'],
         ],
         props: {
           defaultValue: loggedInUser.id,
@@ -200,19 +187,7 @@ const AfterQueryPrep = (props: propsT) => {
   };
 
   const listHeaderFields = () => {
-    const fields = FormFields('task', {
-      // assignee_fk:{
-      //   props: {
-      //     defaultValue: loggedInUser.id,
-      //     readOnly: true,
-      //   },
-      // },
-      title: 'default',
-      description: 'default',
-      bgColor: 'default',
-      dueDate: 'default',
-      status: 'default',
-    });
+    const fields = FormFields('task');
 
     return Object.keys(fields).map((fieldKey) => {
       let TagName = fields[fieldKey].tagName;
@@ -259,7 +234,7 @@ const AfterQueryPrep = (props: propsT) => {
           className={`px-6 py-4 flex flex-wrap gap-4`}
         >
           <select
-            ref={portfolio_fkSelectRef}
+            ref={portfolioSelectRef}
             onChange={tasksQuery.refetch}
             className={`w-max`}
           >
@@ -272,7 +247,7 @@ const AfterQueryPrep = (props: propsT) => {
             )}
           </select>
           <select
-            ref={project_fkSelectRef}
+            ref={projectSelectRef}
             onChange={tasksQuery.refetch}
             className={`w-max`}
           >

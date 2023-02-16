@@ -1,16 +1,67 @@
 import ObjMerge from '../tools/objMerge';
 
-// TODO: abstract certain fields by their category since
-// nb: make sure you won't revert this after doing it
-// they don't change e.g a task is always going to have
-// the same fields all the time
-// the empty ones should be abstracted down to one function call
-// the others could be a function call with an array
-
 const commonValues = {
   props: {
-    type: 'text',
-    className: 'border-b-2 border-b-primary px-2 py-1 bg-transparent block text-gray-500',
+    className:
+      'border-b-2 border-b-primary px-2 py-1 bg-transparent block text-gray-500',
+  },
+};
+
+const selectFields = {
+  portfolio: {
+    tagName: 'select',
+    label: 'portfolio',
+    children: [],
+    props: {
+      defaultValue: '',
+      className: commonValues.props.className,
+    },
+  },
+  project: {
+    tagName: 'select',
+    label: 'project',
+    children: [],
+    props: {
+      defaultValue: '',
+      className: commonValues.props.className,
+    },
+  },
+  task: {
+    tagName: 'select',
+    label: 'task',
+    children: [],
+    props: {
+      defaultValue: '',
+      className: commonValues.props.className,
+    },
+  },
+  privCat: {
+    tagName: 'select',
+    label: 'privileges Category',
+    children: [],
+    props: {
+      defaultValue: '',
+      className: commonValues.props.className,
+    },
+  },
+  user: {
+    tagName: 'select',
+    label: 'user',
+    children: [],
+    props: {
+      defaultValue: '',
+      className: commonValues.props.className,
+    },
+  },
+  assignee: {
+    label: 'assignee',
+    tagName: 'select',
+    children: [],
+    props: {
+      defaultValue: '',
+      className: commonValues.props.className,
+      placeholder: 'assignee',
+    },
   },
 };
 
@@ -40,7 +91,6 @@ const commonFields = {
     label: 'status',
     props: {
       defaultValue: '',
-      type: 'string',
       className: commonValues.props.className,
     },
   },
@@ -61,6 +111,7 @@ const fields: fieldsT = {
     },
   },
   project: {
+    portfolio: selectFields.portfolio,
     ...commonFields,
     dueDate: {
       label: 'duedate',
@@ -68,16 +119,6 @@ const fields: fieldsT = {
       props: {
         defaultValue: '',
         type: 'datetime-local',
-        className: commonValues.props.className,
-      },
-    },
-    portfolio_fk: {
-      tagName: 'select',
-      label: 'portfolio',
-      children: [],
-      props: {
-        defaultValue: '',
-        type: 'string',
         className: commonValues.props.className,
       },
     },
@@ -123,40 +164,10 @@ const fields: fieldsT = {
     },
   },
   task: {
+    portfolio: selectFields.portfolio,
+    project: selectFields.project,
+    assignee: selectFields.assignee,
     ...commonFields,
-    portfolio_fk: {
-      label: 'portfolio',
-      tagName: 'select',
-      children: [],
-      props: {
-        defaultValue: '',
-        type: 'string',
-        className: commonValues.props.className,
-        placeholder: 'portfolio_fk',
-      },
-    },
-    project_fk: {
-      label: 'project',
-      tagName: 'select',
-      children: [],
-      props: {
-        defaultValue: '',
-        type: 'string',
-        className: commonValues.props.className,
-        placeholder: 'project_fk',
-      },
-    },
-    assignee_fk: {
-      label: 'assignee',
-      tagName: 'select',
-      children: [],
-      props: {
-        defaultValue: '',
-        type: 'string',
-        className: commonValues.props.className,
-        placeholder: 'assignee_fk',
-      },
-    },
     bgColor: {
       label: 'background color',
       tagName: 'input',
@@ -177,11 +188,27 @@ const fields: fieldsT = {
       },
     },
   },
+  privileges: {
+    user: {
+      label: 'user',
+      tagName: 'select',
+      children: [],
+      props: {
+        defaultValue: '',
+        className: commonValues.props.className,
+        placeholder: 'user',
+      },
+    },
+    portfolio: selectFields.portfolio,
+    project: selectFields.project,
+    task: selectFields.task,
+    privCat: selectFields.privCat,
+  },
 };
 
 const genFields = (
   item: string,
-  selectedFields: { [key: string]: string | object }
+  selectedFields: { [key: string]: string | object } = {}
 ) => {
   const outputFields = Object.keys(selectedFields).reduce(
     (acc: { [key: string]: any }, fieldKey) => {
@@ -211,7 +238,7 @@ const genFields = (
   );
 
   // console.log('genfields: ', outputFields)
-  return outputFields;
+  return { ...fields[item], ...outputFields };
 };
 
 export default genFields;
