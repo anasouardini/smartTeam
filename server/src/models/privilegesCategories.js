@@ -2,36 +2,28 @@ const Pool = require('./dbPool');
 const AutoQuery = require('./tools/autoQuery');
 const { v4: uuid } = require('uuid');
 
-const create = async (newData, explicitID) => {
+const create = async (newData) => {
   if (!newData || Object.keys(newData).length == 0) {
     return { err: 'no data is provided' };
   }
+  newData.id = uuid();
 
-  if (newData?.id) {
-    if (!explicitID) {
-      return { err: 'id is provided and explicitID was not specified' };
-    }
-  }else{
-    newData.id = uuid();
-  }
-
-
-  const autoQuery = AutoQuery.create('users', newData);
+  const autoQuery = AutoQuery.create('privileges', newData);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
   return response;
 };
 
-const read = async (filter) => {
-
-  const autoQuery = AutoQuery.read('users', filter);
+const read = async (filter, fields) => {
+  const autoQuery = AutoQuery.read('privileges', filter, fields);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
+  // console.log(response[0]);
   return response;
 };
 
 const list = async (filter) => {
-  const autoQuery = AutoQuery.read('users', filter, ['id', 'username']);
+  const autoQuery = AutoQuery.read('privileges', filter, ['privCat']);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
   return response;
@@ -42,14 +34,14 @@ const update = async (filter, newData) => {
     return { err: 'no data is provided' };
   }
 
-  const autoQuery = AutoQuery.update('users', filter, newData);
+  const autoQuery = AutoQuery.update('privilges', filter, newData);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
   return response;
 };
 
 const remove = async (filter) => {
-  const autoQuery = AutoQuery.remove('users', filter);
+  const autoQuery = AutoQuery.remove('privilges', filter);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
   return response;

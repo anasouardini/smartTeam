@@ -4,6 +4,7 @@ module.exports = {
   project: require('./project'),
   task: require('./task'),
   privileges: require('./privileges'),
+  privilegesCategories: require('./privilegesCategories'),
   itemsList: require('./itemsList'),
   login: require('./login'),
   signup: require('./signup'),

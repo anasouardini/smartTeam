@@ -4,6 +4,7 @@ const Models = {
   projects: require('../models/project'),
   tasks: require('../models/task'),
   privileges: require('../models/privileges'),
+  privilegesCategories: require('../models/privilegesCategories'),
 };
 const read = async (req, res, next) => {
   const queryResp = {};

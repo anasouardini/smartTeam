@@ -1,4 +1,4 @@
-const MPrivledges = require('../models/privileges');
+const MPrivledges = require('../models/privilegesCategories');
 
 const readAll = async (req, res, next) => {
   const rulesResp = await MPrivledges.read({

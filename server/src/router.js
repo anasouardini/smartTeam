@@ -37,6 +37,11 @@ router.get('/privileges/all', controllers.privileges.readAll);
 router.put('/privileges', controllers.privileges.update);
 router.delete('/privileges', controllers.privileges.remove);
 
+router.post('/privilegesCategories', controllers.privilegesCategories.create);
+router.get('/privilegesCategories/all', controllers.privilegesCategories.readAll);
+router.put('/privilegesCategories', controllers.privilegesCategories.update);
+router.delete('/privilegesCategories', controllers.privilegesCategories.remove);
+
 router.post('/user/:user', controllers.user.create);
 router.get('/user/:user', controllers.user.read);
 router.put('/user/:user', controllers.user.update);
