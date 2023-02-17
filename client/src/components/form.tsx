@@ -1,17 +1,24 @@
 import React from 'react';
 import { z } from 'zod';
-import Genid from '../tools/genid';
 import Bridge from '../tools/bridge';
+import Genid from '../tools/genid';
+import FixDate from '../tools/fixDate';
+import fixDate from '../tools/fixDate';
 
-type propsT = {
-  fields: {
-    [key: string]: {
-      value: string;
-      tagName: string;
-      props: {[key:string]:string};
-    };
+// TODO: [BUG] after editing and refetching, the form should update it's COPY of the item
+
+type fieldsT = {
+  [key: string]: {
+    children?: string[][];
+    label?: string;
+    tagName: string;
+    props: { [key: string]: string };
   };
+};
+type propsT = {
+  fields: fieldsT;
   mode: string;
+  style?: 'popup';
   route: string;
   refetch: () => void;
   itemID?: string;
@@ -19,18 +26,12 @@ type propsT = {
 };
 
 export default function Form(props: propsT) {
-  // just in case decided I need to change some parent-passed data
-  const [parentState, _] = React.useState({
-    fields: props.fields,
-    mode: props.mode,
-  });
-
   const fieldsRefs = React.useRef<{
     [key: string]: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
   }>({}).current;
 
   const parseFields = () => {
-    const newData = Object.keys(parentState.fields).reduce(
+    const newData = Object.keys(props.fields).reduce(
       (acc: { [key: string]: string }, fieldKey) => {
         acc[fieldKey] = fieldsRefs[fieldKey].value;
         return acc;
@@ -53,11 +54,13 @@ export default function Form(props: propsT) {
 
       if (resp.err) {
         console.log(resp);
-      }else{
+      } else {
         props.refetch();
       }
 
-      props.hideForm();
+      if (props.style == 'popup') {
+        props.hideForm();
+      }
     },
     create: async (e) => {
       e.preventDefault();
@@ -68,11 +71,13 @@ export default function Form(props: propsT) {
 
       if (resp.err) {
         console.log(resp);
-      }else{
+      } else {
         props.refetch();
       }
 
-      props.hideForm();
+      if (props.style == 'popup') {
+        props.hideForm();
+      }
     },
     cancel: (e) => {
       if (e.target != e.currentTarget) return;
@@ -80,17 +85,21 @@ export default function Form(props: propsT) {
     },
   };
 
-// console.log(props.fields)
+  // console.log(props.fields)
   const listFields = () => {
-    return Object.keys(parentState.fields).map((fieldKey) => {
-      const field = parentState.fields[fieldKey];
-      console.log(parentState.fields[fieldKey])
-      const TagName = field.tagName;
+    return Object.keys(props.fields).map((fieldKey) => {
+      const field = props.fields[fieldKey];
 
+      // mysql2 misses dates by addin gone hour. hence this mess
+      // basically adding an hour to the date using string manupulation
+      // because JS handles dates poorly
+      const fieldValue = field.props.defaultValue;
+      fixDate(fieldKey, fieldValue, field.props); // mutates the dateFields in the props
+
+      const TagName = field.tagName;
       const randomKey = Genid(10);
       return (
         <label key={fieldKey + randomKey} className={`text-black`}>
-          {' '}
           {field.label}:
           {field?.children ? (
             <TagName
@@ -102,7 +111,9 @@ export default function Form(props: propsT) {
             >
               {field?.children ? (
                 field.children.map((child) => (
-                  <option key={child[0]} value={child[0]}>{child[1]}</option>
+                  <option key={child[0]} value={child[0]}>
+                    {child[1]}
+                  </option>
                 ))
               ) : (
                 <></>
@@ -119,30 +130,42 @@ export default function Form(props: propsT) {
           )}
         </label>
       );
-
     });
   };
 
-  return (
-    <>
-      <div
-        aria-label='overlay'
-        onClick={formAction['cancel']}
-        className={`fixed top-0 bottom-0 right-0 left-0
+  const sectionProps = {
+    'aria-label': 'form',
+    className: `grow grid`,
+  };
+  if (props.style == 'popup') {
+    sectionProps.onClick = formAction['cancel'];
+    sectionProps.className = `fixed top-0 bottom-0 right-0 left-0
              flex items-center justify-center
-             backdrop-blur-md`}
+             backdrop-blur-md`;
+  }
+
+  return (
+    <section
+      {...sectionProps}
+    >
+    <form
+      aria-label={`${props.route} info`}
+      className={`mt-[2rem] py-3 px-4 border-gray-300 border-2 rounded-md
+                    flex flex-col gap-6`}
+    >
+      <button className={`ml-auto text-lg`} onClick={formAction.cancel}>
+        X
+      </button>
+
+      {listFields()}
+      <button
+        className={`cursor-pointer`}
+        onClick={formAction[props.mode]}
+        name={props.mode}
       >
-        <form className='flex flex-col gap-4 border-primary border-2 rounded-md p-5'>
-          {listFields()}
-          <button
-            className={`cursor-pointer`}
-            onClick={formAction[parentState.mode]}
-            name={parentState.mode}
-          >
-            {parentState.mode}
-          </button>
-        </form>
-      </div>
-    </>
+        {props.mode}
+      </button>
+    </form>
+    </section>
   );
 }

@@ -4,7 +4,7 @@ import { useOutletContext } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import Bridge from '../tools/bridge';
 import Genid from '../tools/genid';
-import SideForm from '../components/sideForm';
+import Form from '../components/form';
 import { FaTrash } from 'react-icons/fa';
 import { useTable } from 'react-table';
 import FormFields from '../components/formFields';
@@ -59,8 +59,15 @@ const AfterQueryPrep = (props: propsT) => {
     },
   };
 
-  const portfolioSelectRef = React.useRef<HTMLSelectElement | null>(null);
-  const projectSelectRef = React.useRef<HTMLSelectElement | null>(null);
+  const headerFieldsRefs = React.useRef<{
+    portfolios: HTMLSelectElement | null | {value: string};
+    projects: HTMLSelectElement | null | {value: string};
+    assignees: HTMLSelectElement | null | {value: string};
+  }>({
+      portfolios: {value: props.itemsListQuery.data.portfolios[0].id},
+    projects: {value: props.itemsListQuery.data.projects[0].id},
+    assignees: null,
+  }).current;
 
   //TODO: needs to be passed separately to the filter header
   const formFieldsRef = React.useRef<null | {
@@ -72,10 +79,10 @@ const AfterQueryPrep = (props: propsT) => {
     const response = await Bridge(
       'read',
       `task/all?portfolio=${
-        portfolioSelectRef.current?.value ??
+        headerFieldsRefs?.portfolios?.value ??
         props.itemsListQuery.data.portfolios[0]
       }&project=${
-        projectSelectRef.current?.value ??
+        headerFieldsRefs.projects?.value ??
         props.itemsListQuery.data.projects[0]
       }`
     );
@@ -90,36 +97,31 @@ const AfterQueryPrep = (props: propsT) => {
       portfolio: {
         children: [
           [
-            portfolioSelectRef.current?.value,
-            portfolioSelectRef.current?.innerText,
+            headerFieldsRefs.portfolios?.value,
+            headerFieldsRefs.portfolios?.innerText,
           ],
         ],
         props: {
-          defaultValue: portfolioSelectRef.current?.innerText,
           readOnly: true,
         },
       },
       project: {
         children: [
           [
-            projectSelectRef.current?.value,
-            projectSelectRef.current?.innerText,
+            headerFieldsRefs.projects?.value,
+            headerFieldsRefs.projects?.innerText,
           ],
         ],
         props: {
-          defaultValue: projectSelectRef.current?.innerText,
           readOnly: true,
         },
       },
       assignee: {
-        children: [
-          [loggedInUser.id, loggedInUser.username],
-        ],
+        children: [[loggedInUser.id, loggedInUser.username]],
         props: {
-          defaultValue: loggedInUser.id,
           readOnly: true,
         },
-      }
+      },
     });
 
     stateActions.sideForm.show(undefined, 'create');
@@ -130,29 +132,27 @@ const AfterQueryPrep = (props: propsT) => {
       portfolio: {
         children: [
           [
-            portfolioSelectRef.current?.value,
-            portfolioSelectRef.current?.innerText,
+            headerFieldsRefs.portfolios?.value,
+            headerFieldsRefs.portfolios?.innerText,
           ],
         ],
         props: {
-          defaultValue: portfolioSelectRef.current?.innerText,
+          defaultValue: headerFieldsRefs.portfolios?.value,
         },
       },
       project: {
         children: [
           [
-            projectSelectRef.current?.value,
-            projectSelectRef.current?.innerText,
+            headerFieldsRefs.projects?.value,
+            headerFieldsRefs.projects?.innerText,
           ],
         ],
         props: {
-          defaultValue: projectSelectRef.current?.innerText,
+          defaultValue: headerFieldsRefs.projects?.value,
         },
       },
       assignee: {
-        children: [
-          [loggedInUser.id, loggedInUser.username],
-        ],
+        children: [[loggedInUser.id, loggedInUser.username]],
         props: {
           defaultValue: loggedInUser.id,
           readOnly: true,
@@ -188,13 +188,42 @@ const AfterQueryPrep = (props: propsT) => {
 
   const listHeaderFields = () => {
     const fields = FormFields('task');
+    // console.log(fields);
 
     return Object.keys(fields).map((fieldKey) => {
       let TagName = fields[fieldKey].tagName;
       if (TagName == 'textarea') {
         TagName = 'input';
       }
-      return <TagName key={fieldKey} {...fields[fieldKey].props} />;
+
+      if (
+        fields[fieldKey]?.children &&
+        props.itemsListQuery.data?.[fieldKey + 's']
+      ) {
+        return (
+          <TagName
+            onChange={tasksQuery.refetch}
+            key={fieldKey}
+            ref={(el)=>headerFieldsRefs[fieldKey+'s'] = el}
+            {...fields[fieldKey].props}
+          >
+            {props.itemsListQuery.data?.[fieldKey + 's'].map(
+              (child: string[]) => {
+                return (
+                  <option key={child.id} value={child.id}>
+                    {child.title}
+                  </option>
+                );
+                return <></>;
+              }
+            )}
+          </TagName>
+        );
+      }
+
+      return <TagName key={fieldKey}
+            ref={(el)=>headerFieldsRefs[fieldKey+'s'] = el}
+        {...fields[fieldKey].props} />;
     });
   };
 
@@ -233,32 +262,6 @@ const AfterQueryPrep = (props: propsT) => {
           aria-label='filters'
           className={`px-6 py-4 flex flex-wrap gap-4`}
         >
-          <select
-            ref={portfolioSelectRef}
-            onChange={tasksQuery.refetch}
-            className={`w-max`}
-          >
-            {props.itemsListQuery.data.portfolios.map(
-              (portfolio: { id: string; title: string }) => (
-                <option key={portfolio.id} value={portfolio.id}>
-                  {portfolio.title}
-                </option>
-              )
-            )}
-          </select>
-          <select
-            ref={projectSelectRef}
-            onChange={tasksQuery.refetch}
-            className={`w-max`}
-          >
-            {props.itemsListQuery.data.projects.map(
-              (project: { id: string; title: string }) => (
-                <option key={project.id} value={project.id}>
-                  {project.title}
-                </option>
-              )
-            )}
-          </select>
           {listHeaderFields()}
           <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
             Filter
@@ -284,7 +287,7 @@ const AfterQueryPrep = (props: propsT) => {
           </section>
 
           {state.popup.sideForm.show && tasksQuery.status == 'success' ? (
-            <SideForm
+            <Form
               fields={formFieldsRef.current}
               mode={state.popup.sideForm.mode}
               route='task'

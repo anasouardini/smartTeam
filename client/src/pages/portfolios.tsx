@@ -108,6 +108,7 @@ export default function Portfolios() {
           <Form
             fields={formFieldsRef}
             mode={state.popup.form.mode}
+            style='popup'
             route={'portfolio'}
             refetch={portfoliosQuery.refetch}
             hideForm={stateActions.form.hide}

@@ -87,7 +87,7 @@ const AfterQueryPrep = (props: propsT) => {
           defaultValue: portfolioSelectRef.current?.value,
           readOnly: true,
         },
-      }
+      },
     });
 
     stateActions.form.show();
@@ -274,7 +274,7 @@ const AfterQueryPrep = (props: propsT) => {
         aria-label='projects'
         className='text-black mt-[7rem] px-10 gap-6 grow flex flex-col items-center'
       >
-        {mountProjectsTable()}
+        <div className={`overflow-auto max-w-min`}>{mountProjectsTable()}</div>
 
         {/* new project button*/}
         <button
@@ -288,6 +288,7 @@ const AfterQueryPrep = (props: propsT) => {
           <Form
             fields={formFieldsRef.current}
             mode={state.popup.form.mode}
+            style='popup'
             itemID={state.popup.form.itemID}
             route={'project'}
             refetch={projectsQuery.refetch}
