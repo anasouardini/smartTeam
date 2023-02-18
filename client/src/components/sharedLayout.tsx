@@ -10,13 +10,17 @@ import {
   FaLightbulb,
   FaList,
   FaKey,
-  FaHatWizard
+  FaHatWizard,
+  FaBars,
 } from 'react-icons/fa';
+import { VscChromeClose } from 'react-icons/vsc';
 
 type loggedInUserT = {
   username: string;
   id: string;
 };
+
+// TODO: add tooltips for the icons
 
 export default function sharedLayout() {
   const [isLoggedInState, setIsLoginState] = React.useState<
@@ -45,6 +49,20 @@ export default function sharedLayout() {
     checkLogin();
   }, []);
 
+  const menuRefs = React.useRef<{
+    expanded: boolean;
+    nav: HTMLElement | null;
+    logo: HTMLElement | null;
+    xIcon: HTMLElement | null;
+    barsIcon: HTMLElement | null;
+  }>({
+    expanded: true,
+    nav: null,
+    logo: null,
+    xIcon: null,
+    barsIcon: null,
+  }).current;
+
   // redirecting
   const authenticating: boolean =
     rLocation.pathname == '/login' || rLocation.pathname == '/signup';
@@ -63,25 +81,51 @@ export default function sharedLayout() {
     console.log(res);
   };
 
-
   const logout = async () => {
     const res = await Bridge('post', 'logout');
     console.log(res);
   };
 
+  // minimizing not hiding
+  const toggleMenu = () => {
+    console.log(menuRefs);
+    if (
+      !(menuRefs.nav && menuRefs.logo && menuRefs.xIcon && menuRefs.barsIcon)
+    ) {
+      return;
+    }
+
+    if (menuRefs.expanded) {
+      menuRefs.nav.style.width = '2.3rem';
+      menuRefs.logo.style.display = 'none';
+      menuRefs.xIcon.style.display = 'none';
+      menuRefs.barsIcon.style.display = 'inline';
+      menuRefs.expanded = false;
+      return;
+    }
+
+    menuRefs.expanded = true;
+    menuRefs.nav.style.width = '10rem';
+    menuRefs.logo.style.display = 'inline';
+    menuRefs.xIcon.style.display = 'inline';
+    menuRefs.barsIcon.style.display = 'none';
+  };
+
   const tailwindClasses = {
     link: 'text-white hover:bg-white hover:text-primary',
-    // the pseudo is temperary
-    linkActive: `bg-white text-primary 
+    // linkActive: `bg-white text-primary
+    //             relative before:absolute after:absolute
+    //             before:border-[15px] before:border-r-white before:border-b-transparent
+    //             before:border-t-transparent before:border-l-transparent
+    //             before:top-0 before:right-0 before:translate-y-[-50%] before:translate-x-[20%]
+    //             after:border-[15px] after:border-t-white after:border-b-transparent
+    //             after:border-r-transparent after:border-l-transparent
+    //             after:bottom-0 after:right-0 after:translate-y-[100%] after:translate-x-[70%]
+    //             `,
+    linkActive: `bg-white text-primary rounded-md
                 relative before:absolute after:absolute
-                before:border-[15px] before:border-r-white before:border-b-transparent
-                before:border-t-transparent before:border-l-transparent
-                before:top-0 before:right-0 before:translate-y-[-50%] before:translate-x-[20%]
-                after:border-[15px] after:border-t-white after:border-b-transparent
-                after:border-r-transparent after:border-l-transparent
-                after:bottom-0 after:right-0 after:translate-y-[100%] after:translate-x-[70%]
                 `,
-    navItem: 'pb-1 flex gap-2 items-center px-2 py-1',
+    navItem: 'pb-1 flex gap-3 items-center px-2 py-1',
   };
 
   const activeLink = ({
@@ -89,10 +133,10 @@ export default function sharedLayout() {
   }: {
     isActive: boolean;
     isPending: boolean;
-  }) => (isActive
-      ? `${tailwindClasses.navItem} ${tailwindClasses.linkActive}` 
-      : `${tailwindClasses.navItem} ${tailwindClasses.link}`
-  );
+  }) =>
+    isActive
+      ? `${tailwindClasses.navItem} ${tailwindClasses.linkActive}`
+      : `${tailwindClasses.navItem} ${tailwindClasses.link}`;
 
   const listNavItems = () => {
     if (isLoggedInState) {
@@ -108,33 +152,25 @@ export default function sharedLayout() {
             </NavLink>
           </li>
           <li>
-            <NavLink to={`/portfolios`} 
-              className={activeLink}
-            >
+            <NavLink to={`/portfolios`} className={activeLink}>
               <FaSuitcase />
               portfolios
             </NavLink>
           </li>
           <li>
-            <NavLink to={`/projects`}
-              className={activeLink}
-            >
+            <NavLink to={`/projects`} className={activeLink}>
               <FaLightbulb />
-             projects 
+              projects
             </NavLink>
           </li>
           <li>
-            <NavLink to={`/tasks`}
-              className={activeLink}
-            >
+            <NavLink to={`/tasks`} className={activeLink}>
               <FaList />
               tasks
             </NavLink>
           </li>
           <li>
-            <NavLink to={`/privileges`}
-              className={activeLink}
-            >
+            <NavLink to={`/privileges`} className={activeLink}>
               <FaKey />
               privileges
             </NavLink>
@@ -155,17 +191,13 @@ export default function sharedLayout() {
     return (
       <>
         <li>
-          <NavLink to='/login'
-              className={activeLink}
-            >
+          <NavLink to='/login' className={activeLink}>
             <FaSignInAlt />
             login
           </NavLink>
         </li>
         <li>
-          <NavLink to='/signup'
-              className={activeLink}
-            >
+          <NavLink to='/signup' className={activeLink}>
             <FaUserPlus />
             signup
           </NavLink>
@@ -176,9 +208,29 @@ export default function sharedLayout() {
 
   return isLoggedInState != undefined ? (
     <>
-      <nav className='bg-primary text-white w-[8rem]'>
-        <div className='text-2xl text-center py-4'>LOGO</div>
-        <ul className='backdrop-blur-xl h-[3rem] flex flex-col gap-3'>
+      {/*aria-expanded would not makes sense here*/}
+      <nav
+        ref={(el) => (menuRefs.nav = el)}
+        className='bg-primary text-white w-[10rem] rounded-md overflow-hidden'
+      >
+        <div className='text-2xl py-4 flex justify-between'>
+          <span ref={(el) => (menuRefs.logo = el)} className='pl-3'>
+            LOGO
+          </span>
+          <button
+            aria-label='menu minmize button'
+            className={`cursor-pointer mr-2 pl-[5px]`}
+            onClick={toggleMenu}
+          >
+            <span ref={(el) => (menuRefs.barsIcon = el)} className='hidden'>
+              <FaBars />
+            </span>
+            <span ref={(el) => (menuRefs.xIcon = el)}>
+              <VscChromeClose />
+            </span>
+          </button>
+        </div>
+        <ul className='backdrop-blur-xl h-[3rem] flex flex-col gap-3 min-w-min'>
           {listNavItems()}
 
           <li>
@@ -186,7 +238,7 @@ export default function sharedLayout() {
               onClick={initDB}
               className={`${tailwindClasses.navItem} ${tailwindClasses.link} w-full`}
             >
-              <FaHatWizard/>
+              <FaHatWizard />
               initDB
             </button>
           </li>
@@ -194,7 +246,12 @@ export default function sharedLayout() {
       </nav>
       {/*
        */}
-      <Outlet context={{ isLoggedIn: isLoggedInState, loggedInUser: loggedInUserState }} />
+      <Outlet
+        context={{
+          isLoggedIn: isLoggedInState,
+          loggedInUser: loggedInUserState,
+        }}
+      />
     </>
   ) : (
     <>fetching data</>
