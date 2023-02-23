@@ -63,6 +63,7 @@ export default function sharedLayout() {
     barsIcon: null,
   }).current;
 
+  // TODO: menu doesn't work in projects(overflowed width) page
   // redirecting
   const authenticating: boolean =
     rLocation.pathname == '/login' || rLocation.pathname == '/signup';
@@ -88,7 +89,6 @@ export default function sharedLayout() {
 
   // minimizing not hiding
   const toggleMenu = () => {
-    console.log(menuRefs);
     if (
       !(menuRefs.nav && menuRefs.logo && menuRefs.xIcon && menuRefs.barsIcon)
     ) {
@@ -96,7 +96,9 @@ export default function sharedLayout() {
     }
 
     if (menuRefs.expanded) {
-      menuRefs.nav.style.width = '2.3rem';
+      menuRefs.nav.style.width = '2.2rem';
+      menuRefs.nav.style.minWidth = '2.2rem'; //TODO: temp solution
+      menuRefs.nav.style.borderRadius = '10px';
       menuRefs.logo.style.display = 'none';
       menuRefs.xIcon.style.display = 'none';
       menuRefs.barsIcon.style.display = 'inline';
@@ -106,6 +108,8 @@ export default function sharedLayout() {
 
     menuRefs.expanded = true;
     menuRefs.nav.style.width = '10rem';
+    menuRefs.nav.style.minWidth = '10rem'; //TODO: temp solution
+    menuRefs.nav.style.borderRadius = '0';
     menuRefs.logo.style.display = 'inline';
     menuRefs.xIcon.style.display = 'inline';
     menuRefs.barsIcon.style.display = 'none';
@@ -211,7 +215,7 @@ export default function sharedLayout() {
       {/*aria-expanded would not makes sense here*/}
       <nav
         ref={(el) => (menuRefs.nav = el)}
-        className='bg-primary text-white w-[10rem] rounded-md overflow-hidden'
+        className='bg-primary text-white min-w-[10rem] overflow-hidden'
       >
         <div className='text-2xl py-4 flex justify-between'>
           <span ref={(el) => (menuRefs.logo = el)} className='pl-3'>
