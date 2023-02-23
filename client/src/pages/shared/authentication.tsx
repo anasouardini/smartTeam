@@ -102,21 +102,18 @@ export default function Authentication(props: {
                 name='submit'
                 value={props.label}
               />
-              <input
+              <button
                 onClick={(e:any)=>handleOAuth('google', e)}
                 className={`${tailwindClasses.formItem} bg-transparent border-2 border-primary rounded-md`}
-                type='submit'
-                name='submit'
-                value='use google account'
-              />
-
-              <input
+              >
+                use google account
+              </button>
+              <button
                 onClick={(e:any)=>handleOAuth('github', e)}
                 className={`${tailwindClasses.formItem} bg-transparent border-2 border-primary rounded-md`}
-                type='submit'
-                name='submit'
-                value='use github account'
-              />
+              >
+                use github account
+              </button>
             </form>
           </div>
         </div>

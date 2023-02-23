@@ -3,9 +3,9 @@ import { z } from 'zod';
 import Bridge from '../tools/bridge';
 import Genid from '../tools/genid';
 import FixDate from '../tools/fixDate';
-import fixDate from '../tools/fixDate';
 
 // TODO: [BUG] after editing and refetching, the form should update it's COPY of the item
+// TODO: [BUG] editing the drops downs in the filter header should not effect the form
 
 type fieldsT = {
   [key: string]: {
@@ -94,7 +94,7 @@ export default function Form(props: propsT) {
       // basically adding an hour to the date using string manupulation
       // because JS handles dates poorly
       const fieldValue = field.props.defaultValue;
-      fixDate(fieldKey, fieldValue, field.props); // mutates the dateFields in the props
+      FixDate(fieldKey, fieldValue, field.props); // mutates the dateFields in the props
 
       const TagName = field.tagName;
       const randomKey = Genid(10);
@@ -110,11 +110,11 @@ export default function Form(props: propsT) {
               {...field.props}
             >
               {field?.children ? (
-                field.children.map((child) => (
-                  <option key={child[0]} value={child[0]}>
+                field.children.map((child) => {
+                  return <option key={child[0]} value={child[0]}>
                     {child[1]}
                   </option>
-                ))
+                })
               ) : (
                 <></>
               )}
