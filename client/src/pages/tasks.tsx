@@ -60,13 +60,19 @@ const AfterQueryPrep = (props: propsT) => {
   };
 
   const headerFieldsRefs = React.useRef<{
-    portfolios: HTMLSelectElement | null | {value: string};
-    projects: HTMLSelectElement | null | {value: string};
-    assignees: HTMLSelectElement | null | {value: string};
+    portfolio: HTMLSelectElement | null | { value: string };
+    project: HTMLSelectElement | null | { value: string };
+    assignee: HTMLSelectElement | null | { value: string };
   }>({
-      portfolios: {value: props.itemsListQuery.data.portfolios[0].id},
-    projects: {value: props.itemsListQuery.data.projects[0].id},
-    assignees: null,
+    portfolio: {
+      value: props.itemsListQuery.data.portfolios[0].id,
+      innerText: props.itemsListQuery.data.portfolios[0].title,
+    },
+    project: {
+      value: props.itemsListQuery.data.projects[0].id,
+      innerText: props.itemsListQuery.data.projects[0].title,
+    },
+    assignee: null,
   }).current;
 
   //TODO: needs to be passed separately to the filter header
@@ -79,11 +85,10 @@ const AfterQueryPrep = (props: propsT) => {
     const response = await Bridge(
       'read',
       `task/all?portfolio=${
-        headerFieldsRefs?.portfolios?.value ??
+        headerFieldsRefs?.portfolio?.value ??
         props.itemsListQuery.data.portfolios[0]
       }&project=${
-        headerFieldsRefs.projects?.value ??
-        props.itemsListQuery.data.projects[0]
+        headerFieldsRefs.project?.value ?? props.itemsListQuery.data.projects[0]
       }`
     );
     return response?.err == 'serverError' ? false : response.data;
@@ -97,8 +102,8 @@ const AfterQueryPrep = (props: propsT) => {
       portfolio: {
         children: [
           [
-            headerFieldsRefs.portfolios?.value,
-            headerFieldsRefs.portfolios?.innerText,
+            headerFieldsRefs.portfolio?.value,
+            headerFieldsRefs.portfolio?.innerText,
           ],
         ],
         props: {
@@ -108,8 +113,8 @@ const AfterQueryPrep = (props: propsT) => {
       project: {
         children: [
           [
-            headerFieldsRefs.projects?.value,
-            headerFieldsRefs.projects?.innerText,
+            headerFieldsRefs.project?.value,
+            headerFieldsRefs.project?.innerText,
           ],
         ],
         props: {
@@ -132,23 +137,23 @@ const AfterQueryPrep = (props: propsT) => {
       portfolio: {
         children: [
           [
-            headerFieldsRefs.portfolios?.value,
-            headerFieldsRefs.portfolios?.innerText,
+            headerFieldsRefs.portfolio?.value,
+            headerFieldsRefs.portfolio?.innerText,
           ],
         ],
         props: {
-          defaultValue: headerFieldsRefs.portfolios?.value,
+          defaultValue: headerFieldsRefs.portfolio?.value,
         },
       },
       project: {
         children: [
           [
-            headerFieldsRefs.projects?.value,
-            headerFieldsRefs.projects?.innerText,
+            headerFieldsRefs.project?.value,
+            headerFieldsRefs.project?.innerText,
           ],
         ],
         props: {
-          defaultValue: headerFieldsRefs.projects?.value,
+          defaultValue: headerFieldsRefs.project?.value,
         },
       },
       assignee: {
@@ -204,7 +209,7 @@ const AfterQueryPrep = (props: propsT) => {
           <TagName
             onChange={tasksQuery.refetch}
             key={fieldKey}
-            ref={(el)=>headerFieldsRefs[fieldKey+'s'] = el}
+            ref={(el) => (headerFieldsRefs[fieldKey + 's'] = el)}
             {...fields[fieldKey].props}
           >
             {props.itemsListQuery.data?.[fieldKey + 's'].map(
@@ -214,16 +219,19 @@ const AfterQueryPrep = (props: propsT) => {
                     {child.title}
                   </option>
                 );
-                return <></>;
               }
             )}
           </TagName>
         );
       }
 
-      return <TagName key={fieldKey}
-            ref={(el)=>headerFieldsRefs[fieldKey+'s'] = el}
-        {...fields[fieldKey].props} />;
+      return (
+        <TagName
+          key={fieldKey}
+          ref={(el) => (headerFieldsRefs[fieldKey + 's'] = el)}
+          {...fields[fieldKey].props}
+        />
+      );
     });
   };
 
