@@ -26,8 +26,8 @@ const read = (table, filter, fields)=>{
   // console.log(query)
   let vars = [];
 
-  query += ' where 1=1';
   if(filter){
+    query += ' where 1=1';
     Object.entries(filter).forEach((item) => {
       query += ` and ${item[0]}=?`;
       vars.push(item[1]);
