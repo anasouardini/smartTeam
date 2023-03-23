@@ -2,8 +2,8 @@ const MProject = require('../models/project');
 
 const readAll = async (req, res, next) => {
   const projectsResp = await MProject.read({
-    portfolio: req.query.portfolio,
-    ownerID: req.userID,
+    owner_FK: req.userID,
+    portfolio_FK: req.query.portfolio,
   });
 
   if (projectsResp.err) {
@@ -11,17 +11,6 @@ const readAll = async (req, res, next) => {
   }
 
   return res.json({ data: projectsResp[0] });
-};
-
-const list = async (req, res, next) => {
-  const tasksResp = await MProject.read({ ownerID: req.userID }, ['id', 'title']);
-
-  if (tasksResp.err) {
-    return next('err while listing all projects');
-  }
-
-  // console.log(tasksResp[0])
-  return res.json({ data: tasksResp[0] });
 };
 
 const readSingle = async (req, res) => {};
@@ -40,7 +29,7 @@ const create = async (req, res, next) => {
     expense,
   } = req.body;
   const projectsResp = await MProject.create({
-    ownerID: req.userID,
+    owner_FK: req.userID,
     portfolio,
     title,
     description,
@@ -81,7 +70,7 @@ const update = async (req, res, next) => {
   // console.log(req.body)
   const projectsResp = await MProject.update(
     {
-      ownerID: req.userID,
+      owner_FK: req.userID,
       portfolio,
       id,
     },
@@ -120,4 +109,4 @@ const remove = async (req, res, next) => {
   return res.json({ data: 'project removed successfully' });
 };
 
-module.exports = { readSingle, readAll, list, create, update, remove };
+module.exports = { readSingle, readAll, create, update, remove };

@@ -2,24 +2,13 @@ const MTask = require('../models/task');
 
 const readAll = async (req, res, next) => {
   const tasksResp = await MTask.read({
+    owner_FK: req.userID,
     project: req.query.project,
     portfolio: req.query.portfolio,
-    ownerID: req.userID,
   });
 
   if (tasksResp.err) {
     return next('err while reading all tasks');
-  }
-
-  // console.log(tasksResp[0])
-  return res.json({ data: tasksResp[0] });
-};
-
-const list = async (req, res, next) => {
-  const tasksResp = await MTask.read({ ownerID: req.userID }, ['id', 'title']);
-
-  if (tasksResp.err) {
-    return next('err while listing tasks');
   }
 
   // console.log(tasksResp[0])
@@ -40,7 +29,7 @@ const create = async (req, res, next) => {
     dueDate,
   } = req.body;
   const tasksResp = await MTask.create({
-    ownerID: req.userID,
+    owner_FK: req.userID,
     portfolio,
     project,
     assignee,
@@ -68,7 +57,7 @@ const update = async (req, res, next) => {
   const editableFiels = ['title', 'description', 'bgColor', 'dueDate'];
   const query = [
     {
-      ownerID: req.userID,
+      owner_FK: req.userID,
       id: newData.id,
     },
     {},
@@ -111,4 +100,4 @@ const remove = async (req, res, next) => {
   return res.json({ data: 'task removed successfully' });
 };
 
-module.exports = { readSingle, list, readAll, create, update, remove };
+module.exports = { readSingle, readAll, create, update, remove };

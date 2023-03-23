@@ -55,6 +55,9 @@ const AfterQueryPrep = (props: propsT) => {
 
   // TODO: extract this to a seperate component
   const projectsQuery = useQuery('projects', async () => {
+    if (props.itemsListQuery.data.portfolios.length === 0) {
+      return false;
+    }
     const response = await Bridge(
       'read',
       `project/all?portfolio=${
@@ -67,6 +70,12 @@ const AfterQueryPrep = (props: propsT) => {
   // if (projectsQuery.status == 'success') {
   //   console.log(projectsQuery.data);
   // }
+
+  if (props.itemsListQuery.data.portfolios.length === 0) {
+    return (
+      <h1>There are no projects, you have to create a portfolio first.</h1>
+    );
+  }
 
   const tailwindClx = {
     projectBorder: 'border-2 border-primary rounded-md',
@@ -251,6 +260,7 @@ const AfterQueryPrep = (props: propsT) => {
       return <TagName key={fieldKey} {...fields[fieldKey].props} />;
     });
   };
+
   return (
     <div aria-label='container' className={`grow flex flex-col`}>
       <header aria-label='filters' className={`px-6 py-4 flex flex-wrap gap-4`}>
@@ -305,7 +315,9 @@ const AfterQueryPrep = (props: propsT) => {
 // react/re-render is making it hard that is why I need to split dependent react-query calls
 export default function Projects() {
   const itemsListQuery = useQuery('portfolio list', async () => {
-    const response = await Bridge('read', `itemsList?item=portfolios`);
+    const requestObj = { portfolios: {} };
+    const urlEncodedRequestObj = new URLSearchParams(requestObj);
+    const response = await Bridge('read', `itemsList?${urlEncodedRequestObj}`);
     return response?.err == 'serverError' ? false : response.data;
   });
 

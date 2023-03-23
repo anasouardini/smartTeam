@@ -1,7 +1,7 @@
 const MPortfolio = require('../models/portfolio');
 
 const readAll = async (req, res, next) => {
-  const portfoliosResp = await MPortfolio.read({ ownerID: req.userID });
+  const portfoliosResp = await MPortfolio.read({ owner_FK: req.userID });
 
   if (portfoliosResp.err) {
     return next('err while reading all portfolios');
@@ -15,7 +15,7 @@ const readSingle = async (req, res) => {};
 const create = async (req, res, next) => {
   const { title, description, bgImg, status } = req.body;
   const portfoliosResp = await MPortfolio.create({
-    ownerID: req.userID,
+    owner_FK: req.userID,
     title,
     description,
     bgImg,
@@ -40,7 +40,7 @@ const update = async (req, res, next) => {
   const { id, title, description, bgImg, status } = req.body;
   const portfoliosResp = await MPortfolio.update(
     {
-      ownerID: req.userID,
+      owner_FK: req.userID,
       id,
     },
     {

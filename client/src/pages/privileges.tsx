@@ -3,6 +3,7 @@ import { useQuery } from 'react-query';
 import Bridge from '../tools/bridge';
 import Genid from '../tools/genid';
 import toUrlEncoded from '../tools/toUrlEncoded';
+import Form from '../components/form';
 
 export default function Privileges() {
   // const [state, setState] = React.useState();
@@ -42,6 +43,10 @@ export default function Privileges() {
     },
   };
 
+  const tailwindClx = {
+    commonBorder: `border-2 border-primary rounded-md px-1 py-1`
+  }
+
   const privilegesQuery = useQuery('privileges', async () => {
     const queryFilter = Object.keys(selectRefs).reduce<{
       [key: string]: string | undefined;
@@ -59,9 +64,10 @@ export default function Privileges() {
   const itemsListQuery = useQuery(
     'users&portfolios&projects&tasks list',
     async () => {
+      // TODO: use post request instead, REST is stupid
       const response = await Bridge(
         'read',
-        `itemsList?item1=users&item2=portfolios&item3=projects&item4=tasks&item5=privilegesCategories`
+        `itemsList?item1=portfolios&item2=projects&item3=tasks&item5=users&item4=privilegesCategories`
       );
       return response?.err == 'serverError' ? false : response.data;
     }
@@ -84,37 +90,46 @@ export default function Privileges() {
 
   const listHeaderFields = () => {
     const list = itemsListQuery.data;
-    console.log(list);
-    return Object.keys(list).map((itemKey) => {
-      return (
-        <select
-          onChange={()=>{privilegesQuery.refetch()}}
-          key={itemKey}
-          name={itemKey}
-          ref={(el) => {
-            selectRefs[itemKey] = el;
-          }}
-        >
-          <option key={'emptyoption'} value=''>{itemKey}</option>
-          {list[itemKey].map((item: { [key: string]: string }) => {
-            const optionValue = item[Object.keys(item)[0]];
-            const optionText = item[Object.keys(item)[1]];
-            return (
-              <option key={optionValue} value={optionValue}>
-                {optionText}
+    // console.log(list);
+    return (
+      <>
+        {Object.keys(list).map((itemKey) => {
+          return (
+            <select
+              onChange={() => {
+                privilegesQuery.refetch();
+              }}
+              className={tailwindClx.commonBorder}
+              key={itemKey}
+              name={itemKey}
+              ref={(el) => {
+                selectRefs[itemKey] = el;
+              }}
+            >
+              <option key={'emptyoption'} value=''>
+                {itemKey}
               </option>
-            );
-          })}
-        </select>
-      );
-    });
+              {list[itemKey].map((item: { [key: string]: string }) => {
+                const optionValue = item[Object.keys(item)[0]];
+                const optionText = item[Object.keys(item)[1]];
+                return (
+                  <option key={optionValue} value={optionValue}>
+                    {optionText}
+                  </option>
+                );
+              })}
+            </select>
+          );
+        })}
+      </>
+    );
   };
 
   return (
     <div aria-label='container' className={`grow flex flex-col`}>
       <header aria-label='filters' className={`px-6 py-4 flex flex-wrap gap-4`}>
         {listHeaderFields()}
-        <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
+        <button onClick={stateActions.sideForm.show} className={`ml-auto bg-primary text-white rounded-md px-2`}>
           New
         </button>
       </header>
@@ -123,18 +138,18 @@ export default function Privileges() {
         className='text-black mt-[7rem] pl-20 flex gap-6'
       >
         {privilegesQuery.status == 'success' ? listRules() : <></>}
-          {state.popup.sideForm.show && tasksQuery.status == 'success' ? (
-            <SideForm
-              fields={formFieldsRef.current}
-              mode={state.popup.sideForm.mode}
-              route='task'
-              refetch={tasksQuery.refetch}
-              itemID={state.popup.sideForm.itemID}
-              hideForm={stateActions.sideForm.hide}
-            />
-          ) : (
-            <></>
-          )}
+        {state.popup.sideForm.show && tasksQuery.status == 'success' ? (
+          <Form
+            fields={formFieldsRef.current}
+            mode={state.popup.sideForm.mode}
+            route='task'
+            refetch={tasksQuery.refetch}
+            itemID={state.popup.sideForm.itemID}
+            hideForm={stateActions.sideForm.hide}
+          />
+        ) : (
+          <></>
+        )}
       </main>
     </div>
   );

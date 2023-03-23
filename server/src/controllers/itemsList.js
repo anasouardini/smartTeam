@@ -8,20 +8,24 @@ const Models = {
 };
 const read = async (req, res, next) => {
   const queryResp = {};
-  const itemsList = Object.values(req.query);
-  for(let i=0; i<itemsList.length; i++){
+  let commonFilterCriteria = { owner_FK: req.userID };
+  const itemsList = Object.entries(req.query);
+  for (let i = 0; i < itemsList.length; i++) {
     const item = itemsList[i];
-    let queryFilter = {ownerID: req.userID}
-    if(item == 'users'){queryFilter = {}}
     // console.log(item)
-    queryResp[item] = (await Models[item].list(queryFilter))[0];
-  };
-
-  if (queryResp.err) {
-    return next(`err while listing ${item}`);
+    queryResp[item[0]] = (
+      await Models[item[0]].list({ ...commonFilterCriteria, ...item[1] })
+    )[0];
   }
 
-  res.json({data: queryResp})
+  for (let i = 0; i < itemsList.length; i++) {
+    const item = itemsList[i];
+    if (queryResp[item[0]].err) {
+      return next(`err while listing ${item[1]}`);
+    }
+  }
+
+  res.json({ data: queryResp });
 };
 
-module.exports = {read}
+module.exports = { read };

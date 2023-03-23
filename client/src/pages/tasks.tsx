@@ -63,17 +63,21 @@ const AfterQueryPrep = (props: propsT) => {
     portfolio: HTMLSelectElement | null | { value: string };
     project: HTMLSelectElement | null | { value: string };
     assignee: HTMLSelectElement | null | { value: string };
-  }>({
-    portfolio: {
-      value: props.itemsListQuery.data.portfolios[0].id,
-      innerText: props.itemsListQuery.data.portfolios[0].title,
-    },
-    project: {
-      value: props.itemsListQuery.data.projects[0].id,
-      innerText: props.itemsListQuery.data.projects[0].title,
-    },
-    assignee: null,
-  }).current;
+  } | null>(
+    props.itemsListQuery.data.portfolios.length
+      ? {
+          portfolio: {
+            value: props.itemsListQuery.data.portfolios[0].id,
+            innerText: props.itemsListQuery.data.portfolios[0].title,
+          },
+          project: {
+            value: props.itemsListQuery.data.projects[0]?.id,
+            innerText: props.itemsListQuery.data.projects[0]?.title,
+          },
+          assignee: null,
+        }
+      : null
+  ).current;
 
   //TODO: needs to be passed separately to the filter header
   const formFieldsRef = React.useRef<null | {
@@ -82,6 +86,15 @@ const AfterQueryPrep = (props: propsT) => {
 
   // TODO: extract this to a seperate component
   const tasksQuery = useQuery('projects', async () => {
+    // when fetching portfolios list give an empty list
+
+    if (
+      props.itemsListQuery.data.portfolios.length === 0 ||
+      props.itemsListQuery.data.projects.length === 0
+    ) {
+      return false;
+    }
+
     const response = await Bridge(
       'read',
       `task/all?portfolio=${
@@ -91,10 +104,11 @@ const AfterQueryPrep = (props: propsT) => {
         headerFieldsRefs.project?.value ?? props.itemsListQuery.data.projects[0]
       }`
     );
+
     return response?.err == 'serverError' ? false : response.data;
   });
   // if (tasksQuery.status == 'success') {
-  //   console.log(tasksQuery.data);
+  //   // console.log(tasksQuery.data);
   // }
 
   const createNewTask = () => {
@@ -263,6 +277,12 @@ const AfterQueryPrep = (props: propsT) => {
   };
 
   // TODO: set default selected item to the last visited one
+  if (props.itemsListQuery.data.portfolios.length === 0) {
+    return <h1>There are no tasks, you need to create a portfolio first.</h1>;
+  }
+  if (props.itemsListQuery.data.projects.length === 0) {
+    return <h1>There are no tasks, you need to create a project first.</h1>;
+  }
   return (
     <>
       <div aria-label='container' className={`grow flex flex-col`}>
@@ -315,18 +335,19 @@ const AfterQueryPrep = (props: propsT) => {
 // react/re-render is making it hard that is why I need to split dependent react-query calls
 export default function Tasks() {
   const itemsListQuery = useQuery('portfolios&projects list', async () => {
-    const response = await Bridge(
-      'read',
-      `itemsList?item1=portfolios&item2=projects`
-    );
+    const requestObj = { portfolios: {}, projects: {} };
+    const urlEncodedRequestObj = new URLSearchParams(requestObj);
+    const response = await Bridge('read', `itemsList?${urlEncodedRequestObj}`);
     return response?.err == 'serverError' ? false : response.data;
   });
 
   // console.log(portfoliosListQuery.status == 'success');
   // console.log(projectsListQuery.status == 'success');
 
-  if (itemsListQuery.status == 'success')
+  if (itemsListQuery.status == 'success') {
+    // console.log(itemsListQuery.data);
     return <AfterQueryPrep itemsListQuery={itemsListQuery} />;
+  }
 
   return <></>;
 }
