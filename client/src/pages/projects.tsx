@@ -87,10 +87,10 @@ const AfterQueryPrep = (props: propsT) => {
     formFieldsRef.current = FormFields('project', {
       portfolio: {
         children: [
-          [
-            portfolioSelectRef.current?.value,
-            portfolioSelectRef.current?.innerText,
-          ],
+          {
+            id: portfolioSelectRef.current?.value,
+            title: portfolioSelectRef.current?.innerText,
+          },
         ],
         props: {
           defaultValue: portfolioSelectRef.current?.value,
@@ -105,6 +105,7 @@ const AfterQueryPrep = (props: propsT) => {
   const editProject = (project: { [key: string]: any }) => {
     formFieldsRef.current = FormFields('project', {
       portfolio: {
+        children: props.itemsListQuery.data.portfolios,
         props: {
           defaultValue: portfolioSelectRef.current?.value,
           readOnly: true,
@@ -120,6 +121,7 @@ const AfterQueryPrep = (props: propsT) => {
       expense: { props: { defaultValue: project.expense } },
     });
 
+    // console.log(formFieldsRef) 😮
     stateActions.form.show(project.id, 'edit');
   };
 
@@ -143,7 +145,10 @@ const AfterQueryPrep = (props: propsT) => {
         const cols = Object.keys(projectsQuery.data[0])
           .filter((projectKey) =>
             projectKey != 'id' &&
-            projectKey != 'portfolio' &&
+            projectKey != 'owner_FK' &&
+            projectKey != 'assignee_FK' &&
+            projectKey != 'creator_FK' &&
+            projectKey != 'portfolio_FK' &&
             projectKey != 'ownerID'
               ? true
               : false
@@ -169,11 +174,6 @@ const AfterQueryPrep = (props: propsT) => {
     if (projectsQuery.status == 'success') {
       const dt = projectsQuery.data.map((project: { [key: string]: any }) => {
         const newProject = { ...project };
-
-        // no reason to delete these
-        // delete newProject.id;
-        // delete newProject.ownerID;
-        // delete newProject.portfolio;
 
         newProject.edit = (
           <button>
@@ -315,7 +315,7 @@ const AfterQueryPrep = (props: propsT) => {
 // react/re-render is making it hard that is why I need to split dependent react-query calls
 export default function Projects() {
   const itemsListQuery = useQuery('portfolio list', async () => {
-    const requestObj = { portfolios: {} };
+    const requestObj = { portfolios: '' };
     const urlEncodedRequestObj = new URLSearchParams(requestObj);
     const response = await Bridge('read', `itemsList?${urlEncodedRequestObj}`);
     return response?.err == 'serverError' ? false : response.data;

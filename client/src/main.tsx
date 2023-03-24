@@ -11,6 +11,7 @@ import Portfolios from './pages/portfolios';
 import Projects from './pages/projects';
 import Tasks from './pages/tasks';
 import Privileges from './pages/privileges';
+import Templates from './pages/privilegesCategories';
 
 import SharedLayout from './components/sharedLayout';
 
@@ -51,6 +52,7 @@ const MyRouter = () => (
         <Route path='/projects' element={<Projects />} />
         <Route path='/tasks' element={<Tasks />} />
         <Route path='/privileges' element={<Privileges />} />
+        <Route path='/templates' element={<Templates />} />
       </Route>
     </Routes>
   </BrowserRouter>

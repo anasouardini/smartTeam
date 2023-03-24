@@ -3,8 +3,7 @@ const MTask = require('../models/task');
 const readAll = async (req, res, next) => {
   const tasksResp = await MTask.read({
     owner_FK: req.userID,
-    project: req.query.project,
-    portfolio: req.query.portfolio,
+    project_FK: req.query.project,
   });
 
   if (tasksResp.err) {
@@ -19,7 +18,6 @@ const readSingle = async (req, res) => {};
 
 const create = async (req, res, next) => {
   const {
-    portfolio,
     project,
     assignee,
     title,
@@ -30,9 +28,8 @@ const create = async (req, res, next) => {
   } = req.body;
   const tasksResp = await MTask.create({
     owner_FK: req.userID,
-    portfolio,
-    project,
-    assignee,
+    project_FK: project,
+    assignee_FK : assignee,
     title,
     description,
     bgColor,
@@ -91,7 +88,7 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   const { id } = req.body;
-  const tasksResp = await MTask.remove({ ownerID: req.userID, id });
+  const tasksResp = await MTask.remove({ owner_FK: req.userID, id });
 
   if (tasksResp.err) {
     return next('err while removing a task');

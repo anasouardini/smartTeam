@@ -115,10 +115,10 @@ const AfterQueryPrep = (props: propsT) => {
     formFieldsRef.current = FormFields('task', {
       portfolio: {
         children: [
-          [
-            headerFieldsRefs.portfolio?.value,
-            headerFieldsRefs.portfolio?.innerText,
-          ],
+          {
+            id: headerFieldsRefs.portfolio?.value,
+            title: headerFieldsRefs.portfolio?.innerText,
+          },
         ],
         props: {
           readOnly: true,
@@ -126,17 +126,17 @@ const AfterQueryPrep = (props: propsT) => {
       },
       project: {
         children: [
-          [
-            headerFieldsRefs.project?.value,
-            headerFieldsRefs.project?.innerText,
-          ],
+          {
+            id: headerFieldsRefs.project?.value,
+            title: headerFieldsRefs.project?.innerText,
+          },
         ],
         props: {
           readOnly: true,
         },
       },
       assignee: {
-        children: [[loggedInUser.id, loggedInUser.username]],
+        children: [{id: loggedInUser.id, title : loggedInUser.username}],
         props: {
           readOnly: true,
         },
@@ -335,7 +335,7 @@ const AfterQueryPrep = (props: propsT) => {
 // react/re-render is making it hard that is why I need to split dependent react-query calls
 export default function Tasks() {
   const itemsListQuery = useQuery('portfolios&projects list', async () => {
-    const requestObj = { portfolios: {}, projects: {} };
+    const requestObj = { portfolios: '', projects: '' };
     const urlEncodedRequestObj = new URLSearchParams(requestObj);
     const response = await Bridge('read', `itemsList?${urlEncodedRequestObj}`);
     return response?.err == 'serverError' ? false : response.data;

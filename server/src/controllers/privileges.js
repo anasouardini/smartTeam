@@ -1,12 +1,21 @@
 const MPrivledges = require('../models/privileges');
 
 const readAll = async (req, res, next) => {
-  const rulesResp = await MPrivledges.read({
-    ownerID: req.userID,
+  let privilegesFilter = {
+    owner_FK: req.userID,
     user: req.user || '%',
-    itemID: req?.portfolios || req?.projects || req?.tasks || '%',
-    privCat: req?.privCat || '%',
-  });
+    privCat_FK: req?.privCat || '%',
+  }
+  if(req.portfolios){
+    privilegesFilter['portfolios'] = req.portfolios;
+  }
+  if(req.projects){
+    privilegesFilter['projects'] = req.projects;
+  }
+  if(req.tasks){
+    privilegesFilter['tasks'] = req.tasks;
+  }
+  const rulesResp = await MPrivledges.read(privilegesFilter);
 
   if (rulesResp.err) {
     return next('err while reading all rules');

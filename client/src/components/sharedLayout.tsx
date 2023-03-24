@@ -180,6 +180,12 @@ export default function sharedLayout() {
             </NavLink>
           </li>
           <li>
+            <NavLink to={`/templates`} className={activeLink}>
+              <FaKey />
+              templates
+            </NavLink>
+          </li>
+          <li>
             <button
               onClick={logout}
               className={`${tailwindClasses.navItem} ${tailwindClasses.link} w-full`}

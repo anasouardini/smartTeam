@@ -64,10 +64,12 @@ export default function Privileges() {
   const itemsListQuery = useQuery(
     'users&portfolios&projects&tasks list',
     async () => {
-      // TODO: use post request instead, REST is stupid
+
+      const requestObj = { portfolios: '', projects:'', tasks:'', users:'', privilegesCategories:'' };
+      const urlEncodedRequestObj = new URLSearchParams(requestObj);
       const response = await Bridge(
         'read',
-        `itemsList?item1=portfolios&item2=projects&item3=tasks&item5=users&item4=privilegesCategories`
+        `itemsList?${urlEncodedRequestObj}`
       );
       return response?.err == 'serverError' ? false : response.data;
     }

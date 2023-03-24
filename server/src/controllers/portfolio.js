@@ -67,7 +67,7 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   const { id } = req.body;
-  const portfoliosResp = await MPortfolio.remove({ ownerID: req.userID, id });
+  const portfoliosResp = await MPortfolio.remove({ owner_FK: req.userID, id });
 
   if (portfoliosResp.err) {
     return next('err while removing a portfolio');

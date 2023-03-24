@@ -9,7 +9,7 @@ import FixDate from '../tools/fixDate';
 
 type fieldsT = {
   [key: string]: {
-    children?: string[][];
+    children?: {id:string, title:string}[];
     label?: string;
     tagName: string;
     props: { [key: string]: string };
@@ -109,15 +109,13 @@ export default function Form(props: propsT) {
               }}
               {...field.props}
             >
-              {field?.children ? (
-                field.children.map((child) => {
-                  return <option key={child[0]} value={child[0]}>
-                    {child[1]}
+              {field.children.map((child) => {
+                return (
+                  <option key={child.id} value={child.id}>
+                    {child.title}
                   </option>
-                })
-              ) : (
-                <></>
-              )}
+                );
+              })}
             </TagName>
           ) : (
             <TagName
@@ -145,27 +143,25 @@ export default function Form(props: propsT) {
   }
 
   return (
-    <section
-      {...sectionProps}
-    >
-    <form
-      aria-label={`${props.route} info`}
-      className={`mt-[2rem] py-3 px-4 border-gray-300 border-2 rounded-md
+    <section {...sectionProps}>
+      <form
+        aria-label={`${props.route} info`}
+        className={`mt-[2rem] py-3 px-4 border-gray-300 border-2 rounded-md
                     flex flex-col gap-6`}
-    >
-      <button className={`ml-auto text-lg`} onClick={formAction.cancel}>
-        X
-      </button>
-
-      {listFields()}
-      <button
-        className={`cursor-pointer`}
-        onClick={formAction[props.mode]}
-        name={props.mode}
       >
-        {props.mode}
-      </button>
-    </form>
+        <button className={`ml-auto text-lg`} onClick={formAction.cancel}>
+          X
+        </button>
+
+        {listFields()}
+        <button
+          className={`cursor-pointer`}
+          onClick={formAction[props.mode]}
+          name={props.mode}
+        >
+          {props.mode}
+        </button>
+      </form>
     </section>
   );
 }

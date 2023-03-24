@@ -9,19 +9,25 @@ const Models = {
 const read = async (req, res, next) => {
   const queryResp = {};
   let commonFilterCriteria = { owner_FK: req.userID };
+  let tables = {
+    users: {},
+    portfolios: commonFilterCriteria,
+    projects: commonFilterCriteria,
+    tasks: commonFilterCriteria,
+  };
   const itemsList = Object.entries(req.query);
   for (let i = 0; i < itemsList.length; i++) {
     const item = itemsList[i];
-    // console.log(item)
+    // console.log(item);
     queryResp[item[0]] = (
-      await Models[item[0]].list({ ...commonFilterCriteria, ...item[1] })
+      await Models[item[0]].list(tables[item[0]])
     )[0];
   }
 
   for (let i = 0; i < itemsList.length; i++) {
     const item = itemsList[i];
-    if (queryResp[item[0]].err) {
-      return next(`err while listing ${item[1]}`);
+    if (queryResp[item[0]]?.err) {
+      return next(`err while listing ${item[0]}`);
     }
   }
 

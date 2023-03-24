@@ -8,14 +8,14 @@ const create = async (newData) => {
   }
   newData.id = uuid();
 
-  const autoQuery = AutoQuery.create('privileges', newData);
+  const autoQuery = AutoQuery.create('privilegesCategories', newData);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
   return response;
 };
 
 const read = async (filter, fields) => {
-  const autoQuery = AutoQuery.read('privileges', filter, fields);
+  const autoQuery = AutoQuery.read('privilegesCategories', filter, fields);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
   // console.log(response[0]);
@@ -23,7 +23,7 @@ const read = async (filter, fields) => {
 };
 
 const list = async (filter) => {
-  const autoQuery = AutoQuery.read('privileges', filter, ['privCat']);
+  const autoQuery = AutoQuery.read('privilegesCategories', filter, ['id']);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
   return response;
@@ -34,14 +34,14 @@ const update = async (filter, newData) => {
     return { err: 'no data is provided' };
   }
 
-  const autoQuery = AutoQuery.update('privilges', filter, newData);
+  const autoQuery = AutoQuery.update('privilgesCategories', filter, newData);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
   return response;
 };
 
 const remove = async (filter) => {
-  const autoQuery = AutoQuery.remove('privilges', filter);
+  const autoQuery = AutoQuery.remove('privilgesCategories', filter);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
   return response;

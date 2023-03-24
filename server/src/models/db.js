@@ -74,6 +74,12 @@ const initQueries = {
                       foreign key(assignee_FK) references users(id) on delete cascade,
                       foreign key(owner_FK, project_FK) references projects(owner_FK, id) on delete cascade
                     )`,
+  createPriviCategoriesTable: `create table privilegesCategories(
+                      id varchar(50),
+                      owner_FK varchar(50),
+                      priviledge json,
+                      primary key(owner_FK, id)
+                    )`,
   createPrivilegesTable: `create table privileges(
                       owner_FK varchar(50),
                       user varchar(50),
@@ -81,19 +87,13 @@ const initQueries = {
                       projectsItem_FK varchar(50),
                       tasksItem_FK varchar(50),
                       privCat_FK varchar(50),
-                      unique(owner_FK, user, portfolioItem_FK, projectsItem_FK, tasksItem_FK, privCat)
+                      unique(owner_FK, user, portfolioItem_FK, projectsItem_FK, tasksItem_FK, privCat_FK),
                       foreign key(owner_FK) references users(id) on delete cascade,
                       foreign key(user) references users(id) on delete cascade,
                       foreign key(owner_FK, portfolioItem_FK) references portfolios(owner_FK, id) on delete cascade,
                       foreign key(owner_FK, projectsItem_FK) references projects(owner_FK, id) on delete cascade,
                       foreign key(owner_FK, tasksItem_FK) references tasks(owner_FK, id) on delete cascade,
                       foreign key(owner_FK, privCat_FK) references privilegesCategories(owner_FK, id) on delete cascade
-                    )`,
-  createPriviCategoriesTable: `create table privilegesCategories(
-                      id varchar(50),
-                      owner_FK varchar(50),
-                      priviledge json,
-                      primary key(owner_FK, id)
                     )`
 };
 

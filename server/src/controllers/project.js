@@ -30,7 +30,7 @@ const create = async (req, res, next) => {
   } = req.body;
   const projectsResp = await MProject.create({
     owner_FK: req.userID,
-    portfolio,
+    portfolio_FK: portfolio,
     title,
     description,
     bgColor,
@@ -71,7 +71,7 @@ const update = async (req, res, next) => {
   const projectsResp = await MProject.update(
     {
       owner_FK: req.userID,
-      portfolio,
+      portfolio_FK: portfolio,
       id,
     },
     {
@@ -86,7 +86,7 @@ const update = async (req, res, next) => {
       expense,
     }
   );
-
+  // console.log(projectsResp)
   if (projectsResp.err) {
     return next('err while updating project');
   }
@@ -100,7 +100,7 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   const { id } = req.body;
-  const projectsResp = await MProject.remove({ ownerID: req.userID, id });
+  const projectsResp = await MProject.remove({ owner_FK: req.userID, id });
 
   if (projectsResp.err) {
     return next('err while removing a project');
