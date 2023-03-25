@@ -1,8 +1,43 @@
 const pool = require('./dbPool');
-const tmpOwnerID = 'github-114059811';
+// const {uuidv4:uuid} = require('uuid');
+const defaultOwnerID = 'github-114059811';
+const defaultPrivileges = [
+  [
+    'creator',
+    defaultOwnerID,
+    JSON.stringify({
+      currentItem: { update: {all:true}, delete: true, assign: true },
+      childrenItems: { update: { all: true }, delete: true, create: true, assign: true },
+    }),
+  ],
+  [
+    'manager',
+    defaultOwnerID,
+    JSON.stringify({
+      currentItem: { update: {all:false}, delete: false, assign: false },
+      childrenItems: { update: { all: true }, delete: true, create: true, assign: true },
+    }),
+  ],
+  [
+    'watcher',
+    defaultOwnerID,
+    JSON.stringify({
+      currentItem: { update: {all:false}, delete: false, assign: false },
+      childrenItems: { update: { all: false }, delete: false, create: false, assign: false },
+    }),
+  ],
+  [
+    'worker',
+    defaultOwnerID,
+    JSON.stringify({
+      currentItem: { update: {all:false, status: true}, delete: false, assign: false },
+      childrenItems: { update: { all:false}, delete: false, create: false, assign: false },
+    }),
+  ],
+];
+
 const initQueries = {
-  clearDB: `drop table if exists users, portfolios, projects, privilegesCategories, privileges,
-            tasks`,
+  clearDB: `drop table if exists users, portfolios, projects, tasks, privilegesCategories, privileges;`,
   createUsersTable: `create table users(
                       id varchar(50),
                       username varchar(20),
@@ -94,18 +129,66 @@ const initQueries = {
                       foreign key(owner_FK, projectsItem_FK) references projects(owner_FK, id) on delete cascade,
                       foreign key(owner_FK, tasksItem_FK) references tasks(owner_FK, id) on delete cascade,
                       foreign key(owner_FK, privCat_FK) references privilegesCategories(owner_FK, id) on delete cascade
-                    )`
+                    )`,
+};
+
+const insertionQueries = {
+  insertDefaultUser: `insert into users(id, username, avatar, fullname, verified)
+                      value(
+                            'github-114059811',
+                            'segfaulty1',
+                            'https://avatars.githubusercontent.com/u/114059811?v=4',
+                            'Ouardini Anas',
+                            1
+                            );`,
+  insertDefaultPrivilegesCategories: `insert into privilegesCategories(id, owner_FK, priviledge)
+                        values( ?, ?, ?)`,
 };
 
 const init = async () => {
-  const queryEntries = Object.entries(initQueries);
-  for (let i = 0; i < queryEntries.length; i++) {
-    let res = await pool(queryEntries[i][1]);
+  // initializing tables
+  const initQueryEntries = Object.entries(initQueries);
+  for (let i = 0; i < initQueryEntries.length; i++) {
+    let res = await pool(initQueryEntries[i][1]);
     // console.log(res[0]);
     if (!res || res?.errno) {
-      console.log(['=============================================================']);
-      console.log(['error happened while initialising the db: (l80-90 models/db.ts)']);
-      console.log(`query: ${queryEntries[i][0]}\n`);
+      console.log([
+        '=============================================================',
+      ]);
+      console.log(['error happened while initialising the db: (models/db.ts)']);
+      console.log(`query: ${initQueryEntries[i][1]}\n`);
+      console.log(res);
+      return false;
+    }
+  }
+
+  // inserting default users
+  const usersEntry = insertionQueries['insertDefaultUser'];
+  let res = await pool(usersEntry);
+  if (!res || res?.errno) {
+    console.log([
+      '=============================================================',
+    ]);
+    console.log(['error happened while iserting default user: (models/db.ts)']);
+    console.log(`query: ${usersEntry}\n`);
+    console.log(res);
+    return false;
+  }
+
+  // inserting default priviledges categories
+  const privilegesQueryEntry =
+    insertionQueries['insertDefaultPrivilegesCategories'];
+  for (let i = 0; i < defaultPrivileges.length; i++) {
+    let res = await pool(privilegesQueryEntry, defaultPrivileges[i]);
+    // console.log(res[0]);
+    if (!res || res?.errno) {
+      console.log([
+        '=============================================================',
+      ]);
+      console.log([
+        'error happened while iserting default privilegesCategories: (models/db.ts)',
+      ]);
+      console.log(`query: ${privilegesQueryEntry}\n`);
       console.log(res);
       return false;
     }

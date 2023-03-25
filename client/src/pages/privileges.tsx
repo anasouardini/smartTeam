@@ -62,7 +62,7 @@ export default function Privileges() {
   });
 
   const itemsListQuery = useQuery(
-    'users&portfolios&projects&tasks list',
+    'users&portfolios&projects&tasks&privilegesCategories list',
     async () => {
 
       const requestObj = { portfolios: '', projects:'', tasks:'', users:'', privilegesCategories:'' };
@@ -111,12 +111,11 @@ export default function Privileges() {
               <option key={'emptyoption'} value=''>
                 {itemKey}
               </option>
+
               {list[itemKey].map((item: { [key: string]: string }) => {
-                const optionValue = item[Object.keys(item)[0]];
-                const optionText = item[Object.keys(item)[1]];
                 return (
-                  <option key={optionValue} value={optionValue}>
-                    {optionText}
+                  <option key={item.id} value={item.id}>
+                    {item.id}
                   </option>
                 );
               })}
