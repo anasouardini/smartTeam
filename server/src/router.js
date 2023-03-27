@@ -33,7 +33,7 @@ router.put('/task', controllers.task.update);
 router.delete('/task', controllers.task.remove);
 
 router.post('/privileges', controllers.privileges.create);
-router.get('/privileges/all', controllers.privileges.readAll);
+router.post('/privileges/all', controllers.privileges.readAll);
 router.put('/privileges', controllers.privileges.update);
 router.delete('/privileges', controllers.privileges.remove);
 

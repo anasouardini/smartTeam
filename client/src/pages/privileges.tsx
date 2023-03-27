@@ -44,19 +44,32 @@ export default function Privileges() {
   };
 
   const tailwindClx = {
-    commonBorder: `border-2 border-primary rounded-md px-1 py-1`
-  }
+    commonBorder: `border-2 border-primary rounded-md px-1 py-1`,
+  };
 
   const privilegesQuery = useQuery('privileges', async () => {
     const queryFilter = Object.keys(selectRefs).reduce<{
       [key: string]: string | undefined;
     }>((acc, refKey) => {
+      if (refKey === 'targetEntity') {
+        const selectedValue = selectRefs[refKey]?.value;
+        const listID = selectRefs[refKey]?.getAttribute('list');
+        acc[refKey] = {
+          type: selectedValue.split(' - ')[0],
+          value: document.querySelector(
+            `#${listID} option[value='${selectedValue}']`
+          )?.dataset?.value || '%'
+        };
+        return acc;
+      }
       acc[refKey] = selectRefs[refKey]?.value;
       return acc;
     }, {});
+    // console.log(queryFilter);
     let response = await Bridge(
-      'read',
-      `privileges/all${toUrlEncoded(queryFilter)}`
+      'post',
+      `privileges/all`,
+      queryFilter
     );
     return !response || response?.err == 'serverError' ? false : response.data;
   });
@@ -64,8 +77,13 @@ export default function Privileges() {
   const itemsListQuery = useQuery(
     'users&portfolios&projects&tasks&privilegesCategories list',
     async () => {
-
-      const requestObj = { portfolios: '', projects:'', tasks:'', users:'', privilegesCategories:'' };
+      const requestObj = {
+        portfolios: '',
+        projects: '',
+        tasks: '',
+        users: '',
+        privilegesCategories: '',
+      };
       const urlEncodedRequestObj = new URLSearchParams(requestObj);
       const response = await Bridge(
         'read',
@@ -75,9 +93,9 @@ export default function Privileges() {
     }
   );
 
-  const selectRefs = React.useRef<{ [key: string]: HTMLSelectElement | null }>(
-    {}
-  ).current;
+  const selectRefs = React.useRef<{
+    [key: string]: HTMLSelectElement | HTMLInputElement | null;
+  }>({}).current;
 
   if (itemsListQuery.status != 'success') {
     return <p>I DON'T HAVE A LOADING SPINNER</p>;
@@ -85,17 +103,57 @@ export default function Privileges() {
 
   const listRules = () => {
     if (privilegesQuery.status == 'success') {
-      console.log(privilegesQuery.data);
+      // console.log(privilegesQuery.data);
     }
     return <></>;
   };
 
   const listHeaderFields = () => {
-    const list = itemsListQuery.data;
-    // console.log(list);
+    // this is the number of lists combined into the first <select> element.
+    const firstPartLength = 3;
+
+    let targetItemsList = itemsListQuery.data;
+    const targetItemsListEntries = Object.entries(targetItemsList);
+    const otherItemsList = Object.fromEntries(
+      targetItemsListEntries.splice(0, firstPartLength)
+    ) as { [key: string]: string[] };
+    targetItemsList = Object.fromEntries(targetItemsListEntries);
+    // console.log(otherItemsList);
+    const targetEntityKey = 'targetEntity';
     return (
       <>
-        {Object.keys(list).map((itemKey) => {
+        <input
+          list='otherItemsList'
+          onChange={() => {
+            // TODO: debounce this
+            privilegesQuery.refetch();
+          }}
+          placeholder={targetEntityKey}
+          className={tailwindClx.commonBorder}
+          name={targetEntityKey}
+          ref={(el) => {
+            selectRefs[targetEntityKey] = el;
+          }}
+        />
+        <datalist id='otherItemsList'>
+          {Object.keys(otherItemsList).map((entityKey: string) => {
+            return otherItemsList[entityKey].map(
+              (entityOption: { [key: string]: string }) => {
+                const entityOptionValues = Object.values(entityOption);
+                // console.log(entityOptionValues);
+                return (
+                  <option
+                    key={entityOptionValues[0]}
+                    value={`${entityKey} - ${entityOptionValues[1]}`}
+                    data-value={entityOptionValues[0]}
+                  />
+                );
+              }
+            );
+          })}
+        </datalist>
+
+        {Object.keys(targetItemsList).map((itemKey) => {
           return (
             <select
               onChange={() => {
@@ -112,13 +170,16 @@ export default function Privileges() {
                 {itemKey}
               </option>
 
-              {list[itemKey].map((item: { [key: string]: string }) => {
-                return (
-                  <option key={item.id} value={item.id}>
-                    {item.id}
-                  </option>
-                );
-              })}
+              {targetItemsList[itemKey].map(
+                (item: { [key: string]: string }) => {
+                  const values = Object.values(item);
+                  return (
+                    <option key={values[0]} value={values[0]}>
+                      {values?.[1] ? values[1] : values[0]}
+                    </option>
+                  );
+                }
+              )}
             </select>
           );
         })}
@@ -130,7 +191,10 @@ export default function Privileges() {
     <div aria-label='container' className={`grow flex flex-col`}>
       <header aria-label='filters' className={`px-6 py-4 flex flex-wrap gap-4`}>
         {listHeaderFields()}
-        <button onClick={stateActions.sideForm.show} className={`ml-auto bg-primary text-white rounded-md px-2`}>
+        <button
+          onClick={stateActions.sideForm.show}
+          className={`ml-auto bg-primary text-white rounded-md px-2`}
+        >
           New
         </button>
       </header>

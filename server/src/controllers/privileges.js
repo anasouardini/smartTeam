@@ -3,18 +3,13 @@ const MPrivledges = require('../models/privileges');
 const readAll = async (req, res, next) => {
   let privilegesFilter = {
     owner_FK: req.userID,
-    user: req.user || '%',
-    privCat_FK: req?.privCat || '%',
+    user: req.body.user || '%',
+    privCat_FK: req.body.privCat || '%',
   }
-  if(req.portfolios){
-    privilegesFilter['portfolios'] = req.portfolios;
+  if(req.body?.targetEntity && req.body?.targetEntity?.value){
+    req[req.body.targetEntity.type] = req.body.targetEntity.value;
   }
-  if(req.projects){
-    privilegesFilter['projects'] = req.projects;
-  }
-  if(req.tasks){
-    privilegesFilter['tasks'] = req.tasks;
-  }
+
   const rulesResp = await MPrivledges.read(privilegesFilter);
 
   if (rulesResp.err) {
