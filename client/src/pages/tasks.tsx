@@ -113,34 +113,6 @@ const AfterQueryPrep = (props: propsT) => {
 
   const createNewTask = () => {
     formFieldsRef.current = FormFields('task', {
-      portfolio: {
-        children: [
-          {
-            id: headerFieldsRefs.portfolio?.value,
-            title: headerFieldsRefs.portfolio?.innerText,
-          },
-        ],
-        props: {
-          readOnly: true,
-        },
-      },
-      project: {
-        children: [
-          {
-            id: headerFieldsRefs.project?.value,
-            title: headerFieldsRefs.project?.innerText,
-          },
-        ],
-        props: {
-          readOnly: true,
-        },
-      },
-      assignee: {
-        children: [{id: loggedInUser.id, title : loggedInUser.username}],
-        props: {
-          readOnly: true,
-        },
-      },
     });
 
     stateActions.sideForm.show(undefined, 'create');

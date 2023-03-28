@@ -85,7 +85,7 @@ export default function Form(props: propsT) {
     },
   };
 
-  // console.log(props.fields)
+  console.log(props)
   const listFields = () => {
     return Object.keys(props.fields).map((fieldKey) => {
       const field = props.fields[fieldKey];
@@ -110,6 +110,7 @@ export default function Form(props: propsT) {
               {...field.props}
             >
               {field.children.map((child) => {
+              
                 return (
                   <option key={child.id} value={child.id}>
                     {child.title}

@@ -35,7 +35,7 @@ const selectFields = {
       className: commonValues.props.className,
     },
   },
-  privCat: {
+  privilegesCategories: {
     tagName: 'select',
     label: 'privileges Category',
     children: [],
@@ -199,10 +199,23 @@ const fields: fieldsT = {
         placeholder: 'user',
       },
     },
-    portfolio: selectFields.portfolio,
-    project: selectFields.project,
-    task: selectFields.task,
-    privCat: selectFields.privCat,
+    targetEntity: {
+      label: 'targetEntity',
+      tagName: 'input',
+      props: {
+        className: commonValues.props.className,
+        placeholder: 'targetEntity'
+      },
+    },
+    targetEntityList: {
+      tagName: 'datalist',
+      children: [],
+      props: {
+        id:'targetEntityList',
+        className: commonValues.props.className,
+      },
+    },
+    privilegesCategories: selectFields.privilegesCategories,
   },
 };
 

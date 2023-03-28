@@ -4,6 +4,7 @@ import Bridge from '../tools/bridge';
 import Genid from '../tools/genid';
 import toUrlEncoded from '../tools/toUrlEncoded';
 import Form from '../components/form';
+import FormFields from '../components/formFields';
 
 export default function Privileges() {
   // const [state, setState] = React.useState();
@@ -56,9 +57,10 @@ export default function Privileges() {
         const listID = selectRefs[refKey]?.getAttribute('list');
         acc[refKey] = {
           type: selectedValue.split(' - ')[0],
-          value: document.querySelector(
-            `#${listID} option[value='${selectedValue}']`
-          )?.dataset?.value || '%'
+          value:
+            document.querySelector(
+              `#${listID} option[value='${selectedValue}']`
+            )?.dataset?.value || '%',
         };
         return acc;
       }
@@ -66,11 +68,7 @@ export default function Privileges() {
       return acc;
     }, {});
     // console.log(queryFilter);
-    let response = await Bridge(
-      'post',
-      `privileges/all`,
-      queryFilter
-    );
+    let response = await Bridge('post', `privileges/all`, queryFilter);
     return !response || response?.err == 'serverError' ? false : response.data;
   });
 
@@ -97,6 +95,33 @@ export default function Privileges() {
     [key: string]: HTMLSelectElement | HTMLInputElement | null;
   }>({}).current;
 
+  const formFieldsRef = React.useRef<null | {
+    [key: string]: { tagName: string; props: { [key: string]: string } };
+  }>(null);
+
+  const headerFieldsRefs = React.useRef<{
+    targetEntity: HTMLSelectElement | null | { [key: string]: string };
+    users: HTMLSelectElement | null | { [key: string]: string };
+    privilegesCategories: HTMLSelectElement | null | { [key: string]: string };
+  } | null>(
+    itemsListQuery.data?.length
+      ? {
+          targetEntity: {
+            value: '',
+          },
+          users: {
+            value: itemsListQuery.data.users[0]?.id,
+            innerText: itemsListQuery.data.users[0]?.username,
+          },
+          privilegesCategories: {
+            value: itemsListQuery.data.privilegesCategories[0]?.id,
+            innerText: itemsListQuery.data.privilegesCategories[0]?.id,
+          },
+        }
+      : null
+  ).current;
+
+  // NO HOOKS BELOW THIS LOGIC BLOCK
   if (itemsListQuery.status != 'success') {
     return <p>I DON'T HAVE A LOADING SPINNER</p>;
   }
@@ -106,6 +131,27 @@ export default function Privileges() {
       // console.log(privilegesQuery.data);
     }
     return <></>;
+  };
+
+  const createNewPrivilege = () => {
+    formFieldsRef.current = FormFields('privileges', {
+      targetEntity: {
+        value: '',
+      },
+      targetEntityList:{
+
+      },
+      users: {
+        value: itemsListQuery.data.users[0]?.id,
+        innerText: itemsListQuery.data.users[0]?.username,
+      },
+      privilegesCategories: {
+        value: itemsListQuery.data.privilegesCategories[0]?.id,
+        innerText: itemsListQuery.data.privilegesCategories[0]?.id,
+      },
+    });
+
+    stateActions.sideForm.show(undefined, 'create');
   };
 
   const listHeaderFields = () => {
@@ -192,7 +238,7 @@ export default function Privileges() {
       <header aria-label='filters' className={`px-6 py-4 flex flex-wrap gap-4`}>
         {listHeaderFields()}
         <button
-          onClick={stateActions.sideForm.show}
+          onClick={createNewPrivilege}
           className={`ml-auto bg-primary text-white rounded-md px-2`}
         >
           New
@@ -203,12 +249,12 @@ export default function Privileges() {
         className='text-black mt-[7rem] pl-20 flex gap-6'
       >
         {privilegesQuery.status == 'success' ? listRules() : <></>}
-        {state.popup.sideForm.show && tasksQuery.status == 'success' ? (
+        {state.popup.sideForm.show && privilegesQuery.status == 'success' ? (
           <Form
             fields={formFieldsRef.current}
             mode={state.popup.sideForm.mode}
             route='task'
-            refetch={tasksQuery.refetch}
+            refetch={privilegesQuery.refetch}
             itemID={state.popup.sideForm.itemID}
             hideForm={stateActions.sideForm.hide}
           />

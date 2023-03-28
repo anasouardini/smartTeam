@@ -57,6 +57,7 @@ export default function Portfolio(props: {
       bgImg: {props:{defaultValue: state.item.bgImg}},
       status: {props:{defaultValue: state.item.status}},
     })
+
     stateActions.form.show();
   };
 
@@ -106,6 +107,7 @@ export default function Portfolio(props: {
         <Form
           fields={formFieldsRef.current}
           route={'portfolio'}
+          style='popup'
           mode={state.popup.form.mode}
           refetch={props.refetch}
           itemID={state.item.id}
