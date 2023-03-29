@@ -3,13 +3,14 @@ import { z } from 'zod';
 import Bridge from '../tools/bridge';
 import Genid from '../tools/genid';
 import FixDate from '../tools/fixDate';
+import customFields from './customFields';
 
 // TODO: [BUG] after editing and refetching, the form should update it's COPY of the item
 // TODO: [BUG] editing the drops downs in the filter header should not effect the form
 
 type fieldsT = {
   [key: string]: {
-    children?: {id:string, title:string}[];
+    children?: { id: string; title: string }[];
     label?: string;
     tagName: string;
     props: { [key: string]: string };
@@ -85,16 +86,33 @@ export default function Form(props: propsT) {
     },
   };
 
-  console.log(props)
+  // console.log(customFields)
+  // console.log(props)
   const listFields = () => {
     return Object.keys(props.fields).map((fieldKey) => {
       const field = props.fields[fieldKey];
 
-      // mysql2 misses dates by addin gone hour. hence this mess
       // basically adding an hour to the date using string manupulation
       // because JS handles dates poorly
       const fieldValue = field.props.defaultValue;
       FixDate(fieldKey, fieldValue, field.props); // mutates the dateFields in the props
+
+      // console.log(customFields?.[field?.tagName], field?.tagName)
+      if (customFields[field?.tagName]) {
+        const TagName = customFields[field?.tagName];
+        return (
+          <label>
+            Target Entity:
+            <br/>
+            <TagName
+              ref={(el) => {
+                fieldsRefs[field?.tagName] = el;
+              }}
+              {...field.props}
+            />
+          </label>
+        );
+      }
 
       const TagName = field.tagName;
       const randomKey = Genid(10);
@@ -110,7 +128,6 @@ export default function Form(props: propsT) {
               {...field.props}
             >
               {field.children.map((child) => {
-              
                 return (
                   <option key={child.id} value={child.id}>
                     {child.title}

@@ -1,5 +1,8 @@
 import ObjMerge from '../tools/objMerge';
 
+// This entire idea was a failure, it would've been better to stick to my favorit
+// custom fields and passing objects directly to the form
+
 const commonValues = {
   props: {
     className:
@@ -199,22 +202,7 @@ const fields: fieldsT = {
         placeholder: 'user',
       },
     },
-    targetEntity: {
-      label: 'targetEntity',
-      tagName: 'input',
-      props: {
-        className: commonValues.props.className,
-        placeholder: 'targetEntity'
-      },
-    },
-    targetEntityList: {
-      tagName: 'datalist',
-      children: [],
-      props: {
-        id:'targetEntityList',
-        className: commonValues.props.className,
-      },
-    },
+    targetEntity: {},
     privilegesCategories: selectFields.privilegesCategories,
   },
 };

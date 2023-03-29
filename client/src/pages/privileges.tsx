@@ -101,15 +101,15 @@ export default function Privileges() {
 
   const headerFieldsRefs = React.useRef<{
     targetEntity: HTMLSelectElement | null | { [key: string]: string };
-    users: HTMLSelectElement | null | { [key: string]: string };
+    user: HTMLSelectElement | null | { [key: string]: string };
     privilegesCategories: HTMLSelectElement | null | { [key: string]: string };
   } | null>(
     itemsListQuery.data?.length
       ? {
           targetEntity: {
-            value: '',
+            tagName: 'ListItem',
           },
-          users: {
+          user: {
             value: itemsListQuery.data.users[0]?.id,
             innerText: itemsListQuery.data.users[0]?.username,
           },
@@ -134,20 +134,32 @@ export default function Privileges() {
   };
 
   const createNewPrivilege = () => {
+    // this is the number of lists combined into the first <select> element.
+    const firstPartLength = 3;
+    const itemsList = Object.fromEntries(
+      Object.entries(itemsListQuery.data).splice(0, firstPartLength)
+    ) as { [key: string]: string[] };
+
     formFieldsRef.current = FormFields('privileges', {
       targetEntity: {
-        value: '',
+        tagName: 'ListInput',
+        props: {
+          itemsList,
+        },
       },
-      targetEntityList:{
-
-      },
-      users: {
+      user: {
         value: itemsListQuery.data.users[0]?.id,
         innerText: itemsListQuery.data.users[0]?.username,
+        children: itemsListQuery.data.users.map((item) => {
+          return { id: item.id, title: item.username };
+        }),
       },
       privilegesCategories: {
         value: itemsListQuery.data.privilegesCategories[0]?.id,
         innerText: itemsListQuery.data.privilegesCategories[0]?.id,
+        children: itemsListQuery.data.privilegesCategories.map((item) => {
+          return { id: item.id, title: item.id };
+        }),
       },
     });
 
