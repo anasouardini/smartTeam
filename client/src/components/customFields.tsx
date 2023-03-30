@@ -10,23 +10,27 @@ const ListInput = (props, ref) => {
   return (
     <>
       <input
-        list='props.itemsList'
+        list='itemsList'
         placeholder={targetEntityKey}
         onChange={(e) => {
           const selectedValue = e.target.value;
           const listID = e.target.getAttribute('list');
-          ref.current = {
-            type: selectedValue.split(' - ')[0],
-            value:
-              document.querySelector(
-                `#${listID} option[value='${selectedValue}']`
-              )?.dataset?.value || '%',
-          };
+          // console.log('changing custom ref')
+          if (selectedValue) {
+            // console.log(`#${listID} option[value='${selectedValue}']`)
+            ref['ListInput'] = {
+              type: selectedValue.split(' - ')[0].slice(0, -1) + '_FK',
+              value:
+                document.querySelector(
+                  `#${listID} option[value='${selectedValue}']`
+                )?.dataset?.value || null,
+            };
+          }
         }}
         className={tailwindClx.commonBorder}
         name={targetEntityKey}
       />
-      <datalist id='props.itemsList'>
+      <datalist id='itemsList'>
         {Object.keys(props.itemsList).map((entityKey: string) => {
           return props.itemsList[entityKey].map(
             (entityOption: { [key: string]: string }) => {
@@ -47,5 +51,4 @@ const ListInput = (props, ref) => {
   );
 };
 
-export default {ListInput: React.forwardRef(ListInput)};
-
+export default { ListInput: React.forwardRef(ListInput) };

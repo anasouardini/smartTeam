@@ -118,16 +118,16 @@ const initQueries = {
   createPrivilegesTable: `create table privileges(
                       owner_FK varchar(50),
                       user varchar(50),
-                      portfolioItem_FK varchar(50),
-                      projectsItem_FK varchar(50),
-                      tasksItem_FK varchar(50),
+                      portfolio_FK varchar(50),
+                      project_FK varchar(50),
+                      task_FK varchar(50),
                       privCat_FK varchar(50),
-                      unique(owner_FK, user, portfolioItem_FK, projectsItem_FK, tasksItem_FK, privCat_FK),
+                      unique(owner_FK, user, portfolio_FK, project_FK, task_FK, privCat_FK),
                       foreign key(owner_FK) references users(id) on delete cascade,
                       foreign key(user) references users(id) on delete cascade,
-                      foreign key(owner_FK, portfolioItem_FK) references portfolios(owner_FK, id) on delete cascade,
-                      foreign key(owner_FK, projectsItem_FK) references projects(owner_FK, id) on delete cascade,
-                      foreign key(owner_FK, tasksItem_FK) references tasks(owner_FK, id) on delete cascade,
+                      foreign key(owner_FK, portfolio_FK) references portfolios(owner_FK, id) on delete cascade,
+                      foreign key(owner_FK, project_FK) references projects(owner_FK, id) on delete cascade,
+                      foreign key(owner_FK, task_FK) references tasks(owner_FK, id) on delete cascade,
                       foreign key(owner_FK, privCat_FK) references privilegesCategories(owner_FK, id) on delete cascade
                     )`,
 };

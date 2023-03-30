@@ -54,23 +54,29 @@ export default function Privileges() {
     }>((acc, refKey) => {
       if (refKey === 'targetEntity') {
         const selectedValue = selectRefs[refKey]?.value;
-        const listID = selectRefs[refKey]?.getAttribute('list');
-        acc[refKey] = {
-          type: selectedValue.split(' - ')[0],
-          value:
-            document.querySelector(
-              `#${listID} option[value='${selectedValue}']`
-            )?.dataset?.value || '%',
-        };
+        if (selectedValue) {
+          const listID = selectRefs[refKey]?.getAttribute('list');
+          acc[refKey] = {
+            type: selectedValue.split(' - ')[0].slice(0, -1) + '_FK',
+            value:
+              document.querySelector(
+                `#${listID} option[value='${selectedValue}']`
+              )?.dataset?.value || '%',
+          };
+        }
         return acc;
       }
-      acc[refKey] = selectRefs[refKey]?.value;
+      acc[refKey] = selectRefs[refKey]?.value ? selectRefs[refKey]?.value : '%';
       return acc;
     }, {});
     // console.log(queryFilter);
     let response = await Bridge('post', `privileges/all`, queryFilter);
     return !response || response?.err == 'serverError' ? false : response.data;
   });
+
+  // if(privilegesQuery.status == 'success'){
+  //     console.log(privilegesQuery.data)
+  //   }
 
   const itemsListQuery = useQuery(
     'users&portfolios&projects&tasks&privilegesCategories list',
@@ -127,10 +133,34 @@ export default function Privileges() {
   }
 
   const listRules = () => {
-    if (privilegesQuery.status == 'success') {
-      // console.log(privilegesQuery.data);
-    }
-    return <></>;
+    const data = privilegesQuery.data;
+    return (
+      <p>
+        {privilegesQuery.status == 'success' ? (
+          // console.log(privilegesQuery.data);
+          data.map((rule) => {
+            return (
+              <p className='my-5'>
+                {Object.keys(rule).map((ruleKey) => {
+                  if (rule[ruleKey]) {
+                    return (
+                      <p>
+                        {ruleKey.includes('_FK')
+                          ? ruleKey.slice(0, -3)
+                          : ruleKey}{' '}
+                        : {rule[ruleKey]}
+                      </p>
+                    );
+                  }
+                })}
+              </p>
+            );
+          })
+        ) : (
+          <></>
+        )}
+      </p>
+    );
   };
 
   const createNewPrivilege = () => {
@@ -265,7 +295,7 @@ export default function Privileges() {
           <Form
             fields={formFieldsRef.current}
             mode={state.popup.sideForm.mode}
-            route='task'
+            route='privileges'
             refetch={privilegesQuery.refetch}
             itemID={state.popup.sideForm.itemID}
             hideForm={stateActions.sideForm.hide}

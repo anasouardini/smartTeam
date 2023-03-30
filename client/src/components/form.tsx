@@ -28,12 +28,20 @@ type propsT = {
 
 export default function Form(props: propsT) {
   const fieldsRefs = React.useRef<{
-    [key: string]: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+    [key: string]: any;
   }>({}).current;
 
   const parseFields = () => {
     const newData = Object.keys(props.fields).reduce(
       (acc: { [key: string]: string }, fieldKey) => {
+        const tagName = props.fields[fieldKey].tagName;
+        if (customFields[tagName]) {
+          // the prop name of the custom input is different from the actual field name
+          // the latter is what is used the identify that value in the server
+          acc[fieldKey] = fieldsRefs[tagName];
+          console.log(fieldsRefs)
+          return acc;
+        }
         acc[fieldKey] = fieldsRefs[fieldKey].value;
         return acc;
       },
@@ -70,6 +78,7 @@ export default function Form(props: propsT) {
         ...parseFields(),
       });
 
+        // console.log(resp);
       if (resp.err) {
         console.log(resp);
       } else {
@@ -100,14 +109,13 @@ export default function Form(props: propsT) {
       // console.log(customFields?.[field?.tagName], field?.tagName)
       if (customFields[field?.tagName]) {
         const TagName = customFields[field?.tagName];
+        // console.log(fieldsRefs)
         return (
           <label>
             Target Entity:
-            <br/>
+            <br />
             <TagName
-              ref={(el) => {
-                fieldsRefs[field?.tagName] = el;
-              }}
+              ref={fieldsRefs}
               {...field.props}
             />
           </label>

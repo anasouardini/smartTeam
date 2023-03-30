@@ -6,7 +6,6 @@ const create = async (newData) => {
   if (!newData || Object.keys(newData).length == 0) {
     return { err: 'no data is provided' };
   }
-  newData.id = uuid();
 
   const autoQuery = AutoQuery.create('privileges', newData);
   const response = await Pool(autoQuery.query, autoQuery.vars);
@@ -18,6 +17,7 @@ const read = async (filter, fields) => {
   const autoQuery = AutoQuery.read('privileges', filter, fields);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
+  // console.log(autoQuery)
   // console.log(response[0]);
   return response;
 };

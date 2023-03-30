@@ -3,12 +3,18 @@ const MPrivledges = require('../models/privileges');
 const readAll = async (req, res, next) => {
   let privilegesFilter = {
     owner_FK: req.userID,
-    user: req.body.user || '%',
-    privCat_FK: req.body.privCat || '%',
+    user: req.body.user,
+    privCat_FK: req.body.privCat,
+  };
+  if (req.body?.targetEntity && req.body?.targetEntity?.type) {
+    privilegesFilter[req.body.targetEntity.type] = req.body.targetEntity.value;
   }
-  if(req.body?.targetEntity && req.body?.targetEntity?.value){
-    req[req.body.targetEntity.type] = req.body.targetEntity.value;
-  }
+
+  Object.keys(privilegesFilter).forEach((itemKey)=>{
+    if(!privilegesFilter[itemKey]){
+      delete privilegesFilter[itemKey];
+    }
+  })
 
   const rulesResp = await MPrivledges.read(privilegesFilter);
 
@@ -20,27 +26,21 @@ const readAll = async (req, res, next) => {
 };
 
 const create = async (req, res, next) => {
-  const {
-    portfolio,
-    project,
-    assignee,
-    title,
-    description,
-    bgColor,
-    status,
-    dueDate,
-  } = req.body;
-  const rulesResp = await MPrivledges.create({
-    ownerID: req.userID,
-    portfolio,
-    project,
-    assignee,
-    title,
-    description,
-    bgColor,
-    status,
-    dueDate,
-  });
+  // console.log(req.body);
+  const { user, privilegesCategories, targetEntity } = req.body;
+  const createQuery = {
+    owner_FK: req.userID,
+    privCat_FK: privilegesCategories,
+    user,
+  };
+
+  if (!targetEntity || !targetEntity?.type) {
+    return next('some field is missing');
+  }
+  createQuery[targetEntity.type] = targetEntity.value;
+  console.log(createQuery)
+
+  const rulesResp = await MPrivledges.create(createQuery);
 
   if (rulesResp.err) {
     return next('err while creating a rule');
