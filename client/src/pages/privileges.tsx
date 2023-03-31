@@ -4,6 +4,7 @@ import Bridge from '../tools/bridge';
 import Genid from '../tools/genid';
 import toUrlEncoded from '../tools/toUrlEncoded';
 import Form from '../components/form';
+import { FaTrash } from 'react-icons/fa';
 import FormFields from '../components/formFields';
 
 export default function Privileges() {
@@ -132,35 +133,93 @@ export default function Privileges() {
     return <p>I DON'T HAVE A LOADING SPINNER</p>;
   }
 
-  const listRules = () => {
+  const listPrivilegesRules = () => {
     const data = privilegesQuery.data;
     return (
-      <p>
+      <div
+        aria-label='privileges list'
+        className='mt-4 text-left flex flex-col gap-2'
+      >
         {privilegesQuery.status == 'success' ? (
           // console.log(privilegesQuery.data);
-          data.map((rule) => {
+          data.map((rule, index) => {
             return (
-              <p className='my-5'>
-                {Object.keys(rule).map((ruleKey) => {
-                  if (rule[ruleKey]) {
-                    return (
-                      <p>
-                        {ruleKey.includes('_FK')
-                          ? ruleKey.slice(0, -3)
-                          : ruleKey}{' '}
-                        : {rule[ruleKey]}
-                      </p>
-                    );
-                  }
-                })}
-              </p>
+              <div
+                onClick={() => editPrivileges(rule)}
+                key={index}
+                className={`px-2 py-1 cursor-pointer hover:border-primary border-[1px] 
+                        rounded-md flex justify-between items-center`}
+              >
+                <h3 key={index}>{rule.user}</h3>
+
+                <button onClick={(e) => removePrivilege(rule.id, e)}>
+                  <FaTrash className={`text-primary`} />
+                </button>
+              </div>
             );
           })
         ) : (
           <></>
         )}
-      </p>
+      </div>
     );
+  };
+
+  const editPrivileges = (privilegeRule) => {
+    // console.log(privilegeRule);
+
+    const firstPartLength = 3;
+    const itemsList = Object.fromEntries(
+      Object.entries(itemsListQuery.data).splice(0, firstPartLength)
+    ) as { [key: string]: string[] };
+    // console.log('itemslist', itemsList)
+
+    // This is a mess, I need to refactor this
+    const selectedTargetEntity = Object.keys(itemsList).reduce(
+      (acc, itemKey) => {
+        // console.log(privilegeRule[itemKey.slice(0, -1)+'_FK'], itemKey.slice(0, -1)+'_FK')
+        const selectedItemKey = itemKey.slice(0, -1) + '_FK';
+        if (privilegeRule[selectedItemKey]) {
+          acc = `${itemKey} - ${
+            itemsList[itemKey].filter(
+              (item) => item.id == [privilegeRule[selectedItemKey]]
+            )[0].title
+          }`;
+          // console.log(acc);
+        }
+        return acc;
+      },
+      ''
+    );
+    // console.log(selectedTargetEntity);
+
+    formFieldsRef.current = FormFields('privileges', {
+      targetEntity: {
+        tagName: 'ListInput',
+        props: {
+          defaultValue: selectedTargetEntity,
+          itemsList,
+        },
+      },
+      user: {
+        props: {
+          defaultValue: privilegeRule.user,
+        },
+        children: itemsListQuery.data.users.map((item) => {
+          return { id: item.id, title: item.username };
+        }),
+      },
+      privilegesCategories: {
+        props: {
+          defaultValue: privilegeRule.privCat_FK,
+        },
+        children: itemsListQuery.data.privilegesCategories.map((item) => {
+          return { id: item.id, title: item.id };
+        }),
+      },
+    });
+
+    stateActions.sideForm.show(privilegeRule.id, 'edit');
   };
 
   const createNewPrivilege = () => {
@@ -178,15 +237,17 @@ export default function Privileges() {
         },
       },
       user: {
-        value: itemsListQuery.data.users[0]?.id,
-        innerText: itemsListQuery.data.users[0]?.username,
+        rops: {
+          defaultValue: itemsListQuery.data.users[0]?.id,
+        },
         children: itemsListQuery.data.users.map((item) => {
           return { id: item.id, title: item.username };
         }),
       },
       privilegesCategories: {
-        value: itemsListQuery.data.privilegesCategories[0]?.id,
-        innerText: itemsListQuery.data.privilegesCategories[0]?.id,
+        prop: {
+          defaultValue: itemsListQuery.data.privilegesCategories[0]?.id,
+        },
         children: itemsListQuery.data.privilegesCategories.map((item) => {
           return { id: item.id, title: item.id };
         }),
@@ -286,11 +347,23 @@ export default function Privileges() {
           New
         </button>
       </header>
-      <main
-        aria-label='portfolios'
-        className='text-black mt-[7rem] pl-20 flex gap-6'
-      >
-        {privilegesQuery.status == 'success' ? listRules() : <></>}
+      <main aria-label='portfolios' className='text-black px-2 grow flex gap-3'>
+        <section
+          aria-label='tasks list'
+          className='grow mt-[2rem] py-4 flex flex-col border-gray-300 border-2 rounded-md px-2'
+        >
+          <div className={`flex`}>
+            <div className={``}>
+              <button
+                onClick={createNewPrivilege}
+                className={`text-md text-white bg-primary rounded-md px-2 py-[2px]`}
+              >
+                New Privilege
+              </button>
+            </div>
+          </div>
+          {privilegesQuery.status == 'success' ? listPrivilegesRules() : <></>}
+        </section>
         {state.popup.sideForm.show && privilegesQuery.status == 'success' ? (
           <Form
             fields={formFieldsRef.current}

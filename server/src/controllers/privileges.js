@@ -38,7 +38,7 @@ const create = async (req, res, next) => {
     return next('some field is missing');
   }
   createQuery[targetEntity.type] = targetEntity.value;
-  console.log(createQuery)
+  // console.log(createQuery)
 
   const rulesResp = await MPrivledges.create(createQuery);
 

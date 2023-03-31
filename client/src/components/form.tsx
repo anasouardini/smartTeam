@@ -30,6 +30,7 @@ export default function Form(props: propsT) {
   const fieldsRefs = React.useRef<{
     [key: string]: any;
   }>({}).current;
+  // console.log(props);
 
   const parseFields = () => {
     const newData = Object.keys(props.fields).reduce(
@@ -39,7 +40,7 @@ export default function Form(props: propsT) {
           // the prop name of the custom input is different from the actual field name
           // the latter is what is used the identify that value in the server
           acc[fieldKey] = fieldsRefs[tagName];
-          console.log(fieldsRefs)
+          // console.log(fieldsRefs)
           return acc;
         }
         acc[fieldKey] = fieldsRefs[fieldKey].value;
@@ -78,7 +79,7 @@ export default function Form(props: propsT) {
         ...parseFields(),
       });
 
-        // console.log(resp);
+      // console.log(resp);
       if (resp.err) {
         console.log(resp);
       } else {
@@ -101,11 +102,6 @@ export default function Form(props: propsT) {
     return Object.keys(props.fields).map((fieldKey) => {
       const field = props.fields[fieldKey];
 
-      // basically adding an hour to the date using string manupulation
-      // because JS handles dates poorly
-      const fieldValue = field.props.defaultValue;
-      FixDate(fieldKey, fieldValue, field.props); // mutates the dateFields in the props
-
       // console.log(customFields?.[field?.tagName], field?.tagName)
       if (customFields[field?.tagName]) {
         const TagName = customFields[field?.tagName];
@@ -114,13 +110,16 @@ export default function Form(props: propsT) {
           <label>
             Target Entity:
             <br />
-            <TagName
-              ref={fieldsRefs}
-              {...field.props}
-            />
+            <TagName key={field.props.defaultValue} ref={fieldsRefs} {...field.props} />
           </label>
         );
       }
+
+      // basically adding an hour to the date using string manupulation
+      // because JS handles dates poorly
+      // console.log(field.props)
+      const fieldValue = field.props.defaultValue;
+      FixDate(fieldKey, fieldValue, field.props); // mutates the dateFields in the props
 
       const TagName = field.tagName;
       const randomKey = Genid(10);

@@ -116,6 +116,7 @@ const initQueries = {
                       primary key(owner_FK, id)
                     )`,
   createPrivilegesTable: `create table privileges(
+                      id varchar(50),
                       owner_FK varchar(50),
                       user varchar(50),
                       portfolio_FK varchar(50),

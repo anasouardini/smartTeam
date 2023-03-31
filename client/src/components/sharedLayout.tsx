@@ -96,23 +96,33 @@ export default function sharedLayout() {
     }
 
     if (menuRefs.expanded) {
+      menuRefs.nav.style.marginLeft = '.5rem';
+      menuRefs.nav.style.marginTop = '.5rem';
+      menuRefs.nav.style.marginBottom = '.5rem';
+
       menuRefs.nav.style.width = '2.2rem';
       menuRefs.nav.style.minWidth = '2.2rem'; //TODO: temp solution
       menuRefs.nav.style.borderRadius = '10px';
       menuRefs.logo.style.display = 'none';
       menuRefs.xIcon.style.display = 'none';
       menuRefs.barsIcon.style.display = 'inline';
+
       menuRefs.expanded = false;
       return;
     }
 
-    menuRefs.expanded = true;
+    menuRefs.nav.style.marginLeft = '0';
+    menuRefs.nav.style.marginTop = '0';
+    menuRefs.nav.style.marginBottom = '0';
+
     menuRefs.nav.style.width = '10rem';
     menuRefs.nav.style.minWidth = '10rem'; //TODO: temp solution
     menuRefs.nav.style.borderRadius = '0';
     menuRefs.logo.style.display = 'inline';
     menuRefs.xIcon.style.display = 'inline';
     menuRefs.barsIcon.style.display = 'none';
+
+    menuRefs.expanded = true;
   };
 
   const tailwindClasses = {
@@ -126,7 +136,7 @@ export default function sharedLayout() {
     //             after:border-r-transparent after:border-l-transparent
     //             after:bottom-0 after:right-0 after:translate-y-[100%] after:translate-x-[70%]
     //             `,
-    linkActive: `bg-white text-primary rounded-md
+    linkActive: `bg-white text-primary
                 relative before:absolute after:absolute
                 `,
     navItem: 'pb-1 flex gap-3 items-center px-2 py-1',

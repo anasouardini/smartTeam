@@ -6,7 +6,6 @@ import Bridge from '../tools/bridge';
 import Genid from '../tools/genid';
 import Form from '../components/form';
 import { FaTrash } from 'react-icons/fa';
-import { useTable } from 'react-table';
 import FormFields from '../components/formFields';
 
 type queryT = {
@@ -111,8 +110,38 @@ const AfterQueryPrep = (props: propsT) => {
   //   // console.log(tasksQuery.data);
   // }
 
+  // TODO: children should be a map from the fetched list
   const createNewTask = () => {
     formFieldsRef.current = FormFields('task', {
+      portfolio: {
+        children: [
+          {
+            id: headerFieldsRefs.portfolio?.value,
+            title: headerFieldsRefs.portfolio?.innerText,
+          },
+        ],
+        props: {
+          defaultValue: headerFieldsRefs.portfolio?.value,
+        },
+      },
+      project: {
+        children: [
+          {
+            id: headerFieldsRefs.project?.value,
+            title: headerFieldsRefs.project?.innerText,
+          },
+        ],
+        props: {
+          defaultValue: headerFieldsRefs.project?.value,
+        },
+      },
+      assignee: {
+        children: [{ id: loggedInUser.id, title: loggedInUser.username }],
+        props: {
+          defaultValue: loggedInUser.id,
+          readOnly: true,
+        },
+      },
     });
 
     stateActions.sideForm.show(undefined, 'create');
@@ -122,10 +151,10 @@ const AfterQueryPrep = (props: propsT) => {
     formFieldsRef.current = FormFields('task', {
       portfolio: {
         children: [
-          [
-            headerFieldsRefs.portfolio?.value,
-            headerFieldsRefs.portfolio?.innerText,
-          ],
+          {
+            id: headerFieldsRefs.portfolio?.value,
+            title: headerFieldsRefs.portfolio?.innerText,
+          },
         ],
         props: {
           defaultValue: headerFieldsRefs.portfolio?.value,
@@ -133,17 +162,17 @@ const AfterQueryPrep = (props: propsT) => {
       },
       project: {
         children: [
-          [
-            headerFieldsRefs.project?.value,
-            headerFieldsRefs.project?.innerText,
-          ],
+          {
+            id: headerFieldsRefs.project?.value,
+            title: headerFieldsRefs.project?.innerText,
+          },
         ],
         props: {
           defaultValue: headerFieldsRefs.project?.value,
         },
       },
       assignee: {
-        children: [[loggedInUser.id, loggedInUser.username]],
+        children: [{ id: loggedInUser.id, title: loggedInUser.username }],
         props: {
           defaultValue: loggedInUser.id,
           readOnly: true,
@@ -226,7 +255,7 @@ const AfterQueryPrep = (props: propsT) => {
   const showTaksTable = () => {
     return (
       <div
-        aria-label='tasks table'
+        aria-label='tasks list'
         className='mt-4 text-left flex flex-col gap-2'
       >
         {tasksQuery.data.map((task, index) => {

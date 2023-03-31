@@ -29,6 +29,7 @@ const ListInput = (props, ref) => {
         }}
         className={tailwindClx.commonBorder}
         name={targetEntityKey}
+        defaultValue={props.defaultValue}
       />
       <datalist id='itemsList'>
         {Object.keys(props.itemsList).map((entityKey: string) => {
