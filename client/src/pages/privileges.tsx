@@ -341,13 +341,12 @@ export default function Privileges() {
       <header aria-label='filters' className={`px-6 py-4 flex flex-wrap gap-4`}>
         {listHeaderFields()}
         <button
-          onClick={createNewPrivilege}
           className={`ml-auto bg-primary text-white rounded-md px-2`}
         >
-          New
+          Filter
         </button>
       </header>
-      <main aria-label='portfolios' className='text-black px-2 grow flex gap-3'>
+      <main aria-label='portfolios' className='text-black px-2 pb-3 grow flex gap-3'>
         <section
           aria-label='tasks list'
           className='grow mt-[2rem] py-4 flex flex-col border-gray-300 border-2 rounded-md px-2'

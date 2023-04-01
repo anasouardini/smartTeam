@@ -2,6 +2,7 @@ const Pool = require('./dbPool');
 const AutoQuery = require('./tools/autoQuery');
 const { v4: uuid } = require('uuid');
 
+// I cna't recal why that explicitID in there :)
 const create = async (newData, explicitID) => {
   if (!newData || Object.keys(newData).length == 0) {
     return { err: 'no data is provided' };
