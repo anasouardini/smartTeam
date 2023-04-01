@@ -57,7 +57,7 @@ const signup = async (req, res) => {
                       If you are the one that linked it feel free to click on the link 
                       bellow to verify it.\n ${hostname}/verifyEmail/${token}`;
   // console.log('signup.js: ', messageBody);
-  
+
   // async
   mailer(email, messageBody);
 

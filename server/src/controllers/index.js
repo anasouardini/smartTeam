@@ -12,5 +12,6 @@ module.exports = {
   checkAuth: require('./checkAuth'),
   oauth: require('./oauth'),
   verifyEmail: require('./verifyEmail'),
+  connection: require('./connection'),
   db: require('./db'),
 }

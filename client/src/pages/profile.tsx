@@ -17,6 +17,12 @@ export default function Profile() {
   //   console.log('RQ.data: ', userInfoQuery.data);
   // }
 
+  const getCnxLink = async ()=>{
+    const resp = await Bridge('read', 'connectionLink');
+    navigator.clipboard.writeText(resp.data);
+    console.log(resp)
+  }
+
   const updateField = async (
     e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -24,7 +30,9 @@ export default function Profile() {
     const name = e.target.name;
 
     // if the value hasn't changed just abort
-    if(userInfoQuery.data?.[name] == value){return}
+    if (userInfoQuery.data?.[name] == value) {
+      return;
+    }
 
     const userUpdateResp = await Bridge(
       'update',
@@ -113,6 +121,9 @@ export default function Profile() {
           />
         </label>
       </section>
+      <button className={`mt-5 bg-primary text-white rounded-md px-2 py-1`} onClick={getCnxLink}>
+        Get Connection Link
+      </button>
     </main>
   ) : (
     <></>

@@ -47,6 +47,9 @@ router.get('/user/:user', controllers.user.read);
 router.put('/user/:user', controllers.user.update);
 router.delete('/user/:user', controllers.user.remove);
 
+router.get('/connectionLink', controllers.connection.genLink);
+router.get('/verifyConnection/:token', controllers.connection.verify);
+
 router.get('/itemsList', controllers.itemsList.read);
 
 router.post('/initDB', controllers.db.init);

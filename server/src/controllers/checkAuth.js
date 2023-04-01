@@ -66,16 +66,49 @@ const checkAuth = async (req, res, next) => {
   if (refreshTokenValid) req.userID = refreshTokenValid.userID;
   // console.log('refreshTokenValid: ', refreshTokenValid);
 
-  // refreshing the access token
-  if (!accessTokenValid && refreshTokenValid && !req.path.includes('/oauth/')) {
-    return res.json({
-      data: 'new access token',
-      accessToken: await genNewAccessToken(refreshTokenValid.userID),
-    });
+  const fullyAuthenticated = accessTokenValid && refreshTokenValid;
+  const authenticationNeedsRefreshing = !accessTokenValid && refreshTokenValid;
+
+  //--- AUTH CONDITIONS
+  const verifyingEmail = req.path.match('^/verifyEmail/');
+
+  const tryingToAuth = [
+    '/login',
+    '/signup',
+    '/oauth/google',
+    '/oauth/github',
+  ].includes(req.path);
+  const verifyingConnection = req.path.match('^/verifyConnection/');
+
+  const doesNotMatterIfAuthenticated = ['/initDB', '/isLogin'].includes(
+    req.path || verifyingEmail
+  );
+  const needsAuthentication = !doesNotMatterIfAuthenticated && !tryingToAuth;
+  const alreadyAuthenticated = tryingToAuth && fullyAuthenticated;
+
+  //---- authentication paths
+  if (alreadyAuthenticated) {
+    const userResp = await MUser.read({ id: refreshTokenValid.userID });
+
+    if (!userResp[0].length) {
+      return res.json({ redirect: '/login' });
+    }
+
+    return res.json({ redirect: `user/${userResp[0][0].username}` });
+  } else if (needsAuthentication && !fullyAuthenticated) {
+
+    // Access Token is not valid, let's refresh it
+    if (authenticationNeedsRefreshing && !verifyingConnection) {
+      return res.json({
+        data: 'new access token',
+        accessToken: await genNewAccessToken(refreshTokenValid.userID),
+      });
+    } else if (!refreshTokenValid) {
+      return res.json({ redirect: '/login' });
+    }
   }
 
-  const authenticated = accessTokenValid && refreshTokenValid;
-
+  // TODO: needs to be in its own route
   // the client is checking the login session
   if (req.path == '/isLogin') {
     if (!refreshTokenValid) {
@@ -85,7 +118,7 @@ const checkAuth = async (req, res, next) => {
     const userResp = await MUser.read({ id: refreshTokenValid.userID });
 
     if (userResp.err || !userResp[0]?.length) {
-      return res.json({ loginStatus: false});
+      return res.json({ loginStatus: false });
     }
 
     const userInfo = {
@@ -98,30 +131,7 @@ const checkAuth = async (req, res, next) => {
     return res.json({ loginStatus: true, loggedInUser: userInfo });
   }
 
-  // order matters
-  const authRoutes = ['/login', '/signup', '/oauth/google', '/oauth/github'];
-  const authIndependent = ['/initDB'];
-
-  const tryingToAuth = authRoutes.includes(req.path);
-  if (tryingToAuth && authenticated) {
-    // console.log('redirect to home', exceptionRoutes.slice(theFirst3Items))
-    const userResp = await MUser.read({ id: refreshTokenValid.userID });
-
-    if (!userResp[0].length) {
-      return res.json({ redirect: '/login' });
-    }
-    return res.json({ redirect: `user/${userResp[0][0].username}` });
-  }
-
-  const visitingAfterAuthRoutes =
-    !tryingToAuth &&
-    !authIndependent.includes(req.path) &&
-    !req.path.match('^/verifyEmail/');
-  if (visitingAfterAuthRoutes && !authenticated) {
-    return res.json({ redirect: '/login' });
-  }
-
-  // the other two cases are passed to the proper route
+  // the other cases are passed to the proper route
   next();
 };
 
