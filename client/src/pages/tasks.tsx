@@ -110,7 +110,6 @@ const AfterQueryPrep = (props: propsT) => {
   //   // console.log(tasksQuery.data);
   // }
 
-  // TODO: children should be a map from the fetched list
   const createNewTask = () => {
     formFieldsRef.current = FormFields('task', {
       portfolio: {
@@ -150,23 +149,13 @@ const AfterQueryPrep = (props: propsT) => {
   const editTask = async (task: { [key: string]: any }) => {
     formFieldsRef.current = FormFields('task', {
       portfolio: {
-        children: [
-          {
-            id: headerFieldsRefs.portfolio?.value,
-            title: headerFieldsRefs.portfolio?.innerText,
-          },
-        ],
+        children: props.itemsListQuery.data.portfolios.map((item)=>item),
         props: {
           defaultValue: headerFieldsRefs.portfolio?.value,
         },
       },
       project: {
-        children: [
-          {
-            id: headerFieldsRefs.project?.value,
-            title: headerFieldsRefs.project?.innerText,
-          },
-        ],
+        children: props.itemsListQuery.data.projects.map((item)=>item),
         props: {
           defaultValue: headerFieldsRefs.project?.value,
         },
