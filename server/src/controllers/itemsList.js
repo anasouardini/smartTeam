@@ -1,5 +1,6 @@
 const Models = {
   users: require('../models/user'),
+  connections: require('../models/connection'),
   portfolios: require('../models/portfolio'),
   projects: require('../models/project'),
   tasks: require('../models/task'),
@@ -11,6 +12,7 @@ const read = async (req, res, next) => {
   let commonFilterCriteria = { owner_FK: req.userID };
   let tables = {
     users: {},
+    connections: {userID: req.userID},
     portfolios: commonFilterCriteria,
     projects: commonFilterCriteria,
     tasks: commonFilterCriteria,
@@ -26,8 +28,14 @@ const read = async (req, res, next) => {
 
   for (let i = 0; i < itemsList.length; i++) {
     const item = itemsList[i];
+    // console.log(queryResp[item[0]])
     if (queryResp[item[0]]?.err) {
       return next(`err while listing ${item[0]}`);
+    }
+
+    if(item[0] == 'connections'){
+      queryResp['users'] = queryResp[item[0]];
+      delete queryResp[item[0]];
     }
   }
 

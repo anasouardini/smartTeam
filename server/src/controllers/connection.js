@@ -17,8 +17,7 @@ const genLink = async (req, res) => {
   res.json({ data: link });
 };
 
-const verify = async (req, res) => {
-  console.log('lskdjflj')
+const verify = async (req, res, next) => {
   const pubKey = await fs.readFile(
     process.cwd() + '/rsa/verifyConnection/key.pub',
     {
@@ -26,15 +25,26 @@ const verify = async (req, res) => {
     }
   );
 
+  let tokenData;
   try {
-    const tokenData = jwt.verify(req.params.token, pubKey);
-    MConnection.create({inviter: tokenData.userID, newConnection: req.userID});
+    tokenData = jwt.verify(req.params.token, pubKey);
   } catch (e) {
     console.log(e);
     res.json({ error: 'this link is not valid.' });
   }
 
+  if(req.userID == tokenData.userID){
+    return res.status(403).json({data: 'You can\'t invite yourself to be a connection of yours.'})
+  }
+
+  const resp = await MConnection.create({inviter: tokenData.userID, newConnection: req.userID});
+  if(resp.err){
+    return next('Err while verifying connection.')
+  }
+
   return res.json({ data: 'Connection was verified successfully.' });
 };
+
+
 
 module.exports = { genLink, verify };

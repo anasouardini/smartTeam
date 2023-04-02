@@ -37,7 +37,7 @@ const defaultPrivileges = [
 ];
 
 const initQueries = {
-  clearDB: `drop table if exists users, portfolios, projects, tasks, privilegesCategories, privileges;`,
+  clearDB: `drop table if exists users, connections, portfolios, projects, tasks, privilegesCategories, privileges;`,
   createUsersTable: `create table users(
                       id varchar(50),
                       username varchar(20),
@@ -131,17 +131,57 @@ const initQueries = {
                       foreign key(owner_FK, task_FK) references tasks(owner_FK, id) on delete cascade,
                       foreign key(owner_FK, privCat_FK) references privilegesCategories(owner_FK, id) on delete cascade
                     )`,
+  createConnectionsTable: `create table connections(
+                      userA_FK varchar(50),
+                      userB_FK varchar(50),
+                      foreign key(userA_FK) references users(id) on delete cascade,
+                      foreign key(userB_FK) references users(id) on delete cascade
+                    );`
 };
 
 const insertionQueries = {
-  insertDefaultUser: `insert into users(id, username, avatar, fullname, verified)
-                      value(
+  insertDefaultUser: `insert into users(id, username, password, avatar, fullname, verified)
+                      values(
                             'github-114059811',
                             'segfaulty1',
+                            '',
                             'https://avatars.githubusercontent.com/u/114059811?v=4',
                             'Ouardini Anas',
                             1
-                            );`,
+                            ),
+                            (
+                            'dlkj3-lkji9-fskd9-k39jf3',
+                            'organization',
+                            '$2a$10$vrGBAXzwHyuL4f8wtp9LtuqJisgrwvYHHUQChFh19h6.h/h/PPGd.',
+                            '',
+                            'organization',
+                            1
+                            ),
+                            (
+                            'dlkj3-lkji9-fsjd9-r39jf3',
+                            'venego',
+                            '$2a$10$2Rs1OQprscaedMDIfa3nM.Rkd4wlUSB/1Y9aniUUF5vNftStoy33G',
+                            '',
+                            'venego',
+                            1
+                            ),
+                            (
+                            'dlkj3-lfji9-fsid9-r39j,3',
+                            'segfaulty',
+                            '$2a$10$nClU9iPu63tTwErJXhQ1guqMdEtUTZoLhc2NmToZZpgq/8Elm0fmK',
+                            '',
+                            'segfaulty',
+                            1
+                            ),
+                            (
+                            'dskj3-gkj79-fsdd9-r39jf3',
+                            'potato',
+                            '$2a$10$pOJ54FmgEmrQp9RJsUopvusKhtNB/EgVAzj1zUB5GYy6ycFIyiUnW',
+                            '',
+                            'potato',
+                            1
+                            )
+                      ;`,
   insertDefaultPrivilegesCategories: `insert into privilegesCategories(id, owner_FK, priviledge)
                         values( ?, ?, ?)`,
 };
@@ -150,6 +190,7 @@ const init = async () => {
   // initializing tables
   const initQueryEntries = Object.entries(initQueries);
   for (let i = 0; i < initQueryEntries.length; i++) {
+    // console.log(initQueryEntries[i][0])
     let res = await pool(initQueryEntries[i][1]);
     // console.log(res[0]);
     if (!res || res?.errno) {
