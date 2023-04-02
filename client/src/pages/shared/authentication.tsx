@@ -14,6 +14,8 @@ export default function Authentication(props: {
     return <Navigate to='/'></Navigate>;
   }
 
+  const inputsRef = React.useRef<{[key:string]: HTMLInputElement}>({}).current;
+
   const tailwindClasses = {
     formItem: 'w-full my-3 py-2',
     input: `border-b-primary border-b-2
@@ -38,9 +40,10 @@ export default function Authentication(props: {
     } | null = null;
 
     if (props.label == 'login') {
+      console.log(e.target[0])
       response = await Bridge('post', 'login', {
-        username: e.target[0].value,
-        password: e.target[1].value,
+        username: inputsRef['username'].value,
+        password: inputsRef['password'].value,
       });
     } else if (props.label == 'signup') {
       const genBody = props.fields.reduce(
@@ -91,6 +94,7 @@ export default function Authentication(props: {
                     className={`${tailwindClasses.formItem} ${tailwindClasses.input}`}
                     type={field[1]}
                     name={field[0]}
+                    ref={(el)=>{inputsRef[field[0]] = el}}
                     placeholder={field[0]}
                   />
                 );

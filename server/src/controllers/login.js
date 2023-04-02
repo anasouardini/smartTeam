@@ -3,15 +3,16 @@ const UserM = require('../models/user');
 const fs = require('fs/promises');
 const jwt = require('jsonwebtoken');
 
-const presistLogin = async (req, res) => {
+const presistLogin = async (req, res, userID) => {
   // creating the refresh token
+  let refreshToken;
   {
     const privKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pem`, {
       encoding: 'utf8',
     });
     const jwtOptions = { algorithm: 'RS256', expiresIn: '1h' };
-    const refreshToken = jwt.sign(
-      { userID: checkUserResponse[0][0].id },
+    refreshToken = jwt.sign(
+      { userID: userID },
       privKey,
       jwtOptions
     );
@@ -23,24 +24,25 @@ const presistLogin = async (req, res) => {
   }
 
   // creating the access token
+  let accessToken;
   {
     const privKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pem`, {
       encoding: 'utf8',
     });
     const jwtOptions = { algorithm: 'RS256', expiresIn: '1h' };
-    const accessToken = jwt.sign(
-      { userID: checkUserResponse[0][0].id },
+    accessToken = jwt.sign(
+      { userID: userID },
       privKey,
       jwtOptions
     );
   }
 
-  return true;
+  return {accessToken, refreshToken};
 };
 
 const login = async (req, res, next) => {
   if (!req.body?.username || !req.body?.password) {
-    res.status(400).json({ error: 'the entered information is not complete' });
+    return res.status(400).json({ error: 'the entered information is not complete' });
   }
 
   // check if username exists
@@ -69,10 +71,11 @@ const login = async (req, res, next) => {
     return res.status(400).json({ error: 'credentials are not correct.' });
   }
 
-  if (presistLogin(req, res)) {
-    res.json({
+  const tokens = await presistLogin(req, res, checkUserResponse[0][0].id);
+  if (tokens) {
+    return res.json({
       data: 'logged in successfully',
-      accessToken,
+      accessToken: tokens.accessToken,
       redirect: `/user/${req.body?.username}`,
     });
   }
