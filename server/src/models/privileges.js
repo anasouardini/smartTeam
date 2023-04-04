@@ -48,4 +48,18 @@ const remove = async (filter) => {
   return response;
 };
 
-module.exports = { create, read, list, update, remove };
+const check = async ({table, itemID}) => {
+  const tableSingular = table.slice(0, -1);// removing the plural 's'
+  const response = await Pool(`
+    select C.privilege from ? I
+    inner join privileges P on I.id=P.?_FK
+    inner join privilegesCategories C on P.privCat_FK=C.id
+    where I.id=?;`,
+    [table, tableSingular, itemID]);
+
+  return response;
+  
+
+}
+
+module.exports = { create, read, list, update, remove, check };
