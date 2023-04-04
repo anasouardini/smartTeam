@@ -70,6 +70,7 @@ export default function Portfolios() {
     });
   };
 
+  // TODO: this should be in it's own component
   const listFields = () => {
     const fields =  FormFields('portfolio');
     return Object.keys(fields).map((fieldKey) => {

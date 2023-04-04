@@ -111,6 +111,13 @@ const AfterQueryPrep = (props: propsT) => {
           readOnly: true,
         },
       },
+      assignee: {
+        children: props.itemsListQuery.data.assignees,
+        props: {
+          defaultValue: props.itemsListQuery.data.assignees[0].id,
+          readOnly: true,
+        },
+      },
       title: { props: { defaultValue: project.title } },
       description: { props: { defaultValue: project.description } },
       bgColor: { props: { defaultValue: project.bgColor } },
@@ -130,12 +137,12 @@ const AfterQueryPrep = (props: propsT) => {
       id,
     });
 
-    if (resp.err) {
+    if (!resp.err) {
+      projectsQuery.refetch();
+    }else{
       console.log(resp);
-      return;
     }
 
-    projectsQuery.refetch();
   };
 
   let columns = React.useMemo(() => {
@@ -249,6 +256,7 @@ const AfterQueryPrep = (props: propsT) => {
   };
 
   // TODO: set default selected item to the last visited one
+  // TODO: this should be in it's own component
   const listFields = () => {
     const fields = FormFields('project');
 
@@ -315,7 +323,7 @@ const AfterQueryPrep = (props: propsT) => {
 // react/re-render is making it hard that is why I need to split dependent react-query calls
 export default function Projects() {
   const itemsListQuery = useQuery('portfolio list', async () => {
-    const requestObj = { portfolios: '' };
+    const requestObj = { portfolios: '', connections: 'assignees' };
     const urlEncodedRequestObj = new URLSearchParams(requestObj);
     const response = await Bridge('read', `itemsList?${urlEncodedRequestObj}`);
     return response?.err == 'serverError' ? false : response.data;

@@ -13,13 +13,13 @@ export default function Privileges() {
 
   const [state, setState] = React.useState({
     popup: {
-      sideForm: { random: '', show: false, mode: 'create', itemID: '' },
+      sideForm: { show: false, mode: 'create', itemID: '' },
     },
   });
   const stateActions = {
     sideForm: {
       show: (itemID: string | undefined, mode: 'edit' | 'create') => {
-        const stateCpy = { ...state }; // tricking react with a shallow copy
+        const stateCpy = structuredClone(state);
 
         if (mode == 'edit') {
           if (itemID === undefined) {
@@ -31,7 +31,6 @@ export default function Privileges() {
         }
 
         stateCpy.popup.sideForm.show = true;
-        stateCpy.popup.sideForm.random = Genid(10);
         // console.log(state.popup.sideForm.show)
 
         stateCpy.popup.sideForm.mode = mode;
@@ -80,13 +79,14 @@ export default function Privileges() {
   //   }
 
   const itemsListQuery = useQuery(
-    'users&portfolios&projects&tasks&privilegesCategories list',
+    'connections&portfolios&projects&tasks&privilegesCategories list',
     async () => {
+      // the first 3 must stay at the top
       const requestObj = {
         portfolios: '',
         projects: '',
         tasks: '',
-        users: '',
+        connections: 'users',
         privilegesCategories: '',
       };
       const urlEncodedRequestObj = new URLSearchParams(requestObj);

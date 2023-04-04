@@ -30,7 +30,6 @@ export default function Form(props: propsT) {
   const fieldsRefs = React.useRef<{
     [key: string]: any;
   }>({}).current;
-  // console.log(props);
 
   const parseFields = () => {
     const newData = Object.keys(props.fields).reduce(
