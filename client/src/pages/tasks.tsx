@@ -12,27 +12,28 @@ type queryT = {
   status: string;
   isLoading: boolean;
   data: {
-    portfolios: { [key: string]: any };
-    projects: { [key: string]: any };
+    portfolios: { [key: string]: any }[];
+    projects: { [key: string]: any }[];
+    assignees: { id: string; username: string }[];
   };
   refetch: () => void;
 };
 type propsT = { itemsListQuery: queryT };
 const AfterQueryPrep = (props: propsT) => {
-  const { loggedInUser } = useOutletContext<{
-    loggedInUser: { username: string; id: string };
-    isLoggedIn: boolean;
-  }>();
+  // const { loggedInUser } = useOutletContext<{
+  //   loggedInUser: { username: string; id: string };
+  //   isLoggedIn: boolean;
+  // }>();
 
   const [state, setState] = React.useState({
     popup: {
-      sideForm: { random: '', show: false, mode: 'create', itemID: '' },
+      sideForm: { show: false, mode: 'create', itemID: '' },
     },
   });
   const stateActions = {
     sideForm: {
       show: (itemID: string | undefined, mode: 'edit' | 'create') => {
-        const stateCpy = { ...state }; // tricking react with a shallow copy
+        const stateCpy = structuredClone(state); // tricking react with a shallow copy
 
         if (mode == 'edit') {
           if (itemID === undefined) {
@@ -44,7 +45,6 @@ const AfterQueryPrep = (props: propsT) => {
         }
 
         stateCpy.popup.sideForm.show = true;
-        stateCpy.popup.sideForm.random = Genid(10);
         // console.log(state.popup.sideForm.show)
 
         stateCpy.popup.sideForm.mode = mode;
@@ -59,26 +59,14 @@ const AfterQueryPrep = (props: propsT) => {
   };
 
   const headerFieldsRefs = React.useRef<{
-    portfolio: HTMLSelectElement | null | { value: string };
-    project: HTMLSelectElement | null | { value: string };
-    assignee: HTMLSelectElement | null | { value: string };
-  } | null>(
-    props.itemsListQuery.data.portfolios.length
-      ? {
-          portfolio: {
-            value: props.itemsListQuery.data.portfolios[0].id,
-            innerText: props.itemsListQuery.data.portfolios[0].title,
-          },
-          project: {
-            value: props.itemsListQuery.data.projects[0]?.id,
-            innerText: props.itemsListQuery.data.projects[0]?.title,
-          },
-          assignee: null,
-        }
-      : null
-  ).current;
+    portfolios: HTMLSelectElement | { [key: string]: any };
+    projects: HTMLSelectElement | { [key: string]: any };
+    assignees: HTMLSelectElement | { [key: string]: any };
+  }>({}).current;
 
   //TODO: needs to be passed separately to the filter header
+  // watch out for react-query it doesn handl errors correctly,
+  // make sure the fucntion passed actually works before passing it to userQuery.
   const formFieldsRef = React.useRef<null | {
     [key: string]: { tagName: string; props: { [key: string]: string } };
   }>(null);
@@ -94,14 +82,18 @@ const AfterQueryPrep = (props: propsT) => {
       return false;
     }
 
+    // TODO: server does not filter using portfolio
     const response = await Bridge(
       'read',
-      `task/all?portfolio=${
-        headerFieldsRefs?.portfolio?.value ??
-        props.itemsListQuery.data.portfolios[0]
+     `task/all?portfolio=${
+        headerFieldsRefs?.portfolios?.value ??
+        props.itemsListQuery.data.portfolios[0].id
       }&project=${
-        headerFieldsRefs.project?.value ?? props.itemsListQuery.data.projects[0]
-      }`
+        headerFieldsRefs?.projects?.value ??
+        props.itemsListQuery.data.projects[0].id
+      }&users=${
+        headerFieldsRefs?.assignees?.value ?? props.itemsListQuery.data.assignees[0].id
+      }` 
     );
 
     return response?.err == 'serverError' ? false : response.data;
@@ -113,31 +105,24 @@ const AfterQueryPrep = (props: propsT) => {
   const createNewTask = () => {
     formFieldsRef.current = FormFields('task', {
       portfolio: {
-        children: [
-          {
-            id: headerFieldsRefs.portfolio?.value,
-            title: headerFieldsRefs.portfolio?.innerText,
-          },
-        ],
+        children: props.itemsListQuery.data.portfolios,
         props: {
-          defaultValue: headerFieldsRefs.portfolio?.value,
+          defaultValue: headerFieldsRefs.portfolios?.value,
         },
       },
       project: {
-        children: [
-          {
-            id: headerFieldsRefs.project?.value,
-            title: headerFieldsRefs.project?.innerText,
-          },
-        ],
+        children: props.itemsListQuery.data.projects,
         props: {
-          defaultValue: headerFieldsRefs.project?.value,
+          defaultValue: headerFieldsRefs.projects?.value,
         },
       },
       assignee: {
-        children: [{ id: loggedInUser.id, title: loggedInUser.username }],
+        children: props.itemsListQuery.data.assignees.map(({ id, username }) => ({
+          title: username,
+          id,
+        })),
         props: {
-          defaultValue: loggedInUser.id,
+          defaultValue: headerFieldsRefs.assignees?.value,
           readOnly: true,
         },
       },
@@ -147,24 +132,27 @@ const AfterQueryPrep = (props: propsT) => {
   };
 
   const editTask = async (task: { [key: string]: any }) => {
+
     formFieldsRef.current = FormFields('task', {
       portfolio: {
-        children: props.itemsListQuery.data.portfolios.map((item)=>item),
+        children: props.itemsListQuery.data.portfolios,
         props: {
-          defaultValue: headerFieldsRefs.portfolio?.value,
+          defaultValue: headerFieldsRefs.portfolios?.value,
         },
       },
       project: {
-        children: props.itemsListQuery.data.projects.map((item)=>item),
+        children: props.itemsListQuery.data.projects,
         props: {
-          defaultValue: headerFieldsRefs.project?.value,
+          defaultValue: task.project_FK,
         },
       },
       assignee: {
-        children: [{ id: loggedInUser.id, title: loggedInUser.username }],
+        children: props.itemsListQuery.data.assignees.map(({ id, username }) => ({
+          title: username,
+          id,
+        })),
         props: {
-          defaultValue: loggedInUser.id,
-          readOnly: true,
+          defaultValue: task.assignee_FK,
         },
       },
       title: { props: { defaultValue: task.title } },
@@ -195,6 +183,7 @@ const AfterQueryPrep = (props: propsT) => {
     tasksQuery.refetch();
   };
 
+  // TODO: this should be in it's own component
   const listHeaderFields = () => {
     const fields = FormFields('task');
     // console.log(fields);
@@ -220,7 +209,7 @@ const AfterQueryPrep = (props: propsT) => {
               (child: string[]) => {
                 return (
                   <option key={child.id} value={child.id}>
-                    {child.title}
+                    {child.title ? child.title : child.username}
                   </option>
                 );
               }
@@ -325,7 +314,11 @@ const AfterQueryPrep = (props: propsT) => {
 // react/re-render is making it hard that is why I need to split dependent react-query calls
 export default function Tasks() {
   const itemsListQuery = useQuery('portfolios&projects list', async () => {
-    const requestObj = { portfolios: '', projects: '' };
+    const requestObj = {
+      portfolios: '',
+      projects: '',
+      connections: 'assignees',
+    };
     const urlEncodedRequestObj = new URLSearchParams(requestObj);
     const response = await Bridge('read', `itemsList?${urlEncodedRequestObj}`);
     return response?.err == 'serverError' ? false : response.data;
@@ -335,7 +328,6 @@ export default function Tasks() {
   // console.log(projectsListQuery.status == 'success');
 
   if (itemsListQuery.status == 'success') {
-    // console.log(itemsListQuery.data);
     return <AfterQueryPrep itemsListQuery={itemsListQuery} />;
   }
 
