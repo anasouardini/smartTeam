@@ -11,7 +11,11 @@ const ListInput = (props, ref) => {
     <>
       <input
         list='itemsList'
-        placeholder={targetEntityKey}
+        placeholder={
+          Object.keys(props.itemsList).length
+            ? targetEntityKey
+            : 'List is empty'
+        }
         onChange={(e) => {
           const selectedValue = e.target.value;
           const listID = e.target.getAttribute('list');
@@ -30,6 +34,7 @@ const ListInput = (props, ref) => {
         className={tailwindClx.commonBorder}
         name={targetEntityKey}
         defaultValue={props.defaultValue}
+        autoComplete='off'
       />
       <datalist id='itemsList'>
         {Object.keys(props.itemsList).map((entityKey: string) => {
