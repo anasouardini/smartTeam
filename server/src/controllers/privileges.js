@@ -1,4 +1,9 @@
-const MPrivledges = require('../models/privileges');
+const MPriviledges = require('../models/privileges');
+const MEntities = {
+  portfolio_FK: require('../models/portfolio'),
+  project_FK: require('../models/project'),
+  task_FK: require('../models/task'),
+};
 
 const readAll = async (req, res, next) => {
   let privilegesFilter = {
@@ -10,13 +15,13 @@ const readAll = async (req, res, next) => {
     privilegesFilter[req.body.targetEntity.type] = req.body.targetEntity.value;
   }
 
-  Object.keys(privilegesFilter).forEach((itemKey)=>{
-    if(!privilegesFilter[itemKey]){
+  Object.keys(privilegesFilter).forEach((itemKey) => {
+    if (!privilegesFilter[itemKey]) {
       delete privilegesFilter[itemKey];
     }
-  })
+  });
 
-  const rulesResp = await MPrivledges.read(privilegesFilter);
+  const rulesResp = await MPriviledges.read(privilegesFilter);
 
   if (rulesResp.err) {
     return next('err while reading all rules');
@@ -34,23 +39,47 @@ const create = async (req, res, next) => {
     user,
   };
 
-  if (!targetEntity || !targetEntity?.type) {
-    return next('some field is missing');
+  // console.log(targetEntity);
+  if (!targetEntity || !targetEntity?.type || !targetEntity?.value) {
+    return res
+      .status(400)
+      .json({ data: 'Tagerget Entity field is not filed out.' });
   }
   createQuery[targetEntity.type] = targetEntity.value;
-  // console.log(createQuery)
 
-  const rulesResp = await MPrivledges.create(createQuery);
-
+  // adding a privileges row
+  const rulesResp = await MPriviledges.create(createQuery);
   if (rulesResp.err) {
     return next('err while creating a rule');
   }
-
   if (!rulesResp[0].affectedRows) {
     return next('err while creating a rule, zero affected rows');
   }
 
-  return res.json({ data: 'rule created successfully' });
+  // assigning user to the table/entity
+  const entityResp = await MEntities[targetEntity.type].update(
+    { id: targetEntity.value },
+    { assignee_FK: user }
+  );
+  if (entityResp.err) {
+    return next(
+      `err while assigning user/${user} to entity ${
+        targetEntity.type / targetEntity.value
+      } -- query error`
+    );
+  }
+  if (!entityResp[0].affectedRows) {
+    return next(
+      `err while assigning user/${user} to entity ${
+        targetEntity.type / targetEntity.value
+      } -- zero affectedRows`
+    );
+  }
+
+  return res.json({
+    data: `user ${user} now has access to ${targetEntity.type}/${targetEntity.value}
+    with privileges of ${privilegesCategories}`,
+  });
 };
 
 const update = async (req, res, next) => {
@@ -59,7 +88,7 @@ const update = async (req, res, next) => {
   const editableFiels = ['title', 'description', 'bgColor', 'dueDate'];
   const query = [
     {
-      ownerID: req.userID,
+      owner_FK: req.userID,
       id: newData.id,
     },
     {},
@@ -73,7 +102,7 @@ const update = async (req, res, next) => {
   // console.log(query)
 
   if (Object.keys(query[1]).length) {
-    const rulesResp = await MPrivledges.update(...query);
+    const rulesResp = await MPriviledges.update(...query);
 
     // console.log(query)
 
@@ -93,7 +122,7 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   const { id } = req.body;
-  const rulesResp = await MPrivledges.remove({ ownerID: req.userID, id });
+  const rulesResp = await MPriviledges.remove({ owner_FK: req.userID, id });
 
   if (rulesResp.err) {
     return next('err while removing a rule');

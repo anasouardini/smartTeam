@@ -1,13 +1,31 @@
 const MPortfolio = require('../models/portfolio');
+const privileges = require('../tools/privileges');
 
 const readAll = async (req, res, next) => {
-  const portfoliosResp = await MPortfolio.read({ owner_FK: req.userID });
+  const portfoliosResp = await MPortfolio.read({});
 
   if (portfoliosResp.err) {
     return next('err while reading all portfolios');
   }
 
-  return res.json({ data: portfoliosResp[0] });
+  const privilegesResult = await privileges.check({
+    route: req.path,
+    action: 'readAll',
+    userID: req.userID,
+    item: portfoliosResp[0],
+  });
+  if (privilegesResult.err) {
+    return next(
+      `err while checking privileges for ${req.path}/readAll\n${privilegesResult.data}`
+    );
+  }
+  if (!privilegesResult.valid) {
+    return res
+      .status(403)
+      .json({ data: 'You have no privileges to perfrom such action.' });
+  }
+
+  return res.json({ data: privilegesResult.data });
 };
 
 const readSingle = async (req, res) => {};
