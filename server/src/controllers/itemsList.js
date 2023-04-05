@@ -30,11 +30,11 @@ const read = async (req, res, next) => {
     const item = itemsList[i];
     // console.log(queryResp[item[0]])
     if (queryResp[item[0]]?.err) {
-      return next(`err while listing ${item[0]}`);
+      return next(`err while listing ${item[0]}\n${queryResp[item[0]]?.err}`);
     }
 
-    if(item[0] == 'connections'){
-      queryResp['users'] = queryResp[item[0]];
+    if(item[1]){
+      queryResp[item[1]] = queryResp[item[0]];
       delete queryResp[item[0]];
     }
   }

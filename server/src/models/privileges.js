@@ -8,6 +8,11 @@ const create = async (newData) => {
   }
   newData.id = uuid();
 
+  // const response2 = await Pool(`select * from privilegesCategories;`, [newData.user]);
+  // console.log(newData.owner_FK)
+  // console.log(newData.user)
+  // console.log(response2)
+
   const autoQuery = AutoQuery.create('privileges', newData);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
@@ -35,14 +40,14 @@ const update = async (filter, newData) => {
     return { err: 'no data is provided' };
   }
 
-  const autoQuery = AutoQuery.update('privilges', filter, newData);
+  const autoQuery = AutoQuery.update('privileges', filter, newData);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
   return response;
 };
 
 const remove = async (filter) => {
-  const autoQuery = AutoQuery.remove('privilges', filter);
+  const autoQuery = AutoQuery.remove('privileges', filter);
   const response = await Pool(autoQuery.query, autoQuery.vars);
 
   return response;

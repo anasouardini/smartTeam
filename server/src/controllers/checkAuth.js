@@ -45,6 +45,7 @@ const checkRefreshToken = async (refreshToken) => {
     try {
       return jwt.verify(refreshToken, pubKey);
     } catch (err) {
+      // when token experies, it's considered as an erro!! wierd.
       console.log('erro verifying refresh token: ', err);
     }
   }
