@@ -145,14 +145,24 @@ export default function Privileges() {
           data.map((rule, index) => {
             return (
               <div
-                onClick={() => editPrivileges(rule)}
+                onClick={(e) => {
+                  if (e.target == e.currentTarget) {
+                    editPrivileges(rule);
+                  }
+                }}
                 key={index}
                 className={`px-2 py-1 cursor-pointer hover:border-primary border-[1px] 
                         rounded-md flex justify-between items-center`}
               >
-                <h3 key={index}>{rule.user}</h3>
+                <h3 key={index}>
+                  {
+                    itemsListQuery.data.users.filter(
+                      (user) => user.id == 'venego-venego-venego-venego'
+                    )[0].username
+                  }
+                </h3>
 
-                <button onClick={(e) => removePrivilege(rule.id, e)}>
+                <button onClick={(e) => removePrivilege(rule, e)}>
                   <FaTrash className={`text-primary`} />
                 </button>
               </div>
@@ -257,6 +267,15 @@ export default function Privileges() {
     stateActions.sideForm.show(undefined, 'create');
   };
 
+  const removePrivilege = async (item, e) => {
+    const resp = await Bridge('remove', 'privileges', { id: item.id });
+    if (resp.err) {
+      console.log(resp);
+    } else {
+      privilegesQuery.refetch();
+    }
+  };
+
   const listHeaderFields = () => {
     // this is the number of lists combined into the first <select> element.
     const firstPartLength = 3;
@@ -277,8 +296,13 @@ export default function Privileges() {
             // TODO: debounce this
             privilegesQuery.refetch();
           }}
-          placeholder={targetEntityKey}
+          placeholder={
+            Object.keys(otherItemsList).length
+              ? targetEntityKey
+              : 'List is empty'
+          }
           className={tailwindClx.commonBorder}
+          autoComplete='off'
           name={targetEntityKey}
           ref={(el) => {
             selectRefs[targetEntityKey] = el;
@@ -340,13 +364,14 @@ export default function Privileges() {
     <div aria-label='container' className={`grow flex flex-col`}>
       <header aria-label='filters' className={`px-6 py-4 flex flex-wrap gap-4`}>
         {listHeaderFields()}
-        <button
-          className={`ml-auto bg-primary text-white rounded-md px-2`}
-        >
+        <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
           Filter
         </button>
       </header>
-      <main aria-label='portfolios' className='text-black px-2 pb-3 grow flex gap-3'>
+      <main
+        aria-label='portfolios'
+        className='text-black px-2 pb-3 grow flex gap-3'
+      >
         <section
           aria-label='tasks list'
           className='grow mt-[2rem] py-4 flex flex-col border-gray-300 border-2 rounded-md px-2'
