@@ -1,6 +1,6 @@
 const pool = require('./dbPool');
 // const {uuidv4:uuid} = require('uuid');
-const defaultOwnerID = 'github-114059811';
+const defaultOwnerID = 'organization-organization';
 const defaultPrivileges = [
   [
     'creator',
@@ -150,7 +150,7 @@ const insertionQueries = {
                             1
                             ),
                             (
-                            'dlkj3-lkji9-fskd9-k39jf3',
+                            'organization-organization',
                             'organization',
                             '$2a$10$vrGBAXzwHyuL4f8wtp9LtuqJisgrwvYHHUQChFh19h6.h/h/PPGd.',
                             '',
@@ -158,15 +158,15 @@ const insertionQueries = {
                             1
                             ),
                             (
-                            'dlkj3-lkji9-fsjd9-r39jf3',
+                            'venego-venego-venego-venego',
                             'venego',
                             '$2a$10$2Rs1OQprscaedMDIfa3nM.Rkd4wlUSB/1Y9aniUUF5vNftStoy33G',
                             '',
                             'venego',
                             1
                             ),
-                            (
-                            'dlkj3-lfji9-fsid9-r39j,3',
+                                      (
+                            'segfaulty-segfaulty-segfaulty',
                             'segfaulty',
                             '$2a$10$nClU9iPu63tTwErJXhQ1guqMdEtUTZoLhc2NmToZZpgq/8Elm0fmK',
                             '',
@@ -174,7 +174,7 @@ const insertionQueries = {
                             1
                             ),
                             (
-                            'dskj3-gkj79-fsdd9-r39jf3',
+                            'potato-potato-potato-potato',
                             'potato',
                             '$2a$10$pOJ54FmgEmrQp9RJsUopvusKhtNB/EgVAzj1zUB5GYy6ycFIyiUnW',
                             '',
