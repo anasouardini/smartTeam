@@ -41,6 +41,7 @@ const presistLogin = async (req, res, userID) => {
 };
 
 const login = async (req, res, next) => {
+
   if (!req.body?.username || !req.body?.password) {
     return res.status(400).json({ error: 'the entered information is not complete' });
   }
@@ -57,7 +58,7 @@ const login = async (req, res, next) => {
   }
 
   if (!checkUserResponse[0][0].verified) {
-    // return res.status(400).json({ error: 'verify your account before you can login.' });
+    return res.status(400).json({ error: 'verify your account before you can login.' });
   }
 
   // checking if passwords match up
