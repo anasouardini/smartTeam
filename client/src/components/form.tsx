@@ -39,7 +39,6 @@ export default function Form(props: propsT) {
           // the prop name of the custom input is different from the actual field name
           // the latter is what is used the identify that value in the server
           acc[fieldKey] = fieldsRefs[tagName];
-          // console.log(fieldsRefs)
           return acc;
         }
         acc[fieldKey] = fieldsRefs[fieldKey].value;
@@ -74,9 +73,8 @@ export default function Form(props: propsT) {
     create: async (e) => {
       e.preventDefault();
 
-      const resp = await Bridge('post', props.route, {
-        ...parseFields(),
-      });
+      const parsedFields = parseFields();
+      const resp = await Bridge('post', props.route, parsedFields);
 
       // console.log(resp);
       if (resp.err) {
@@ -109,7 +107,11 @@ export default function Form(props: propsT) {
           <label>
             Target Entity:
             <br />
-            <TagName key={field.props.defaultValue} ref={fieldsRefs} {...field.props} />
+            <TagName
+              key={field.props.defaultValue}
+              ref={fieldsRefs}
+              {...field.props}
+            />
           </label>
         );
       }
