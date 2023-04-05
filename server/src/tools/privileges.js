@@ -24,7 +24,7 @@ const getRole = (userID, item) => {
 const checkAceess = async ({ route, itemID, action, columnName }) => {
   const parentPrivsResp = await MPrivileges.check(route, itemID);
   if (parentPrivsResp.err) {
-    return { err: true };
+    return { err: true, data: 'err while fetching privileges' };
   }
 
   const privilegesObj = JSON.parse(parentPrivsResp[0][0].privilege);
@@ -33,7 +33,8 @@ const checkAceess = async ({ route, itemID, action, columnName }) => {
   if (action === 'update') {
     isValid =
       privilegesObj.childrenItems.update.all ||
-      privilegesObj.childrenItems.update?.[columnName];
+      privilegesObj.childrenItems.update?.[columnName] ||
+      false;
   } else {
     isValid = privilegesObj.childrenItems?.[action];
   }
@@ -44,6 +45,7 @@ const checkAceess = async ({ route, itemID, action, columnName }) => {
 const check = async ({ route, action, userID, item }) => {
   const result = { err: false, valid: false, data: [] };
 
+  // TODO: read and read all need to check aprivileges
   switch (action) {
     case 'readSingle': {
       if (getRole(userID, item)) {
@@ -76,7 +78,8 @@ const check = async ({ route, action, userID, item }) => {
         action: 'create',
       });
       if (accessResult.err) {
-        result.err = true;
+        result.err = accessResult.err;
+        result.data = accessResult.data;
         break;
       }
       if (accessResult.isValid) {
@@ -93,7 +96,8 @@ const check = async ({ route, action, userID, item }) => {
         columnName: item.columnName,
       });
       if (accessResult.err) {
-        result.err = true;
+        result.err = accessResult.err;
+        result.data = accessResult.data;
         break;
       }
       if (accessResult.isValid) {
@@ -110,7 +114,8 @@ const check = async ({ route, action, userID, item }) => {
       });
 
       if (accessResult.err) {
-        result.err = true;
+        result.err = accessResult.err;
+        result.data = accessResult.data;
         break;
       }
       if (accessResult.isValid) {
@@ -127,7 +132,8 @@ const check = async ({ route, action, userID, item }) => {
       });
 
       if (accessResult.err) {
-        result.err = true;
+        result.err = accessResult.err;
+        result.data = accessResult.data;
       }
       if (accessResult.isValid) {
         result.valid = true;
@@ -136,8 +142,8 @@ const check = async ({ route, action, userID, item }) => {
       break;
     }
     default:
-      console.log(`tools/privileges.js(${route}, ${action}) => there is no such action`)
       result.err = true;
+      result.data = 'not such action';
   }
 
   return result;
