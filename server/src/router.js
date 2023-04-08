@@ -50,7 +50,7 @@ router.delete('/user/:user', controllers.user.remove);
 router.get('/connectionLink', controllers.connection.genLink);
 router.get('/verifyConnection/:token', controllers.connection.verify);
 
-router.get('/itemsList', controllers.itemsList.read);
+router.post('/itemsList', controllers.itemsList.read);
 
 router.post('/initDB', controllers.db.init);
 
