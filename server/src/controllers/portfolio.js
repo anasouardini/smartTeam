@@ -2,21 +2,28 @@ const MPortfolio = require('../models/portfolio');
 const privileges = require('../tools/privileges');
 
 const readAll = async (req, res, next) => {
-  const portfoliosResp = await MPortfolio.read({});
+  const { owner_FK } = req.query;
+  const filter = {};
+  if (owner_FK) {
+    filter.owner_FK = owner_FK;
+  }
+  const portfoliosResp = await MPortfolio.read(filter);
 
   if (portfoliosResp.err) {
     return next('err while reading all portfolios');
   }
+  // console.log(req.query);
+  // console.log(portfoliosResp[0]);
 
   const privilegesResult = await privileges.check({
-    route: req.path,
+    entityName: 'portfolios',
     action: 'readAll',
     userID: req.userID,
     item: portfoliosResp[0],
   });
   if (privilegesResult.err) {
     return next(
-      `err while checking privileges for ${req.path}/readAll\n${privilegesResult.data}`
+      `err while checking privileges for ${req.path}\n${privilegesResult.data}`
     );
   }
   if (!privilegesResult.valid) {
@@ -24,16 +31,33 @@ const readAll = async (req, res, next) => {
       .status(403)
       .json({ data: 'You have no privileges to perfrom such action.' });
   }
-
   return res.json({ data: privilegesResult.data });
 };
 
 const readSingle = async (req, res) => {};
 
 const create = async (req, res, next) => {
-  const { title, description, bgImg, status } = req.body;
+  const { title, description, bgImg, status, owner_FK } = req.body;
+
+  const privilegesResult = await privileges.check({
+    entityName: 'portfolios',
+    action: 'create',
+    userID: req.userID,
+    item: { owner_FK },
+  });
+  if (privilegesResult.err) {
+    return next(
+      `err while checking privileges for ${req.path}\n${privilegesResult.data}`
+    );
+  }
+  if (!privilegesResult.valid) {
+    return res
+      .status(403)
+      .json({ data: `You have no privileges to perfrom such action. ${privilegesResult.data}` });
+  }
+
   const portfoliosResp = await MPortfolio.create({
-    owner_FK: req.userID,
+    owner_FK,
     title,
     description,
     bgImg,
@@ -55,10 +79,29 @@ const create = async (req, res, next) => {
 };
 
 const update = async (req, res, next) => {
-  const { id, title, description, bgImg, status } = req.body;
+  const { id, owner_FK, title, description, bgImg, status } = req.body;
+
+  const privilegesResult = await privileges.check({
+    entityName: 'portfolios',
+    action: 'update',
+    userID: req.userID,
+    //TODO: I need a way to determin what columns have changed,
+    item: { owner_FK, id, columnsNames: ['title'] },
+  });
+  if (privilegesResult.err) {
+    return next(
+      `err while checking privileges for ${req.path}\n${privilegesResult.data}`
+    );
+  }
+  if (!privilegesResult.valid) {
+    return res
+      .status(403)
+      .json({ data: 'You have no privileges to perfrom such action.' });
+  }
+
   const portfoliosResp = await MPortfolio.update(
     {
-      owner_FK: req.userID,
+      owner_FK,
       id,
     },
     {
@@ -84,8 +127,27 @@ const update = async (req, res, next) => {
 };
 
 const remove = async (req, res, next) => {
-  const { id } = req.body;
-  const portfoliosResp = await MPortfolio.remove({ owner_FK: req.userID, id });
+  const { id, owner_FK } = req.body;
+
+  const privilegesResult = await privileges.check({
+    entityName: 'portfolios',
+    action: 'remove',
+    userID: req.userID,
+    //TODO: I need a way to determin what columns have changed,
+    item: { owner_FK, id},
+  });
+  if (privilegesResult.err) {
+    return next(
+      `err while checking privileges for ${req.path}\n${privilegesResult.data}`
+    );
+  }
+  if (!privilegesResult.valid) {
+    return res
+      .status(403)
+      .json({ data: 'You have no privileges to perfrom such action.' });
+  }
+
+  const portfoliosResp = await MPortfolio.remove({ owner_FK, id });
 
   if (portfoliosResp.err) {
     return next('err while removing a portfolio');
