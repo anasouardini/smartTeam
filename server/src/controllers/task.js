@@ -2,7 +2,7 @@ const MTask = require('../models/task');
 
 const readAll = async (req, res, next) => {
   const tasksResp = await MTask.read({
-    owner_FK: req.userID,
+    owner_FK: req.query.owner_FK,
     project_FK: req.query.project,
   });
 
@@ -19,7 +19,7 @@ const readSingle = async (req, res) => {};
 const create = async (req, res, next) => {
   const {
     project,
-    assignee,
+    owner_FK,
     title,
     description,
     bgColor,
@@ -27,9 +27,8 @@ const create = async (req, res, next) => {
     dueDate,
   } = req.body;
   const tasksResp = await MTask.create({
-    owner_FK: req.userID,
+    owner_FK,
     project_FK: project,
-    assignee_FK : assignee,
     title,
     description,
     bgColor,
@@ -54,7 +53,7 @@ const update = async (req, res, next) => {
   const editableFiels = ['title', 'description', 'bgColor', 'dueDate'];
   const query = [
     {
-      owner_FK: req.userID,
+      owner_FK: newData.owner_FK,
       id: newData.id,
     },
     {},
@@ -87,8 +86,8 @@ const update = async (req, res, next) => {
 };
 
 const remove = async (req, res, next) => {
-  const { id } = req.body;
-  const tasksResp = await MTask.remove({ owner_FK: req.userID, id });
+  const { id, owner_FK } = req.body;
+  const tasksResp = await MTask.remove({ owner_FK, id });
 
   if (tasksResp.err) {
     return next('err while removing a task');
