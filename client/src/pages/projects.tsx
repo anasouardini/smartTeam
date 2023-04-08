@@ -1,6 +1,7 @@
 import React from 'react';
 // import { useParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
+import { useOutletContext } from 'react-router-dom';
 import Bridge from '../tools/bridge';
 import Genid from '../tools/genid';
 import Form from '../components/form';
@@ -17,7 +18,12 @@ type queryT = {
 type propsT = { itemsListQuery: queryT };
 
 //TODO: this global state and state actions is better used as a global hook
-const AfterQueryPrep = (props: propsT) => {
+export default function Projects() {
+  const { loggedInUser } = useOutletContext<{
+    loggedInUser: { username: string; id: string };
+    isLoggedIn: boolean;
+  }>();
+
   const [state, setState] = React.useState({
     popup: { form: { show: false, mode: 'create', itemID: '' } },
   });
@@ -47,35 +53,81 @@ const AfterQueryPrep = (props: propsT) => {
     },
   };
 
-  const portfolioSelectRef = React.useRef<HTMLSelectElement | null>(null);
   // the minimal initial ref value is just for the filter header
-  const formFieldsRef = React.useRef<null | {
-    [key: string]: { tagName: string; props: { [key: string]: string } };
-  }>(null);
+  const Refs = React.useRef<{
+    formFields: {
+      [key: string]: { tagName: string; props: { [key: string]: string } };
+    };
+    formHiddenFields: { owner_FK: string };
+    selectInputs: { [key: string]: HTMLSelectElement };
+  }>({
+    selectInputs: {},
+    FormFields: FormFields('projects'),
+    formHiddenFields: { owner_FK: '' },
+  });
 
-  // TODO: extract this to a seperate component
-  const projectsQuery = useQuery('projects', async () => {
-    if (props.itemsListQuery.data.portfolios.length === 0) {
-      return false;
-    }
-    const response = await Bridge(
-      'read',
-      `project/all?portfolio=${
-        portfolioSelectRef.current?.value ??
-        props.itemsListQuery.data.portfolios[0]
-      }`
-    );
+  const itemsListQuery = useQuery('portfolio&connections list', async () => {
+    const requestObj = {
+      items: {
+        portfolios: {
+          name: 'portfolios',
+          filter: { /* owner_FK: Refs.current.selectInputs.profiles.value */ },
+        },
+        connections: {
+          name: 'assignees',
+          filter: { userID: loggedInUser.id},
+        },
+      },
+    };
+    const response = await Bridge('post', 'itemsList', requestObj);
     return response?.err == 'serverError' ? false : response.data;
   });
+  // if(itemsListQuery.status == 'success'){
+  //   console.log(itemsListQuery.data)
+  // }
+
+  // TODO: extract this to a seperate component
+  const projectsQuery = useQuery(
+    'projects',
+    async () => {
+      const requestObj = {
+        portfolio:
+          Refs.current.selectInputs.portfolios?.value ??
+          itemsListQuery.data.portfolios[0].id,
+      };
+      // console.log(Refs.current.selectInputs);
+
+      const profile =
+        Refs.current.selectInputs?.profiles?.value ||
+        itemsListQuery.data?.profiles[0].id;
+
+      if (profile) {
+        requestObj.owner_FK = profile;
+      }
+
+      const urlEncodedRequestObj = new URLSearchParams(requestObj);
+      const response = await Bridge(
+        'read',
+        `project/all?${urlEncodedRequestObj}`
+      );
+      return response?.err == 'serverError' ? false : response.data;
+    },
+    {
+      enabled: !!(
+        itemsListQuery.status == 'success' &&
+        itemsListQuery.data.portfolios.length
+      ),
+    }
+  );
   // if (projectsQuery.status == 'success') {
   //   console.log(projectsQuery.data);
   // }
 
-  if (props.itemsListQuery.data.portfolios.length === 0) {
-    return (
-      <h1>There are no projects, you have to create a portfolio first.</h1>
-    );
-  }
+  // if (!itemsListQuery.data?.portfolios?.length) {
+  //   return (
+  //     <h1>There are no projects, you have to create a portfolio first.</h1>
+  //   );
+  // }
 
   const tailwindClx = {
     projectBorder: 'border-2 border-primary rounded-md',
@@ -84,16 +136,13 @@ const AfterQueryPrep = (props: propsT) => {
   };
 
   const createNewProject = () => {
-    formFieldsRef.current = FormFields('project', {
+    Refs.current.formHiddenFields.owner_FK =
+      Refs.current.selectInputs.profiles.value;
+    Refs.current.formFields = FormFields('project', {
       portfolio: {
-        children: [
-          {
-            id: portfolioSelectRef.current?.value,
-            title: portfolioSelectRef.current?.innerText,
-          },
-        ],
+        children: itemsListQuery.data.portfolios,
         props: {
-          defaultValue: portfolioSelectRef.current?.value,
+          defaultValue: Refs.current.selectInputs.portfolios?.value,
           readOnly: true,
         },
       },
@@ -103,18 +152,20 @@ const AfterQueryPrep = (props: propsT) => {
   };
 
   const editProject = (project: { [key: string]: any }) => {
-    formFieldsRef.current = FormFields('project', {
+    Refs.current.formHiddenFields.owner_FK =
+      Refs.current.selectInputs.profiles.value;
+    Refs.current.formFields = FormFields('project', {
       portfolio: {
-        children: props.itemsListQuery.data.portfolios,
+        children: itemsListQuery.data.portfolios,
         props: {
-          defaultValue: portfolioSelectRef.current?.value,
+          defaultValue: Refs.current.selectInputs.portfolios?.value,
           readOnly: true,
         },
       },
       assignee: {
-        children: props.itemsListQuery.data.assignees,
+        children: itemsListQuery.data.assignees,
         props: {
-          defaultValue: props.itemsListQuery.data.assignees[0].id,
+          defaultValue: itemsListQuery.data.assignees[0].id,
           readOnly: true,
         },
       },
@@ -135,14 +186,14 @@ const AfterQueryPrep = (props: propsT) => {
   const removeProject = async (id: string) => {
     const resp = await Bridge('remove', `project`, {
       id,
+      owner_FK: Refs.current.selectInputs.profiles.value,
     });
 
     if (!resp.err) {
       projectsQuery.refetch();
-    }else{
+    } else {
       console.log(resp);
     }
-
   };
 
   let columns = React.useMemo(() => {
@@ -257,7 +308,7 @@ const AfterQueryPrep = (props: propsT) => {
 
   // TODO: set default selected item to the last visited one
   // TODO: this should be in it's own component
-  const listFields = () => {
+  const listHeaderFields = () => {
     const fields = FormFields('project');
 
     return Object.keys(fields).map((fieldKey) => {
@@ -269,21 +320,52 @@ const AfterQueryPrep = (props: propsT) => {
     });
   };
 
+  const listProfiles = () => {
+    if (itemsListQuery.status != 'success') {
+      return (
+        <select>
+          <option>empty list</option>
+        </select>
+      );
+    }
+
+    const profiles = itemsListQuery.data.assignees;
+    return (
+      <>
+        <select
+          onChange={() => {
+            projectsQuery.refetch();
+          }}
+          className={`ml-auto`}
+          ref={(el) => {
+            Refs.current.selectInputs.profiles = el;
+          }}
+        >
+          {profiles.map((profile: { id: string; username: string }) => {
+            return <option value={profile.id}>{profile.username}</option>;
+          })}
+          <option value={loggedInUser.id}>{loggedInUser.username}</option>
+        </select>
+      </>
+    );
+  };
+
   return (
     <div aria-label='container' className={`grow flex flex-col`}>
       <header aria-label='filters' className={`px-6 py-4 flex flex-wrap gap-4`}>
         <select
-          ref={portfolioSelectRef}
+          ref={(el) => (Refs.current.selectInputs.portfolios = el)}
           onChange={projectsQuery.refetch}
           className={`w-max`}
         >
-          {props.itemsListQuery.data.portfolios.map(
+          {itemsListQuery.status=='success' && itemsListQuery.data.portfolios.map(
             (portfolio: { id: string; title: string }) => (
               <option value={portfolio.id}>{portfolio.title}</option>
             )
           )}
         </select>
-        {listFields()}
+        {listHeaderFields()}
+        {listProfiles()}
         <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
           Filter
         </button>
@@ -302,9 +384,10 @@ const AfterQueryPrep = (props: propsT) => {
           <span className='text-2xl'>+</span> add new project
         </button>
 
-        {state.popup.form.show && formFieldsRef.current != null ? (
+        {state.popup.form.show && Refs.current.formFields != null ? (
           <Form
-            fields={formFieldsRef.current}
+            hiddenFields={Refs.current.formHiddenFields}
+            fields={Refs.current.formFields}
             mode={state.popup.form.mode}
             style='popup'
             itemID={state.popup.form.itemID}
@@ -318,19 +401,4 @@ const AfterQueryPrep = (props: propsT) => {
       </main>
     </div>
   );
-};
-
-// react/re-render is making it hard that is why I need to split dependent react-query calls
-export default function Projects() {
-  const itemsListQuery = useQuery('portfolio list', async () => {
-    const requestObj = { portfolios: '', connections: 'assignees' };
-    const urlEncodedRequestObj = new URLSearchParams(requestObj);
-    const response = await Bridge('read', `itemsList?${urlEncodedRequestObj}`);
-    return response?.err == 'serverError' ? false : response.data;
-  });
-
-  if (itemsListQuery.status == 'success')
-    return <AfterQueryPrep itemsListQuery={itemsListQuery} />;
-
-  return <></>;
 }
