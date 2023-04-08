@@ -1,11 +1,13 @@
 const MProject = require('../models/project');
 
 const readAll = async (req, res, next) => {
+  // console.log(req.query)
   const projectsResp = await MProject.read({
-    owner_FK: req.userID,
+    owner_FK: req.query.owner_FK,
     portfolio_FK: req.query.portfolio,
   });
 
+  // console.log(projectsResp[0])
   if (projectsResp.err) {
     return next('err while reading all projects');
   }
@@ -17,6 +19,7 @@ const readSingle = async (req, res) => {};
 
 const create = async (req, res, next) => {
   const {
+    owner_FK,
     portfolio,
     title,
     description,
@@ -29,7 +32,7 @@ const create = async (req, res, next) => {
     expense,
   } = req.body;
   const projectsResp = await MProject.create({
-    owner_FK: req.userID,
+    owner_FK,
     portfolio_FK: portfolio,
     title,
     description,
@@ -57,6 +60,7 @@ const update = async (req, res, next) => {
   const {
     portfolio,
     id,
+    owner_FK,
     title,
     description,
     bgColor,
@@ -70,7 +74,7 @@ const update = async (req, res, next) => {
   // console.log(req.body)
   const projectsResp = await MProject.update(
     {
-      owner_FK: req.userID,
+      owner_FK,
       portfolio_FK: portfolio,
       id,
     },
@@ -99,8 +103,8 @@ const update = async (req, res, next) => {
 };
 
 const remove = async (req, res, next) => {
-  const { id } = req.body;
-  const projectsResp = await MProject.remove({ owner_FK: req.userID, id });
+  const { id, owner_FK } = req.body;
+  const projectsResp = await MProject.remove({ owner_FK, id });
 
   if (projectsResp.err) {
     return next('err while removing a project');
