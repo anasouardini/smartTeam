@@ -6,32 +6,32 @@ const defaultPrivileges = [
     'creator',
     defaultOwnerID,
     JSON.stringify({
-      currentItem: { update: {all:true}, delete: true, assign: true },
-      childrenItems: { update: { all: true }, delete: true, create: true, assign: true },
+      currentItem: { update: {all:true}, remove: true, assign: true },
+      childrenItems: { update: { all: true }, remove: true, create: true, assign: true },
     }),
   ],
   [
     'manager',
     defaultOwnerID,
     JSON.stringify({
-      currentItem: { update: {all:false}, delete: false, assign: false },
-      childrenItems: { update: { all: true }, delete: true, create: true, assign: true },
+      currentItem: { update: {all:false}, remove: false, assign: false },
+      childrenItems: { update: { all: true }, remove: true, create: true, assign: true },
     }),
   ],
   [
     'watcher',
     defaultOwnerID,
     JSON.stringify({
-      currentItem: { update: {all:false}, delete: false, assign: false },
-      childrenItems: { update: { all: false }, delete: false, create: false, assign: false },
+      currentItem: { update: {all:false}, remove: false, assign: false },
+      childrenItems: { update: { all: false }, remove: false, create: false, assign: false },
     }),
   ],
   [
     'worker',
     defaultOwnerID,
     JSON.stringify({
-      currentItem: { update: {all:false, status: true}, delete: false, assign: false },
-      childrenItems: { update: { all:false}, delete: false, create: false, assign: false },
+      currentItem: { update: {all:false, status: true}, remove: false, assign: false },
+      childrenItems: { update: { all:false, title: true}, remove: false, create: false, assign: false },
     }),
   ],
 ];
@@ -54,8 +54,6 @@ const initQueries = {
   createPorfoliosTable: `create table portfolios(
                       id varchar(50),
                       owner_FK varchar(50),
-                      creator_FK varchar(50),
-                      assignee_FK varchar(50),
                       title varchar(50),
                       description varchar(200),
                       projectsNumber int,
@@ -65,15 +63,11 @@ const initQueries = {
                       progress int,
                       status varchar(20),
                       primary key(owner_FK, id),
-                      foreign key(owner_FK) references users(id) on delete cascade,
-                      foreign key(creator_FK) references users(id) on delete cascade,
-                      foreign key(assignee_FK) references users(id) on delete cascade
+                      foreign key(owner_FK) references users(id) on delete cascade
                     )`,
   createProjectsTable: `create table projects(
                       id varchar(50),
                       owner_FK varchar(50),
-                      creator_FK varchar(50),
-                      assignee_FK varchar(50),
                       portfolio_FK varchar(50),
                       title varchar(50),
                       description varchar(200),
@@ -87,15 +81,11 @@ const initQueries = {
                       expense int,
                       primary key(owner_FK, id),
                       foreign key(owner_FK) references users(id) on delete cascade,
-                      foreign key(creator_FK) references users(id) on delete cascade,
-                      foreign key(assignee_FK) references users(id) on delete cascade,
                       foreign key(owner_FK, portfolio_FK) references portfolios(owner_FK, id) on delete cascade
                     )`,
   createTasksTable: `create table tasks(
                       id varchar(50),
                       owner_FK varchar(50),
-                      creator_FK varchar(50),
-                      assignee_FK varchar(50),
                       project_FK varchar(50),
                       title varchar(50),
                       description varchar(200),
@@ -105,14 +95,12 @@ const initQueries = {
                       status varchar(20),
                       primary key(owner_FK, id),
                       foreign key(owner_FK) references users(id) on delete cascade,
-                      foreign key(creator_FK) references users(id) on delete cascade,
-                      foreign key(assignee_FK) references users(id) on delete cascade,
                       foreign key(owner_FK, project_FK) references projects(owner_FK, id) on delete cascade
                     )`,
   createPriviCategoriesTable: `create table privilegesCategories(
                       id varchar(50),
                       owner_FK varchar(50),
-                      priviledge json,
+                      privilege json,
                       primary key(owner_FK, id)
                     )`,
   createPrivilegesTable: `create table privileges(
@@ -182,7 +170,7 @@ const insertionQueries = {
                             1
                             )
                       ;`,
-  insertDefaultPrivilegesCategories: `insert into privilegesCategories(id, owner_FK, priviledge)
+  insertDefaultPrivilegesCategories: `insert into privilegesCategories(id, owner_FK, privilege)
                         values( ?, ?, ?)`,
 };
 
@@ -217,7 +205,7 @@ const init = async () => {
     return false;
   }
 
-  // inserting default priviledges categories
+  // inserting default privileges categories
   const privilegesQueryEntry =
     insertionQueries['insertDefaultPrivilegesCategories'];
   for (let i = 0; i < defaultPrivileges.length; i++) {
