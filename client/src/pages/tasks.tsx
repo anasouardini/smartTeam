@@ -20,10 +20,10 @@ type queryT = {
 };
 type propsT = { itemsListQuery: queryT };
 const AfterQueryPrep = (props: propsT) => {
-  // const { loggedInUser } = useOutletContext<{
-  //   loggedInUser: { username: string; id: string };
-  //   isLoggedIn: boolean;
-  // }>();
+  const { loggedInUser } = useOutletContext<{
+    loggedInUser: { username: string; id: string };
+    isLoggedIn: boolean;
+  }>();
 
   const [state, setState] = React.useState({
     popup: {
@@ -67,43 +67,59 @@ const AfterQueryPrep = (props: propsT) => {
   //TODO: needs to be passed separately to the filter header
   // watch out for react-query it doesn handl errors correctly,
   // make sure the fucntion passed actually works before passing it to userQuery.
-  const formFieldsRef = React.useRef<null | {
-    [key: string]: { tagName: string; props: { [key: string]: string } };
-  }>(null);
+  const Refs = React.useRef<{
+    formFields: {
+      [key: string]: { tagName: string; props: { [key: string]: string } };
+    };
+    formHiddenFields: any;
+    selectInputs: any;
+  }>({ formFields: {}, formHiddenFields: {}, selectInputs: {} });
 
   // TODO: extract this to a seperate component
-  const tasksQuery = useQuery('projects', async () => {
-    // when fetching portfolios list give an empty list
+  const tasksQuery = useQuery(
+    'projects',
+    async () => {
+      // when fetching portfolios list give an empty list
 
-    if (
-      props.itemsListQuery.data.portfolios.length === 0 ||
-      props.itemsListQuery.data.projects.length === 0
-    ) {
-      return false;
+      // TODO: server does not filter using portfolio
+
+      const requestObj = {
+        portfolio: headerFieldsRefs?.portfolios?.value ??
+          props.itemsListQuery.data.portfolios[0].id,
+        project: headerFieldsRefs?.projects?.value ??
+          props.itemsListQuery.data.projects[0].id,
+        users: headerFieldsRefs?.assignees?.value ??
+          props.itemsListQuery.data.assignees[0].id
+      };
+      const profile =
+        Refs.current.selectInputs?.profiles?.value ||
+        props.itemsListQuery.data?.profiles?.[0]?.id;
+      if (profile) {
+        requestObj.owner_FK = profile;
+      }
+
+      const urlEncodedRequestObj = new URLSearchParams(requestObj);
+      const response = await Bridge(
+        'read',
+        `task/all?${urlEncodedRequestObj}`
+      );
+
+      return response?.err == 'serverError' ? false : response.data;
+    },
+    {
+      enabled: !!(
+        props.itemsListQuery.data.portfolios.length ||
+        props.itemsListQuery.data.projects.length
+      ),
     }
-
-    // TODO: server does not filter using portfolio
-    const response = await Bridge(
-      'read',
-     `task/all?portfolio=${
-        headerFieldsRefs?.portfolios?.value ??
-        props.itemsListQuery.data.portfolios[0].id
-      }&project=${
-        headerFieldsRefs?.projects?.value ??
-        props.itemsListQuery.data.projects[0].id
-      }&users=${
-        headerFieldsRefs?.assignees?.value ?? props.itemsListQuery.data.assignees[0].id
-      }` 
-    );
-
-    return response?.err == 'serverError' ? false : response.data;
-  });
+  );
   // if (tasksQuery.status == 'success') {
   //   // console.log(tasksQuery.data);
   // }
 
   const createNewTask = () => {
-    formFieldsRef.current = FormFields('task', {
+    Refs.current.formHiddenFields.owner_FK = Refs.current.selectInputs.profiles.value;
+    Refs.current.formFields = FormFields('task', {
       portfolio: {
         children: props.itemsListQuery.data.portfolios,
         props: {
@@ -116,24 +132,14 @@ const AfterQueryPrep = (props: propsT) => {
           defaultValue: headerFieldsRefs.projects?.value,
         },
       },
-      assignee: {
-        children: props.itemsListQuery.data.assignees.map(({ id, username }) => ({
-          title: username,
-          id,
-        })),
-        props: {
-          defaultValue: headerFieldsRefs.assignees?.value,
-          readOnly: true,
-        },
-      },
     });
 
     stateActions.sideForm.show(undefined, 'create');
   };
 
   const editTask = async (task: { [key: string]: any }) => {
-
-    formFieldsRef.current = FormFields('task', {
+    Refs.current.formHiddenFields.owner_FK = Refs.current.selectInputs.profiles.value;
+    Refs.current.formFields = FormFields('task', {
       portfolio: {
         children: props.itemsListQuery.data.portfolios,
         props: {
@@ -144,15 +150,6 @@ const AfterQueryPrep = (props: propsT) => {
         children: props.itemsListQuery.data.projects,
         props: {
           defaultValue: task.project_FK,
-        },
-      },
-      assignee: {
-        children: props.itemsListQuery.data.assignees.map(({ id, username }) => ({
-          title: username,
-          id,
-        })),
-        props: {
-          defaultValue: task.assignee_FK,
         },
       },
       title: { props: { defaultValue: task.title } },
@@ -173,6 +170,7 @@ const AfterQueryPrep = (props: propsT) => {
 
     const resp = await Bridge('remove', `task`, {
       id,
+      owner_FK: Refs.current.selectInputs.profiles.value,
     });
 
     if (resp.err) {
@@ -228,6 +226,36 @@ const AfterQueryPrep = (props: propsT) => {
     });
   };
 
+  const listProfiles = () => {
+    if (props.itemsListQuery.status != 'success') {
+      return (
+        <select>
+          <option>empty list</option>
+        </select>
+      );
+    }
+
+    const profiles = props.itemsListQuery.data.assignees;
+    return (
+      <>
+        <select
+          onChange={() => {
+            tasksQuery.refetch();
+          }}
+          className={`ml-auto`}
+          ref={(el) => {
+            Refs.current.selectInputs.profiles = el;
+          }}
+        >
+          {profiles.map((profile: { id: string; username: string }) => {
+            return <option value={profile.id}>{profile.username}</option>;
+          })}
+          <option value={loggedInUser.id}>{loggedInUser.username}</option>
+        </select>
+      </>
+    );
+  };
+
   // tables suck, falling back to DIVs
   //TODO: use grid instead of a table
   const showTaksTable = () => {
@@ -256,12 +284,12 @@ const AfterQueryPrep = (props: propsT) => {
   };
 
   // TODO: set default selected item to the last visited one
-  if (props.itemsListQuery.data.portfolios.length === 0) {
-    return <h1>There are no tasks, you need to create a portfolio first.</h1>;
-  }
-  if (props.itemsListQuery.data.projects.length === 0) {
-    return <h1>There are no tasks, you need to create a project first.</h1>;
-  }
+  // if (props.itemsListQuery.data.portfolios.length === 0) {
+  //   return <h1>There are no tasks, you need to create a portfolio first.</h1>;
+  // }
+  // if (props.itemsListQuery.data.projects.length === 0) {
+  //   return <h1>There are no tasks, you need to create a project first.</h1>;
+  // }
   return (
     <>
       <div aria-label='container' className={`grow flex flex-col`}>
@@ -270,6 +298,7 @@ const AfterQueryPrep = (props: propsT) => {
           className={`px-6 py-4 flex flex-wrap gap-4`}
         >
           {listHeaderFields()}
+          {listProfiles()}
           <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
             Filter
           </button>
@@ -295,7 +324,8 @@ const AfterQueryPrep = (props: propsT) => {
 
           {state.popup.sideForm.show && tasksQuery.status == 'success' ? (
             <Form
-              fields={formFieldsRef.current}
+              hiddenFields={Refs.current.formHiddenFields}
+              fields={Refs.current.formFields}
               mode={state.popup.sideForm.mode}
               route='task'
               refetch={tasksQuery.refetch}
