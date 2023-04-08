@@ -19,7 +19,7 @@ const presistLogin = async (req, res, userID) => {
 
     res.cookie(process.env.COOKIE_NAME, refreshToken, {
       httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24,
+      maxAge: 1000 * 60 * 60,
     });
   }
 
