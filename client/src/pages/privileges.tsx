@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuery } from 'react-query';
+import { useOutletContext } from 'react-router-dom';
 import Bridge from '../tools/bridge';
 import Genid from '../tools/genid';
 import toUrlEncoded from '../tools/toUrlEncoded';
@@ -8,6 +9,10 @@ import { FaTrash } from 'react-icons/fa';
 import FormFields from '../components/formFields';
 
 export default function Privileges() {
+  const { loggedInUser } = useOutletContext<{
+    loggedInUser: { username: string; id: string };
+    isLoggedIn: boolean;
+  }>();
   // const [state, setState] = React.useState();
   // const stateActions = {};
 
@@ -49,13 +54,13 @@ export default function Privileges() {
   };
 
   const privilegesQuery = useQuery('privileges', async () => {
-    const queryFilter = Object.keys(selectRefs).reduce<{
+    const queryFilter = Object.keys(Refs.current.selectInputs).reduce<{
       [key: string]: string | undefined;
     }>((acc, refKey) => {
       if (refKey === 'targetEntity') {
-        const selectedValue = selectRefs[refKey]?.value;
+        const selectedValue = Refs.current.selectInputs[refKey]?.value;
         if (selectedValue) {
-          const listID = selectRefs[refKey]?.getAttribute('list');
+          const listID = Refs.current.selectInputs[refKey]?.getAttribute('list');
           acc[refKey] = {
             type: selectedValue.split(' - ')[0].slice(0, -1) + '_FK',
             value:
@@ -66,10 +71,17 @@ export default function Privileges() {
         }
         return acc;
       }
-      acc[refKey] = selectRefs[refKey]?.value ? selectRefs[refKey]?.value : '%';
+      acc[refKey] = Refs.current.selectInputs[refKey]?.value ? Refs.current.selectInputs[refKey]?.value : '%';
       return acc;
     }, {});
     // console.log(queryFilter);
+
+    const profile =
+      Refs.current.selectInputs?.profiles?.value ||
+      itemsListQuery.data?.profiles?.[0].id;
+    if (profile) {
+      queryFilter.owner_FK = profile;
+    }
     let response = await Bridge('post', `privileges/all`, queryFilter);
     return !response || response?.err == 'serverError' ? false : response.data;
   });
@@ -97,36 +109,20 @@ export default function Privileges() {
       return response?.err == 'serverError' ? false : response.data;
     }
   );
-
-  const selectRefs = React.useRef<{
-    [key: string]: HTMLSelectElement | HTMLInputElement | null;
-  }>({}).current;
+  // if(itemsListQuery.status == 'success'){
+  //   console.log(itemsListQuery.data)
+  // }
+  const Refs = React.useRef<{
+    selectInputs: { [key: string]: HTMLSelectElement | HTMLInputElement };
+    formHiddenFields: { owner_FK: string };
+  }>({
+    selectInputs: {},
+    formHiddenFields: {owner_FK: ''},
+  });
 
   const formFieldsRef = React.useRef<null | {
     [key: string]: { tagName: string; props: { [key: string]: string } };
   }>(null);
-
-  const headerFieldsRefs = React.useRef<{
-    targetEntity: HTMLSelectElement | null | { [key: string]: string };
-    user: HTMLSelectElement | null | { [key: string]: string };
-    privilegesCategories: HTMLSelectElement | null | { [key: string]: string };
-  } | null>(
-    itemsListQuery.data?.length
-      ? {
-          targetEntity: {
-            tagName: 'ListItem',
-          },
-          user: {
-            value: itemsListQuery.data.users[0]?.id,
-            innerText: itemsListQuery.data.users[0]?.username,
-          },
-          privilegesCategories: {
-            value: itemsListQuery.data.privilegesCategories[0]?.id,
-            innerText: itemsListQuery.data.privilegesCategories[0]?.id,
-          },
-        }
-      : null
-  ).current;
 
   // NO HOOKS BELOW THIS LOGIC BLOCK
   if (itemsListQuery.status != 'success') {
@@ -177,7 +173,7 @@ export default function Privileges() {
 
   const editPrivileges = (privilegeRule) => {
     // console.log(privilegeRule);
-
+    Refs.current.formHiddenFields.owner_FK = Refs.current.selectInputs.profiles.value;
     const firstPartLength = 3;
     const itemsList = Object.fromEntries(
       Object.entries(itemsListQuery.data).splice(0, firstPartLength)
@@ -233,6 +229,7 @@ export default function Privileges() {
   };
 
   const createNewPrivilege = () => {
+    Refs.current.formHiddenFields.owner_FK = Refs.current.selectInputs.profiles.value;
     // this is the number of lists combined into the first <select> element.
     const firstPartLength = 3;
     const itemsList = Object.fromEntries(
@@ -268,7 +265,7 @@ export default function Privileges() {
   };
 
   const removePrivilege = async (item, e) => {
-    const resp = await Bridge('remove', 'privileges', { id: item.id });
+    const resp = await Bridge('remove', 'privileges', { id: item.id, owner_FK: Refs.current.selectInputs.profiles.value });
     if (resp.err) {
       console.log(resp);
     } else {
@@ -305,7 +302,7 @@ export default function Privileges() {
           autoComplete='off'
           name={targetEntityKey}
           ref={(el) => {
-            selectRefs[targetEntityKey] = el;
+            Refs.current.selectInputs[targetEntityKey] = el;
           }}
         />
         <datalist id='otherItemsList'>
@@ -336,7 +333,7 @@ export default function Privileges() {
               key={itemKey}
               name={itemKey}
               ref={(el) => {
-                selectRefs[itemKey] = el;
+                Refs.current.selectInputs[itemKey] = el;
               }}
             >
               <option key={'emptyoption'} value=''>
@@ -360,10 +357,41 @@ export default function Privileges() {
     );
   };
 
+  const listProfiles = () => {
+    if (itemsListQuery.status != 'success') {
+      return (
+        <select>
+          <option>empty list</option>
+        </select>
+      );
+    }
+
+    const profiles = itemsListQuery.data.users;
+    return (
+      <>
+        <select
+          onChange={() => {
+            privilegesQuery.refetch();
+          }}
+          className={`ml-auto`}
+          ref={(el) => {
+            Refs.current.selectInputs.profiles = el;
+          }}
+        >
+          {profiles.map((profile: { id: string; username: string }) => {
+            return <option value={profile.id}>{profile.username}</option>;
+          })}
+          <option value={loggedInUser.id}>{loggedInUser.username}</option>
+        </select>
+      </>
+    );
+  };
+
   return (
     <div aria-label='container' className={`grow flex flex-col`}>
       <header aria-label='filters' className={`px-6 py-4 flex flex-wrap gap-4`}>
         {listHeaderFields()}
+        {listProfiles()}
         <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
           Filter
         </button>
@@ -390,6 +418,8 @@ export default function Privileges() {
         </section>
         {state.popup.sideForm.show && privilegesQuery.status == 'success' ? (
           <Form
+            hiddenFields={Refs.current.formHiddenFields}
+            owner={{ThisIsABetterWayToDoThis: 'use this instead of hidden fields'}}
             fields={formFieldsRef.current}
             mode={state.popup.sideForm.mode}
             route='privileges'
