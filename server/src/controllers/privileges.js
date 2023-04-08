@@ -7,7 +7,7 @@ const MEntities = {
 
 const readAll = async (req, res, next) => {
   let privilegesFilter = {
-    owner_FK: req.userID,
+    owner_FK: req.body.owner_FK,
     user: req.body.user,
     privCat_FK: req.body.privCat,
   };
@@ -32,9 +32,9 @@ const readAll = async (req, res, next) => {
 
 const create = async (req, res, next) => {
   // console.log(req.body);
-  const { user, privilegesCategories, targetEntity } = req.body;
+  const { user, owner_FK, privilegesCategories, targetEntity } = req.body;
   const createQuery = {
-    owner_FK: req.userID,
+    owner_FK,
     privCat_FK: privilegesCategories,
     user,
   };
@@ -57,24 +57,24 @@ const create = async (req, res, next) => {
   }
 
   // assigning user to the table/entity
-  const entityResp = await MEntities[targetEntity.type].update(
-    { id: targetEntity.value },
-    { assignee_FK: user }
-  );
-  if (entityResp.err) {
-    return next(
-      `err while assigning user/${user} to entity ${
-        targetEntity.type / targetEntity.value
-      } -- query error`
-    );
-  }
-  if (!entityResp[0].affectedRows) {
-    return next(
-      `err while assigning user/${user} to entity ${
-        targetEntity.type / targetEntity.value
-      } -- zero affectedRows`
-    );
-  }
+  // const entityResp = await MEntities[targetEntity.type].update(
+  //   { id: targetEntity.value },
+  //   { assignee_FK: user }
+  // );
+  // if (entityResp.err) {
+  //   return next(
+  //     `err while assigning user/${user} to entity ${
+  //       targetEntity.type / targetEntity.value
+  //     } -- query error`
+  //   );
+  // }
+  // if (!entityResp[0].affectedRows) {
+  //   return next(
+  //     `err while assigning user/${user} to entity ${
+  //       targetEntity.type / targetEntity.value
+  //     } -- zero affectedRows`
+  //   );
+  // }
 
   return res.json({
     data: `user ${user} now has access to ${targetEntity.type}/${targetEntity.value}
@@ -88,7 +88,7 @@ const update = async (req, res, next) => {
   const editableFiels = ['title', 'description', 'bgColor', 'dueDate'];
   const query = [
     {
-      owner_FK: req.userID,
+      owner_FK: newData.owner_FK,
       id: newData.id,
     },
     {},
@@ -121,8 +121,8 @@ const update = async (req, res, next) => {
 };
 
 const remove = async (req, res, next) => {
-  const { id } = req.body;
-  const rulesResp = await MPriviledges.remove({ owner_FK: req.userID, id });
+  const { id, owner_FK } = req.body;
+  const rulesResp = await MPriviledges.remove({ owner_FK, id });
 
   if (rulesResp.err) {
     return next('err while removing a rule');
