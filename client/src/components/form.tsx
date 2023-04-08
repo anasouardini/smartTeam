@@ -7,6 +7,8 @@ import customFields from './customFields';
 
 // TODO: [BUG] after editing and refetching, the form should update it's COPY of the item
 // TODO: [BUG] editing the drops downs in the filter header should not effect the form
+// TODO: [BUG] remove the hidden fields add the field organization to the form, when you update the on in the header, the hidden field is not updated
+// TODO: the select fields in the form should filter the options of the select field dependent on it.
 
 type fieldsT = {
   [key: string]: {
@@ -16,8 +18,12 @@ type fieldsT = {
     props: { [key: string]: string };
   };
 };
+type hiddenFieldsT = {
+  owner_FK: string;
+};
 type propsT = {
   fields: fieldsT;
+  hiddenFields: hiddenFieldsT;
   mode: string;
   style?: 'popup';
   route: string;
@@ -57,6 +63,7 @@ export default function Form(props: propsT) {
 
       const resp = await Bridge('update', props.route, {
         id: props.itemID,
+        owner_FK: props.hiddenFields.owner_FK,
         ...parseFields(),
       });
 
@@ -73,7 +80,10 @@ export default function Form(props: propsT) {
     create: async (e) => {
       e.preventDefault();
 
-      const parsedFields = parseFields();
+      const parsedFields = {
+        ...parseFields(),
+        owner_FK: props?.hiddenFields?.owner_FK,
+      };
       const resp = await Bridge('post', props.route, parsedFields);
 
       // console.log(resp);
