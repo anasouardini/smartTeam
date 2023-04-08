@@ -169,7 +169,6 @@ const fields: fieldsT = {
   task: {
     portfolio: selectFields.portfolio,
     project: selectFields.project,
-    assignee: selectFields.assignee,
     ...commonFields,
     bgColor: {
       label: 'background color',
@@ -211,6 +210,7 @@ const genFields = (
   item: string,
   selectedFields: { [key: string]: string | object } = {}
 ) => {
+  // console.log(selectedFields)
   const outputFields = Object.keys(selectedFields).reduce(
     (acc: { [key: string]: any }, fieldKey) => {
       if (!fields[item][fieldKey]) {
