@@ -40,15 +40,15 @@ export default function Authentication(props: {
     } | null = null;
 
     if (props.label == 'login') {
-      console.log(e.target[0])
       response = await Bridge('post', 'login', {
         username: inputsRef['username'].value,
         password: inputsRef['password'].value,
       });
     } else if (props.label == 'signup') {
+      // console.log(e.target[0])
       const genBody = props.fields.reduce(
         (acc: { [key: string]: string }, field, index) => {
-          acc[field[0]] = e.target[index].value;
+          acc[field[0]] = inputsRef[field[0]].value;
           return acc;
         },
         {}
@@ -101,7 +101,7 @@ export default function Authentication(props: {
               })}
               <input
                 onClick={handleAuth}
-                className={`${tailwindClasses.formItem} ${tailwindClasses.button} mt-7`}
+                className={`${tailwindClasses.formItem} ${tailwindClasses.button} mt-7 cursor-pointer`}
                 type='submit'
                 name='submit'
                 value={props.label}
