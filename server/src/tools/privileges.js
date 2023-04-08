@@ -1,79 +1,119 @@
 const MPrivileges = require('../models/privileges');
 
-// route=table
-// action
-// items(if the action=='read/readAll')
-// itemID(if action != 'read/readAll')
-// req
+// const getRole = (userID, item) => {
+//   switch (userID) {
+//     case item.owner_FK:
+//       return 'owner';
+//     case item.creator_FK:
+//       return 'creator';
+//     case item.assignee_FK:
+//       return 'assignee';
+//     default:
+//       return '';
+//   }
+// };
 
-//
-
-const getRole = (userID, item) => {
-  switch (userID) {
-    case item.owner_FK:
-      return 'owner';
-    case item.creator_FK:
-      return 'creator';
-    case item.assignee_FK:
-      return 'assignee';
-    default:
-      return '';
-  }
+const parentRoute = {
+  portfolios: 'profile',
+  projects: 'portfolios',
+  tasks: 'projects',
 };
 
-const checkAceess = async ({ route, itemID, action, columnName }) => {
-  const parentPrivsResp = await MPrivileges.check(route, itemID);
+const checkAceess = async ({ route, itemID, action, columnsNames }) => {
+  let isValid = false;
+  const parentPrivsResp = await MPrivileges.check({ route, itemID });
   if (parentPrivsResp.err) {
     return { err: true, data: 'err while fetching privileges' };
   }
 
-  const privilegesObj = JSON.parse(parentPrivsResp[0][0].privilege);
-
-  let isValid;
-  if (action === 'update') {
-    isValid =
-      privilegesObj.childrenItems.update.all ||
-      privilegesObj.childrenItems.update?.[columnName] ||
-      false;
-  } else {
-    isValid = privilegesObj.childrenItems?.[action];
+  // console.log(parentPrivsResp[0])
+  if (!parentPrivsResp[0].length) {
+    return { isValid };
   }
 
+  const privilegesObj = parentPrivsResp[0][0].privilege;
+  console.log(privilegesObj)
+
+  if (action === 'update') {
+    isValid = privilegesObj.currentItem.update.all;
+    if (!isValid) {
+      isValid = columnsNames.every(
+        (columnName) => privilegesObj.currentItem.update?.[columnName]
+      );
+    }
+    return { isValid };
+  }
+
+  isValid = privilegesObj.currentItem?.[action];
   return { isValid };
 };
 
-const check = async ({ route, action, userID, item }) => {
+const check = async ({ entityName, action, userID, item }) => {
   const result = { err: false, valid: false, data: [] };
 
-  // TODO: read and read all need to check aprivileges
   switch (action) {
     case 'readSingle': {
-      if (getRole(userID, item)) {
+      if (item.owner_FK === userID) {
+        result.valid = true;
+        break;
+      }
+      const parentPrivsResp = await MPrivileges.check({route: entityName, itemID: item.id});
+      if (parentPrivsResp.err) {
+        result.err = true;
+        result.data = 'err while fetching privileges';
+        break;
+      }
+      if (parentPrivsResp[0].length) {
         result.valid = true;
       }
       break;
     }
     case 'readAll': {
       result.valid = true;
+      if(!item.length){break;}
+
+      // console.log(item)
+      // TODO: filtering by table/entity name, will remove the extra rows
+      const parentPrivsResp = await MPrivileges.read({owner_FK: item[0].owner_FK});
+      if (parentPrivsResp.err) {
+        result.err = true;
+        result.data = 'err while fetching privileges';
+        break;
+      }
+
       // items is an array, despite the singular name
       item.forEach((item) => {
-        if (getRole(userID, item)) {
+        if (item.owner_FK === userID) {
           result.data.push(item);
+          return; // continue to the next
+        }
+
+        // console.log(parentPrivsResp[0])
+        if (parentPrivsResp[0].length) {
+          parentPrivsResp[0].forEach((priv) => {
+            const tableName = entityName.slice(0, -1) + '_FK';
+            // console.log(tableName);
+            if (priv[tableName] === item.id) {
+              result.data.push(item);
+            }
+          });
         }
       });
       break;
     }
     case 'create': {
-      if (route === 'portfolios') {
-        // needs the organizations feature to be implemented
-        // the origanization that the portfolio is going to be created at,
-        // is the only one that should be able to do it
+      if (entityName === 'portfolios') {
+        const isOwner = userID == item.owner_FK;
+        if (!isOwner) {
+          result.data = 'portfolios can only be created by the account owner.';
+        }
 
+        result.valid = isOwner;
         break;
       }
 
       const accessResult = await checkAceess({
-        route: item.parentRoute,
+        route: parentRoute[entityName],
         itemID: item.parentID,
         action: 'create',
       });
@@ -89,11 +129,16 @@ const check = async ({ route, action, userID, item }) => {
       break;
     }
     case 'update': {
+
+      if (item.owner_FK === userID) {
+        result.valid = true;
+        break;
+      }
       const accessResult = await checkAceess({
-        route,
+        route: entityName,
         itemID: item.id,
         action: 'update',
-        columnName: item.columnName,
+        columnsNames: item.columnsNames,
       });
       if (accessResult.err) {
         result.err = accessResult.err;
@@ -107,8 +152,15 @@ const check = async ({ route, action, userID, item }) => {
       break;
     }
     case 'remove': {
+
+      if (item.owner_FK === userID) {
+        result.valid = true;
+        break;
+      }
+
+      // console.log(entityName)
       const accessResult = await checkAceess({
-        route,
+        route: entityName,
         itemID: item.id,
         action: 'remove',
       });
@@ -126,7 +178,7 @@ const check = async ({ route, action, userID, item }) => {
     }
     case 'assign': {
       const accessResult = await checkAceess({
-        route,
+        route: entityName,
         itemID: item.id,
         action: 'assign',
       });
