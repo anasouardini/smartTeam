@@ -15,10 +15,11 @@ const read = async (req, res, next) => {
     const item = itemsListEntries[i];
     // console.log(item);
     // console.log(Models[item.name].list);
-    console.log(item[1])
+    // console.log(item[1])
     promiseList[item[0]] = Models[item[0]].list(item[1].filter);
   }
 
+  // resolving promises
   for (let i = 0; i < Object.keys(promiseList).length; i++) {
     const itemKey = Object.keys(promiseList)[i]
     const itemValue = await Object.values(promiseList)[i]
@@ -28,12 +29,17 @@ const read = async (req, res, next) => {
     }
 
     promiseList[itemKey] = itemValue[0];
+  }
 
-    // renaming the entity
+
+  // renaming the entities
+  for (let i = 0; i < Object.keys(promiseList).length; i++) {
+    const itemValue = Object.values(promiseList)[i]
+
     const entityKey = itemsListEntries[i][0];
     const entityValue = itemsListEntries[i][1];
     if (entityKey != entityValue.name) {
-      promiseList[entityValue.name] = itemValue[0];
+      promiseList[entityValue.name] = itemValue;
       delete promiseList[entityKey];
     }
   }

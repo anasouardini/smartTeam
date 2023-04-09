@@ -1,4 +1,5 @@
 const MProject = require('../models/project');
+const privileges = require('../tools/privileges');
 
 const readAll = async (req, res, next) => {
   // console.log(req.query)
@@ -12,7 +13,24 @@ const readAll = async (req, res, next) => {
     return next('err while reading all projects');
   }
 
-  return res.json({ data: projectsResp[0] });
+  const privilegesResult = await privileges.check({
+    entityName: 'projects',
+    action: 'readAll',
+    userID: req.userID,
+    item: projectsResp[0],
+  });
+  if (privilegesResult.err) {
+    return next(
+      `err while checking privileges for ${req.path}\n${privilegesResult.data}`
+    );
+  }
+  if (!privilegesResult.valid) {
+    return res
+      .status(403)
+      .json({ data: 'You have no privileges to perfrom such action.' });
+  }
+
+  return res.json({ data: privilegesResult.data });
 };
 
 const readSingle = async (req, res) => {};
@@ -31,6 +49,24 @@ const create = async (req, res, next) => {
     budget,
     expense,
   } = req.body;
+
+  const privilegesResult = await privileges.check({
+    entityName: 'projects',
+    action: 'create',
+    userID: req.userID,
+    item: {parentID: portfolio},
+  });
+  if (privilegesResult.err) {
+    return next(
+      `err while checking privileges for ${req.path}\n${privilegesResult.data}`
+    );
+  }
+  if (!privilegesResult.valid) {
+    return res
+      .status(403)
+      .json({ data: 'You have no privileges to perfrom such action.' });
+  }
+
   const projectsResp = await MProject.create({
     owner_FK,
     portfolio_FK: portfolio,

@@ -1,17 +1,8 @@
-const MPrivileges = require('../models/privileges');
-
-// const getRole = (userID, item) => {
-//   switch (userID) {
-//     case item.owner_FK:
-//       return 'owner';
-//     case item.creator_FK:
-//       return 'creator';
-//     case item.assignee_FK:
-//       return 'assignee';
-//     default:
-//       return '';
-//   }
-// };
+const Models = {
+  MPrivileges: require('../models/privileges'),
+  MPortfolios: require('../models/portfolio'),
+  MProjects: require('../models/project'),
+};
 
 const parentRoute = {
   portfolios: 'profile',
@@ -21,7 +12,7 @@ const parentRoute = {
 
 const checkAceess = async ({ route, itemID, action, columnsNames }) => {
   let isValid = false;
-  const parentPrivsResp = await MPrivileges.check({ route, itemID });
+  const parentPrivsResp = await Models.MPrivileges.check({ route, itemID });
   if (parentPrivsResp.err) {
     return { err: true, data: 'err while fetching privileges' };
   }
@@ -32,7 +23,7 @@ const checkAceess = async ({ route, itemID, action, columnsNames }) => {
   }
 
   const privilegesObj = parentPrivsResp[0][0].privilege;
-  console.log(privilegesObj)
+  // console.log(privilegesObj)
 
   if (action === 'update') {
     isValid = privilegesObj.currentItem.update.all;
@@ -48,6 +39,57 @@ const checkAceess = async ({ route, itemID, action, columnsNames }) => {
   return { isValid };
 };
 
+const checkChildrenAccess = async ({ route, item, action }) => {
+  let parentRouteName = parentRoute[route];
+  const itemResp = await Models[parentRouteName].read({
+    id: item.parentID,
+    owner_FK: item.owner_FK,
+  });
+  if (itemResp.err) {
+    return { err: true, data: 'err while fetching privileges' };
+  }
+
+  let isValid = false;
+  const parentPrivsResp = await Models.MPrivileges.check({
+    route: parentRouteName,
+    itemID: item.parentID,
+  });
+  if (parentPrivsResp.err) {
+    return { err: true, data: 'err while fetching privileges' };
+  }
+
+  // console.log(parentPrivsResp[0])
+  if (!parentPrivsResp[0].length) {
+    const nextParentRoute = parentRoute?.[parentRouteName];
+    if (nextParentRoute && nextParentRoute != 'profile') {
+      const nextParentItemID =
+        itemResp[0][nextParentRoute.slice(0, -1) + '_FK'];
+      return checkChildrenAccess({
+        route: parentRouteName,
+        item: { owner_FK, parentID: nextParentItemID },
+        action,
+      });
+    }
+    return {isValid}
+  }
+
+  const privilegesObj = parentPrivsResp[0][0].privilege;
+  // console.log(privilegesObj)
+
+  if (action === 'update') {
+    isValid = privilegesObj.childrenItems.update.all;
+    if (!isValid) {
+      isValid = columnsNames.every(
+        (columnName) => privilegesObj.childrenItems.update?.[columnName]
+      );
+    }
+    return { isValid };
+  }
+
+  isValid = privilegesObj.childrenItems?.[action];
+  return { isValid };
+};
+
 const check = async ({ entityName, action, userID, item }) => {
   const result = { err: false, valid: false, data: [] };
 
@@ -57,7 +99,10 @@ const check = async ({ entityName, action, userID, item }) => {
         result.valid = true;
         break;
       }
-      const parentPrivsResp = await MPrivileges.check({route: entityName, itemID: item.id});
+      const parentPrivsResp = await Models.MPrivileges.check({
+        route: entityName,
+        itemID: item.id,
+      });
       if (parentPrivsResp.err) {
         result.err = true;
         result.data = 'err while fetching privileges';
@@ -70,12 +115,16 @@ const check = async ({ entityName, action, userID, item }) => {
     }
     case 'readAll': {
       result.valid = true;
-      if(!item.length){break;}
+      if (!item.length) {
+        break;
+      }
 
       // console.log(item)
       // TODO: filtering by table/entity name, will remove the extra rows
-      const parentPrivsResp = await MPrivileges.read({owner_FK: item[0].owner_FK});
-      if (parentPrivsResp.err) {
+      const privsResp = await Models.MPrivileges.read({
+        owner_FK: item[0].owner_FK,
+      });
+      if (privsResp.err) {
         result.err = true;
         result.data = 'err while fetching privileges';
         break;
@@ -89,8 +138,8 @@ const check = async ({ entityName, action, userID, item }) => {
         }
 
         // console.log(parentPrivsResp[0])
-        if (parentPrivsResp[0].length) {
-          parentPrivsResp[0].forEach((priv) => {
+        if (privsResp[0].length) {
+          privsResp[0].forEach((priv) => {
             const tableName = entityName.slice(0, -1) + '_FK';
             // console.log(tableName);
             if (priv[tableName] === item.id) {
@@ -129,7 +178,6 @@ const check = async ({ entityName, action, userID, item }) => {
       break;
     }
     case 'update': {
-
       if (item.owner_FK === userID) {
         result.valid = true;
         break;
@@ -152,7 +200,6 @@ const check = async ({ entityName, action, userID, item }) => {
       break;
     }
     case 'remove': {
-
       if (item.owner_FK === userID) {
         result.valid = true;
         break;
