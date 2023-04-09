@@ -60,7 +60,8 @@ export default function Privileges() {
       if (refKey === 'targetEntity') {
         const selectedValue = Refs.current.selectInputs[refKey]?.value;
         if (selectedValue) {
-          const listID = Refs.current.selectInputs[refKey]?.getAttribute('list');
+          const listID =
+            Refs.current.selectInputs[refKey]?.getAttribute('list');
           acc[refKey] = {
             type: selectedValue.split(' - ')[0].slice(0, -1) + '_FK',
             value:
@@ -71,7 +72,9 @@ export default function Privileges() {
         }
         return acc;
       }
-      acc[refKey] = Refs.current.selectInputs[refKey]?.value ? Refs.current.selectInputs[refKey]?.value : '%';
+      acc[refKey] = Refs.current.selectInputs[refKey]?.value
+        ? Refs.current.selectInputs[refKey]?.value
+        : '%';
       return acc;
     }, {});
     // console.log(queryFilter);
@@ -95,17 +98,15 @@ export default function Privileges() {
     async () => {
       // the first 3 must stay at the top
       const requestObj = {
-        portfolios: '',
-        projects: '',
-        tasks: '',
-        connections: 'users',
-        privilegesCategories: '',
+        items: {
+          portfolios: { name: 'portfolios', filter: {} },
+          projects: { name: 'projects', filter: {} },
+          tasks: { name: 'tasks', filter: {} },
+          connections: { name: 'users', filter: { userID: loggedInUser.id } },
+          privilegesCategories: { name: 'privilegesCategories', filter: {} },
+        },
       };
-      const urlEncodedRequestObj = new URLSearchParams(requestObj);
-      const response = await Bridge(
-        'read',
-        `itemsList?${urlEncodedRequestObj}`
-      );
+      const response = await Bridge('post', `itemsList`, requestObj);
       return response?.err == 'serverError' ? false : response.data;
     }
   );
@@ -117,7 +118,7 @@ export default function Privileges() {
     formHiddenFields: { owner_FK: string };
   }>({
     selectInputs: {},
-    formHiddenFields: {owner_FK: ''},
+    formHiddenFields: { owner_FK: '' },
   });
 
   const formFieldsRef = React.useRef<null | {
@@ -173,7 +174,8 @@ export default function Privileges() {
 
   const editPrivileges = (privilegeRule) => {
     // console.log(privilegeRule);
-    Refs.current.formHiddenFields.owner_FK = Refs.current.selectInputs.profiles.value;
+    Refs.current.formHiddenFields.owner_FK =
+      Refs.current.selectInputs.profiles.value;
     const firstPartLength = 3;
     const itemsList = Object.fromEntries(
       Object.entries(itemsListQuery.data).splice(0, firstPartLength)
@@ -229,7 +231,8 @@ export default function Privileges() {
   };
 
   const createNewPrivilege = () => {
-    Refs.current.formHiddenFields.owner_FK = Refs.current.selectInputs.profiles.value;
+    Refs.current.formHiddenFields.owner_FK =
+      Refs.current.selectInputs.profiles.value;
     // this is the number of lists combined into the first <select> element.
     const firstPartLength = 3;
     const itemsList = Object.fromEntries(
@@ -265,7 +268,10 @@ export default function Privileges() {
   };
 
   const removePrivilege = async (item, e) => {
-    const resp = await Bridge('remove', 'privileges', { id: item.id, owner_FK: Refs.current.selectInputs.profiles.value });
+    const resp = await Bridge('remove', 'privileges', {
+      id: item.id,
+      owner_FK: Refs.current.selectInputs.profiles.value,
+    });
     if (resp.err) {
       console.log(resp);
     } else {
@@ -284,6 +290,7 @@ export default function Privileges() {
     ) as { [key: string]: string[] };
     targetItemsList = Object.fromEntries(targetItemsListEntries);
     // console.log(otherItemsList);
+    // console.log(targetItemsList)
     const targetEntityKey = 'targetEntity';
     return (
       <>
@@ -419,7 +426,9 @@ export default function Privileges() {
         {state.popup.sideForm.show && privilegesQuery.status == 'success' ? (
           <Form
             hiddenFields={Refs.current.formHiddenFields}
-            owner={{ThisIsABetterWayToDoThis: 'use this instead of hidden fields'}}
+            owner={{
+              ThisIsABetterWayToDoThis: 'use this instead of hidden fields',
+            }}
             fields={formFieldsRef.current}
             mode={state.popup.sideForm.mode}
             route='privileges'
