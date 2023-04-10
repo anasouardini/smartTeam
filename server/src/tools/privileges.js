@@ -10,149 +10,154 @@ const parentRoute = {
   tasks: 'projects',
 };
 
-const checkAceess = async ({ route, itemID, action, columnsNames }) => {
-  let isValid = false;
-  const parentPrivsResp = await Models.MPrivileges.check({ route, itemID });
-  if (parentPrivsResp.err) {
-    return { err: true, data: 'err while fetching privileges' };
-  }
+const checkAccess = async ({
+  userID,
+  tableName,
+  items,
+  action,
+  columnsNames,
+  checkParents,
+}) => {
+  const resultTemplate = {
+    err: false,
+    errMessage: '',
+    isValid: false,
+    item: {},
+  };
+  const results = [];
 
-  // console.log(parentPrivsResp[0])
-  if (!parentPrivsResp[0].length) {
-    return { isValid };
-  }
-
-  const privilegesObj = parentPrivsResp[0][0].privilege;
-  // console.log(privilegesObj)
-
-  if (action === 'update') {
-    isValid = privilegesObj.currentItem.update.all;
-    if (!isValid) {
-      isValid = columnsNames.every(
-        (columnName) => privilegesObj.currentItem.update?.[columnName]
-      );
-    }
-    return { isValid };
-  }
-
-  isValid = privilegesObj.currentItem?.[action];
-  return { isValid };
-};
-
-const checkChildrenAccess = async ({ route, item, action }) => {
-  let parentRouteName = parentRoute[route];
-  const itemResp = await Models[parentRouteName].read({
-    id: item.parentID,
-    owner_FK: item.owner_FK,
-  });
-  if (itemResp.err) {
-    return { err: true, data: 'err while fetching privileges' };
-  }
-
-  let isValid = false;
-  const parentPrivsResp = await Models.MPrivileges.check({
-    route: parentRouteName,
-    itemID: item.parentID,
-  });
-  if (parentPrivsResp.err) {
-    return { err: true, data: 'err while fetching privileges' };
-  }
-
-  // console.log(parentPrivsResp[0])
-  if (!parentPrivsResp[0].length) {
-    const nextParentRoute = parentRoute?.[parentRouteName];
-    if (nextParentRoute && nextParentRoute != 'profile') {
-      const nextParentItemID =
-        itemResp[0][nextParentRoute.slice(0, -1) + '_FK'];
-      return checkChildrenAccess({
-        route: parentRouteName,
-        item: { owner_FK, parentID: nextParentItemID },
-        action,
+  for (let i = 0; i < items.length; i++) {
+    let itemResp;
+    if (checkParents) {
+      itemResp = await Models[tableName].read({
+        id: items[i].id,
+        owner_FK: items[i].owner_FK,
       });
+      if (itemResp.err) {
+        return {
+          err: true,
+          data: 'err while fetching privileges in checkAceess -- syntax error in privileges/check',
+        };
+      }
+      if (itemResp[0].length) {
+        return {
+          err: true,
+          data: 'err while fetching item in checkAceess -- no item was found',
+        };
+      }
     }
-    return {isValid}
+
+    // check if the user is the owner
+    if (items[i].owner_FK == userID) {
+      results[i] = { ...resultTemplate, isValid: true, item: items[i] };
+    }
+
+    // fetching privileges
+    const parentPrivsResp = await Models.MPrivileges.check({
+      route: tableName,
+      itemID: checkParents ? itemResp[0][0].id : items[0].id,
+    });
+    if (parentPrivsResp.err) {
+      results[i] = {
+        ...resultTemplate,
+        err: true,
+        errMessage: 'err while fetching privileges',
+      };
+    }
+
+    // check parent if there are no privileges for the current item
+    if (!parentPrivsResp[0].length) {
+      const parentRoute = parentRoute?.[tableName.slice(0, -1) + '_FK'];
+      if (parentRoute && parentRoute != 'profile') {
+        const parentID = itemResp[0][0][parentRoute];
+        return checkAccess({
+          userID,
+          tableName: parentRoute,
+          items: [items[i]],
+          action,
+          checkParents: true,
+        });
+      }
+      results[i] = { ...resultTemplate };
+    }
+
+    // read is implicitly indicated by the existance of a row in privileges table
+    if (action === 'read') {
+      results[i] = { ...resultTemplate, isValid: true, item: items[i] };
+    }
+
+    // check if has privileges for the provided action
+    const privSection = checkParents ? 'childrenItems' : 'currentItem';
+    const privilegesObj = parentPrivsResp[0][0].privilege;
+    // console.log(privilegesObj)
+
+    if (action === 'update') {
+      isValid = privilegesObj[privSection].update.all;
+      if (!isValid && !checkParents) {
+        isValid = columnsNames.every(
+          (columnName) => privilegesObj[privSection].update?.[columnName]
+        );
+      }
+      results[i] = { ...resultTemplate };
+    }
+
+    results[i] = {
+      ...resultTemplate,
+      isValid: privilegesObj[privSection]?.[action],
+    };
   }
 
-  const privilegesObj = parentPrivsResp[0][0].privilege;
-  // console.log(privilegesObj)
-
-  if (action === 'update') {
-    isValid = privilegesObj.childrenItems.update.all;
-    if (!isValid) {
-      isValid = columnsNames.every(
-        (columnName) => privilegesObj.childrenItems.update?.[columnName]
-      );
-    }
-    return { isValid };
-  }
-
-  isValid = privilegesObj.childrenItems?.[action];
-  return { isValid };
+  return results;
 };
 
-const check = async ({ entityName, action, userID, item }) => {
+const check = async ({ tableName, action, userID, items, columnsNames }) => {
   const result = { err: false, valid: false, data: [] };
 
   switch (action) {
     case 'readSingle': {
-      if (item.owner_FK === userID) {
-        result.valid = true;
-        break;
-      }
-      const parentPrivsResp = await Models.MPrivileges.check({
-        route: entityName,
-        itemID: item.id,
+      const accessResult = await checkAccess({
+        userID,
+        tableName,
+        items,
+        action,
+        columnsNames,
       });
-      if (parentPrivsResp.err) {
-        result.err = true;
-        result.data = 'err while fetching privileges';
-        break;
-      }
-      if (parentPrivsResp[0].length) {
-        result.valid = true;
+
+      if (accessResult[0].isValid) {
+        result.valid = accessResult[0].isValid;
+        result.data = items;
       }
       break;
     }
     case 'readAll': {
       result.valid = true;
-      if (!item.length) {
+      if (!items.length) {
         break;
       }
 
-      // console.log(item)
-      // TODO: filtering by table/entity name, will remove the extra rows
-      const privsResp = await Models.MPrivileges.read({
-        owner_FK: item[0].owner_FK,
+      const privsResp = checkAccess({
+        userID,
+        tableName,
+        items: items,
+        action,
       });
-      if (privsResp.err) {
-        result.err = true;
-        result.data = 'err while fetching privileges';
-        break;
-      }
 
       // items is an array, despite the singular name
-      item.forEach((item) => {
+      items.forEach((item, index) => {
         if (item.owner_FK === userID) {
           result.data.push(item);
           return; // continue to the next
         }
 
-        // console.log(parentPrivsResp[0])
-        if (privsResp[0].length) {
-          privsResp[0].forEach((priv) => {
-            const tableName = entityName.slice(0, -1) + '_FK';
-            // console.log(tableName);
-            if (priv[tableName] === item.id) {
-              result.data.push(item);
-            }
-          });
+        if (privsResp[index].isValid) {
+          result.data.push(item);
         }
       });
       break;
     }
     case 'create': {
-      if (entityName === 'portfolios') {
-        const isOwner = userID == item.owner_FK;
+      if (tableName === 'portfolios') {
+        const isOwner = userID == items.owner_FK;
         if (!isOwner) {
           result.data = 'portfolios can only be created by the account owner.';
         }
@@ -161,9 +166,10 @@ const check = async ({ entityName, action, userID, item }) => {
         break;
       }
 
-      const accessResult = await checkAceess({
-        route: parentRoute[entityName],
-        itemID: item.parentID,
+      const accessResult = await checkAccess({
+        userID,
+        tableName,
+        itemID: items.parentID,
         action: 'create',
       });
       if (accessResult.err) {
@@ -178,15 +184,16 @@ const check = async ({ entityName, action, userID, item }) => {
       break;
     }
     case 'update': {
-      if (item.owner_FK === userID) {
+      if (items.owner_FK === userID) {
         result.valid = true;
         break;
       }
-      const accessResult = await checkAceess({
-        route: entityName,
-        itemID: item.id,
+      const accessResult = await checkAccess({
+        userID,
+        tableName,
+        itemID: items.id,
         action: 'update',
-        columnsNames: item.columnsNames,
+        columnsNames: items.columnsNames,
       });
       if (accessResult.err) {
         result.err = accessResult.err;
@@ -200,15 +207,16 @@ const check = async ({ entityName, action, userID, item }) => {
       break;
     }
     case 'remove': {
-      if (item.owner_FK === userID) {
+      if (items.owner_FK === userID) {
         result.valid = true;
         break;
       }
 
       // console.log(entityName)
-      const accessResult = await checkAceess({
-        route: entityName,
-        itemID: item.id,
+      const accessResult = await checkAccess({
+        userID,
+        tableName,
+        itemID: items.id,
         action: 'remove',
       });
 
@@ -224,9 +232,10 @@ const check = async ({ entityName, action, userID, item }) => {
       break;
     }
     case 'assign': {
-      const accessResult = await checkAceess({
-        route: entityName,
-        itemID: item.id,
+      const accessResult = await checkAccess({
+        userID,
+        tableName,
+        itemID: items.id,
         action: 'assign',
       });
 

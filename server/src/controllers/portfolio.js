@@ -19,7 +19,7 @@ const readAll = async (req, res, next) => {
     entityName: 'portfolios',
     action: 'readAll',
     userID: req.userID,
-    item: portfoliosResp[0],
+    items: portfoliosResp[0],
   });
   if (privilegesResult.err) {
     return next(
@@ -43,7 +43,7 @@ const create = async (req, res, next) => {
     entityName: 'portfolios',
     action: 'create',
     userID: req.userID,
-    item: { owner_FK },
+    items: [{ owner_FK }],
   });
   if (privilegesResult.err) {
     return next(
@@ -86,7 +86,7 @@ const update = async (req, res, next) => {
     action: 'update',
     userID: req.userID,
     //TODO: I need a way to determin what columns have changed,
-    item: { owner_FK, id, columnsNames: ['title'] },
+    items: [{ owner_FK, id, columnsNames: ['title'] }],
   });
   if (privilegesResult.err) {
     return next(
@@ -134,7 +134,7 @@ const remove = async (req, res, next) => {
     action: 'remove',
     userID: req.userID,
     //TODO: I need a way to determin what columns have changed,
-    item: { owner_FK, id},
+    items: [{ owner_FK, id}],
   });
   if (privilegesResult.err) {
     return next(

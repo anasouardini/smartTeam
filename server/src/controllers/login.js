@@ -10,7 +10,7 @@ const presistLogin = async (req, res, userID) => {
     const privKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pem`, {
       encoding: 'utf8',
     });
-    const jwtOptions = { algorithm: 'RS256', expiresIn: '1h' };
+    const jwtOptions = { algorithm: 'RS256', expiresIn: '24h' };
     refreshToken = jwt.sign(
       { userID: userID },
       privKey,
@@ -29,7 +29,7 @@ const presistLogin = async (req, res, userID) => {
     const privKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pem`, {
       encoding: 'utf8',
     });
-    const jwtOptions = { algorithm: 'RS256', expiresIn: '1h' };
+    const jwtOptions = { algorithm: 'RS256', expiresIn: '24h' };
     accessToken = jwt.sign(
       { userID: userID },
       privKey,

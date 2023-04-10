@@ -14,10 +14,10 @@ const readAll = async (req, res, next) => {
   }
 
   const privilegesResult = await privileges.check({
-    entityName: 'projects',
+    tableName: 'projects',
     action: 'readAll',
     userID: req.userID,
-    item: projectsResp[0],
+    items: projectsResp[0],
   });
   if (privilegesResult.err) {
     return next(
@@ -51,10 +51,10 @@ const create = async (req, res, next) => {
   } = req.body;
 
   const privilegesResult = await privileges.check({
-    entityName: 'projects',
+    tableName: 'projects',
     action: 'create',
     userID: req.userID,
-    item: {parentID: portfolio},
+    items: [{parentID: portfolio}],
   });
   if (privilegesResult.err) {
     return next(
