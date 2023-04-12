@@ -95,6 +95,9 @@ export default function Portfolios() {
     },
     { enabled: !!itemsListQuery.data?.profiles }
   );
+  if(portfoliosQuery.status == 'success'){
+    console.log(portfoliosQuery.data)
+  }
 
   type porfoliosResponseT = {
     id: string;
@@ -221,10 +224,10 @@ export default function Portfolios() {
             Refs.current.selectInputs.profiles = el;
           }}
         >
+          <option value={loggedInUser.id}>{loggedInUser.username}</option>
           {profiles.map((profile: { id: string; username: string }) => {
             return <option value={profile.id}>{profile.username}</option>;
           })}
-          <option value={loggedInUser.id}>{loggedInUser.username}</option>
         </select>
       </>
     );

@@ -341,10 +341,10 @@ export default function Projects() {
             Refs.current.selectInputs.profiles = el;
           }}
         >
+          <option value={loggedInUser.id}>{loggedInUser.username}</option>
           {profiles.map((profile: { id: string; username: string }) => {
             return <option value={profile.id}>{profile.username}</option>;
           })}
-          <option value={loggedInUser.id}>{loggedInUser.username}</option>
         </select>
       </>
     );

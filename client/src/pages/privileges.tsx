@@ -98,12 +98,28 @@ export default function Privileges() {
     async () => {
       // the first 3 must stay at the top
       const requestObj = {
+        title: 'privileges',
         items: {
-          portfolios: { name: 'portfolios', filter: {} },
-          projects: { name: 'projects', filter: {} },
-          tasks: { name: 'tasks', filter: {} },
-          connections: { name: 'users', filter: { userID: loggedInUser.id } },
-          privilegesCategories: { name: 'privilegesCategories', filter: {} },
+          portfolios: {
+            name: 'portfolios',
+            filter: { owner_FK: Refs.current.globalFilter },
+          },
+          projects: {
+            name: 'projects',
+            filter: { owner_FK: Refs.current.globalFilter },
+          },
+          tasks: {
+            name: 'tasks',
+            filter: { owner_FK: Refs.current.globalFilter },
+          },
+          connections: {
+            name: 'users',
+            filter: { userID: loggedInUser.id },
+          },
+          privilegesCategories: {
+            name: 'privilegesCategories',
+            filter: { owner_FK: Refs.current.globalFilter },
+          },
         },
       };
       const response = await Bridge('post', `itemsList`, requestObj);
@@ -115,9 +131,11 @@ export default function Privileges() {
   // }
   const Refs = React.useRef<{
     selectInputs: { [key: string]: HTMLSelectElement | HTMLInputElement };
+    globalFilter: string;
     formHiddenFields: { owner_FK: string };
   }>({
     selectInputs: {},
+    globalFilter: loggedInUser.id,
     formHiddenFields: { owner_FK: '' },
   });
 
@@ -138,8 +156,8 @@ export default function Privileges() {
         className='mt-4 text-left flex flex-col gap-2'
       >
         {privilegesQuery.status == 'success' ? (
-          // console.log(privilegesQuery.data);
           data.map((rule, index) => {
+            console.log(privilegesQuery.data);
             return (
               <div
                 onClick={(e) => {
@@ -154,8 +172,8 @@ export default function Privileges() {
                 <h3 key={index}>
                   {
                     itemsListQuery.data.users.filter(
-                      (user) => user.id == 'venego-venego-venego-venego'
-                    )[0].username
+                      (user) => user.id == rule.user
+                    )?.[0]?.username
                   }
                 </h3>
 
@@ -377,7 +395,8 @@ export default function Privileges() {
     return (
       <>
         <select
-          onChange={() => {
+          onChange={(e) => {
+            Refs.current.globalFilter = e.target.value;
             privilegesQuery.refetch();
           }}
           className={`ml-auto`}
@@ -385,10 +404,10 @@ export default function Privileges() {
             Refs.current.selectInputs.profiles = el;
           }}
         >
+          <option value={loggedInUser.id}>{loggedInUser.username}</option>
           {profiles.map((profile: { id: string; username: string }) => {
             return <option value={profile.id}>{profile.username}</option>;
           })}
-          <option value={loggedInUser.id}>{loggedInUser.username}</option>
         </select>
       </>
     );

@@ -16,7 +16,7 @@ const readAll = async (req, res, next) => {
   // console.log(portfoliosResp[0]);
 
   const privilegesResult = await privileges.check({
-    entityName: 'portfolios',
+    tableName: 'portfolios',
     action: 'readAll',
     userID: req.userID,
     items: portfoliosResp[0],
@@ -26,7 +26,7 @@ const readAll = async (req, res, next) => {
       `err while checking privileges for ${req.path}\n${privilegesResult.data}`
     );
   }
-  if (!privilegesResult.valid) {
+  if (!privilegesResult.isValid) {
     return res
       .status(403)
       .json({ data: 'You have no privileges to perfrom such action.' });
@@ -40,7 +40,7 @@ const create = async (req, res, next) => {
   const { title, description, bgImg, status, owner_FK } = req.body;
 
   const privilegesResult = await privileges.check({
-    entityName: 'portfolios',
+    tableName: 'portfolios',
     action: 'create',
     userID: req.userID,
     items: [{ owner_FK }],
@@ -50,7 +50,7 @@ const create = async (req, res, next) => {
       `err while checking privileges for ${req.path}\n${privilegesResult.data}`
     );
   }
-  if (!privilegesResult.valid) {
+  if (!privilegesResult.isValid) {
     return res
       .status(403)
       .json({ data: `You have no privileges to perfrom such action. ${privilegesResult.data}` });
@@ -82,7 +82,7 @@ const update = async (req, res, next) => {
   const { id, owner_FK, title, description, bgImg, status } = req.body;
 
   const privilegesResult = await privileges.check({
-    entityName: 'portfolios',
+    tableName: 'portfolios',
     action: 'update',
     userID: req.userID,
     //TODO: I need a way to determin what columns have changed,
@@ -93,7 +93,7 @@ const update = async (req, res, next) => {
       `err while checking privileges for ${req.path}\n${privilegesResult.data}`
     );
   }
-  if (!privilegesResult.valid) {
+  if (!privilegesResult.isValid) {
     return res
       .status(403)
       .json({ data: 'You have no privileges to perfrom such action.' });
@@ -130,7 +130,7 @@ const remove = async (req, res, next) => {
   const { id, owner_FK } = req.body;
 
   const privilegesResult = await privileges.check({
-    entityName: 'portfolios',
+    tableName: 'portfolios',
     action: 'remove',
     userID: req.userID,
     //TODO: I need a way to determin what columns have changed,
@@ -141,7 +141,7 @@ const remove = async (req, res, next) => {
       `err while checking privileges for ${req.path}\n${privilegesResult.data}`
     );
   }
-  if (!privilegesResult.valid) {
+  if (!privilegesResult.isValid) {
     return res
       .status(403)
       .json({ data: 'You have no privileges to perfrom such action.' });
