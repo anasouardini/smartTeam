@@ -1,6 +1,8 @@
 const pool = require('./dbPool');
 // const {uuidv4:uuid} = require('uuid');
 const defaultOwnerID = 'organization-organization';
+
+// TODO: an instance of this for each account/user
 const defaultPrivileges = [
   [
     'creator',

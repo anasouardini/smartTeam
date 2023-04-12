@@ -16,7 +16,15 @@ const read = async (req, res, next) => {
     // console.log(item);
     // console.log(Models[item.name].list);
     // console.log(item[1])
-    promiseList[item[0]] = Models[item[0]].list(item[1].filter);
+
+    const commonFilter = {owner_FK: req.userID}
+    // users are not filtered by owner_FK
+    if(item[0] === 'users'){
+      delete commonFilter.owner_FK;
+    }
+    console.log('common', commonFilter)
+    console.log('item', item[1])
+    promiseList[item[0]] = Models[item[0]].list({...commonFilter, ...item[1].filter});
   }
 
   // resolving promises
