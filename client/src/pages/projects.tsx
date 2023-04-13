@@ -60,10 +60,12 @@ export default function Projects() {
     };
     formHiddenFields: { owner_FK: string };
     selectInputs: { [key: string]: HTMLSelectElement };
+    globalFilter: string;
   }>({
     selectInputs: {},
     FormFields: FormFields('projects'),
     formHiddenFields: { owner_FK: '' },
+    globalFilter: loggedInUser.id,
   });
 
   const itemsListQuery = useQuery('portfolio&connections list', async () => {
@@ -71,11 +73,11 @@ export default function Projects() {
       items: {
         portfolios: {
           name: 'portfolios',
-          filter: { /* owner_FK: Refs.current.selectInputs.profiles.value */ },
+          filter: { owner_FK: Refs.current.globalFilter },
         },
-        connections: {
-          name: 'assignees',
-          filter: { userID: loggedInUser.id},
+        profiles: {
+          name: 'connections',
+          filter: {},
         },
       },
     };
@@ -113,10 +115,7 @@ export default function Projects() {
       return response?.err == 'serverError' ? false : response.data;
     },
     {
-      enabled: !!(
-        itemsListQuery.status == 'success' &&
-        itemsListQuery.data.portfolios.length
-      ),
+      enabled: !!itemsListQuery?.data?.portfolios?.length,
     }
   );
   // if (projectsQuery.status == 'success') {
@@ -163,9 +162,9 @@ export default function Projects() {
         },
       },
       assignee: {
-        children: itemsListQuery.data.assignees,
+        children: itemsListQuery.data.profiles,
         props: {
-          defaultValue: itemsListQuery.data.assignees[0].id,
+          defaultValue: itemsListQuery.data.profiles[0].id,
           readOnly: true,
         },
       },
@@ -329,11 +328,13 @@ export default function Projects() {
       );
     }
 
-    const profiles = itemsListQuery.data.assignees;
+    const profiles = itemsListQuery.data.profiles;
     return (
       <>
         <select
-          onChange={() => {
+          onChange={(e) => {
+            Refs.current.globalFilter = e.target.value;
+            itemsListQuery.refetch();
             projectsQuery.refetch();
           }}
           className={`ml-auto`}
@@ -358,11 +359,12 @@ export default function Projects() {
           onChange={projectsQuery.refetch}
           className={`w-max`}
         >
-          {itemsListQuery.status=='success' && itemsListQuery.data.portfolios.map(
-            (portfolio: { id: string; title: string }) => (
-              <option value={portfolio.id}>{portfolio.title}</option>
-            )
-          )}
+          {itemsListQuery.status == 'success' &&
+            itemsListQuery.data.portfolios.map(
+              (portfolio: { id: string; title: string }) => (
+                <option value={portfolio.id}>{portfolio.title}</option>
+              )
+            )}
         </select>
         {listHeaderFields()}
         {listProfiles()}

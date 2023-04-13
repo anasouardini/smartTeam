@@ -96,9 +96,9 @@ export default function Privileges() {
   const itemsListQuery = useQuery(
     'connections&portfolios&projects&tasks&privilegesCategories list',
     async () => {
-      // the first 3 must stay at the top
+      // console.log('itemsListQuery', Refs.current.globalFilter)
+      // order matters
       const requestObj = {
-        title: 'privileges',
         items: {
           portfolios: {
             name: 'portfolios',
@@ -112,13 +112,17 @@ export default function Privileges() {
             name: 'tasks',
             filter: { owner_FK: Refs.current.globalFilter },
           },
-          connections: {
-            name: 'users',
-            filter: { userID: loggedInUser.id },
+          users: {
+            name: 'connections',
+            filter: { userID: Refs.current.globalFilter },
           },
           privilegesCategories: {
             name: 'privilegesCategories',
             filter: { owner_FK: Refs.current.globalFilter },
+          },
+          profiles: {
+            name: 'connections',
+            filter: {  },
           },
         },
       };
@@ -157,7 +161,7 @@ export default function Privileges() {
       >
         {privilegesQuery.status == 'success' ? (
           data.map((rule, index) => {
-            console.log(privilegesQuery.data);
+            // console.log(privilegesQuery.data);
             return (
               <div
                 onClick={(e) => {
@@ -297,6 +301,38 @@ export default function Privileges() {
     }
   };
 
+  const listProfiles = () => {
+    if (itemsListQuery.status != 'success') {
+      return (
+        <select>
+          <option>empty list</option>
+        </select>
+      );
+    }
+
+    const profiles = itemsListQuery.data.profiles;
+    return (
+      <>
+        <select
+          onChange={(e) => {
+            Refs.current.globalFilter = e.target.value;
+            itemsListQuery.refetch();
+            privilegesQuery.refetch();
+          }}
+          className={`ml-auto`}
+          ref={(el) => {
+            Refs.current.selectInputs.profiles = el;
+          }}
+        >
+          <option value={loggedInUser.id}>{loggedInUser.username}</option>
+          {profiles.map((profile: { id: string; username: string }) => {
+            return <option value={profile.id}>{profile.username}</option>;
+          })}
+        </select>
+      </>
+    );
+  };
+
   const listHeaderFields = () => {
     // this is the number of lists combined into the first <select> element.
     const firstPartLength = 3;
@@ -349,6 +385,9 @@ export default function Privileges() {
         </datalist>
 
         {Object.keys(targetItemsList).map((itemKey) => {
+          if (itemKey === 'profiles') {
+            return listProfiles();
+          }
           return (
             <select
               onChange={() => {
@@ -382,42 +421,10 @@ export default function Privileges() {
     );
   };
 
-  const listProfiles = () => {
-    if (itemsListQuery.status != 'success') {
-      return (
-        <select>
-          <option>empty list</option>
-        </select>
-      );
-    }
-
-    const profiles = itemsListQuery.data.users;
-    return (
-      <>
-        <select
-          onChange={(e) => {
-            Refs.current.globalFilter = e.target.value;
-            privilegesQuery.refetch();
-          }}
-          className={`ml-auto`}
-          ref={(el) => {
-            Refs.current.selectInputs.profiles = el;
-          }}
-        >
-          <option value={loggedInUser.id}>{loggedInUser.username}</option>
-          {profiles.map((profile: { id: string; username: string }) => {
-            return <option value={profile.id}>{profile.username}</option>;
-          })}
-        </select>
-      </>
-    );
-  };
-
   return (
     <div aria-label='container' className={`grow flex flex-col`}>
       <header aria-label='filters' className={`px-6 py-4 flex flex-wrap gap-4`}>
         {listHeaderFields()}
-        {listProfiles()}
         <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
           Filter
         </button>

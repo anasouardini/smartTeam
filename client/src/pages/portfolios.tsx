@@ -59,8 +59,8 @@ export default function Portfolios() {
   const itemsListQuery = useQuery('connections list', async () => {
     const requestObj = {
       items: {
-        connections: {
-          name: 'profiles',
+        profiles: {
+          name: 'connections',
           filter: { userID: loggedInUser.id },
         },
       },
@@ -96,7 +96,7 @@ export default function Portfolios() {
     { enabled: !!itemsListQuery.data?.profiles }
   );
   if(portfoliosQuery.status == 'success'){
-    console.log(portfoliosQuery.data)
+    // console.log(portfoliosQuery.data)
   }
 
   type porfoliosResponseT = {
@@ -150,6 +150,8 @@ export default function Portfolios() {
     portfoliosQuery.refetch();
   };
 
+
+
   const listPortfolios = () => {
     return portfoliosQuery.data.map((portfolioItem: porfoliosResponseT) => {
       // randome key to keep the UI from staling
@@ -191,18 +193,6 @@ export default function Portfolios() {
     });
   };
 
-  // TODO: this should be in it's own component
-  const listFields = () => {
-    const fields = FormFields('portfolio');
-    return Object.keys(fields).map((fieldKey) => {
-      let TagName = fields[fieldKey].tagName;
-      if (TagName == 'textarea') {
-        TagName = 'input';
-      }
-      return <TagName key={fieldKey} {...fields[fieldKey].props} />;
-    });
-  };
-
   const listProfiles = () => {
     if (itemsListQuery.status != 'success') {
       return (
@@ -232,6 +222,18 @@ export default function Portfolios() {
       </>
     );
   };
+  // TODO: this should be in it's own component
+  const listFields = () => {
+    const fields = FormFields('portfolio');
+    return Object.keys(fields).map((fieldKey) => {
+      let TagName = fields[fieldKey].tagName;
+      if (TagName == 'textarea') {
+        TagName = 'input';
+      }
+      return <TagName key={fieldKey} {...fields[fieldKey].props} />;
+    });
+  };
+
 
   return (
     <div aria-label='container' className={`grow flex flex-col`}>

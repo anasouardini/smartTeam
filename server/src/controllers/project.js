@@ -24,7 +24,7 @@ const readAll = async (req, res, next) => {
       `err while checking privileges for ${req.path}\n${privilegesResult.data}`
     );
   }
-  if (!privilegesResult.valid) {
+  if (!privilegesResult.isValid) {
     return res
       .status(403)
       .json({ data: 'You have no privileges to perfrom such action.' });
@@ -61,7 +61,7 @@ const create = async (req, res, next) => {
       `err while checking privileges for ${req.path}\n${privilegesResult.data}`
     );
   }
-  if (!privilegesResult.valid) {
+  if (!privilegesResult.isValid) {
     return res
       .status(403)
       .json({ data: 'You have no privileges to perfrom such action.' });
