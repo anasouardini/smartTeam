@@ -4,7 +4,7 @@ const { v4: uuid } = require('uuid');
 
 const create = async (newData) => {
   if (!newData || Object.keys(newData).length == 0) {
-    return { err: 'no data is provided' };
+    return { warning: 'no data is provided' };
   }
   newData.id = uuid();
 
@@ -31,7 +31,7 @@ const list = async (filter) => {
 
 const update = async (filter, newData) => {
   if (!newData || Object.keys(newData).length == 0) {
-    return { err: 'no data is provided' };
+    return { warning: 'no data is provided' };
   }
 
   const autoQuery = AutoQuery.update('tasks', filter, newData);

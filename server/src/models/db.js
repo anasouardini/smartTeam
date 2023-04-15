@@ -16,7 +16,7 @@ const defaultPrivileges = [
     'manager',
     defaultOwnerID,
     JSON.stringify({
-      currentItem: { update: {all:false}, remove: false, assign: false },
+      currentItem: { update: {all:false, status: true}, remove: false, assign: false },
       childrenItems: { update: { all: true }, remove: true, create: true, assign: true },
     }),
   ],
@@ -33,7 +33,7 @@ const defaultPrivileges = [
     defaultOwnerID,
     JSON.stringify({
       currentItem: { update: {all:false, status: true}, remove: false, assign: false },
-      childrenItems: { update: { all:false, title: true}, remove: false, create: false, assign: false },
+      childrenItems: { update: { all:false}, remove: false, create: false, assign: false },
     }),
   ],
 ];
