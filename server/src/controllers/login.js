@@ -10,16 +10,17 @@ const presistLogin = async (req, res, userID) => {
     const privKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pem`, {
       encoding: 'utf8',
     });
-    const jwtOptions = { algorithm: 'RS256', expiresIn: '24h' };
+    const jwtOptions = { algorithm: 'RS256', expiresIn: '1d' };
     refreshToken = jwt.sign(
       { userID: userID },
       privKey,
       jwtOptions
     );
 
+    const oneHoure = 1000 * 60 * 60
     res.cookie(process.env.COOKIE_NAME, refreshToken, {
       httpOnly: true,
-      maxAge: 1000 * 60 * 60,
+      maxAge: oneHoure * 24,
     });
   }
 
@@ -29,7 +30,7 @@ const presistLogin = async (req, res, userID) => {
     const privKey = await fs.readFile(`${process.cwd()}/rsa/auth/key.pem`, {
       encoding: 'utf8',
     });
-    const jwtOptions = { algorithm: 'RS256', expiresIn: '24h' };
+    const jwtOptions = { algorithm: 'RS256', expiresIn: '1d' };
     accessToken = jwt.sign(
       { userID: userID },
       privKey,
