@@ -147,7 +147,6 @@ const check = async ({ tableName, action, userID, items, columnsNames }) => {
         tableName,
         items,
         action,
-        columnsNames,
       });
 
       if (accessResult[0].isValid) {
@@ -211,6 +210,7 @@ const check = async ({ tableName, action, userID, items, columnsNames }) => {
         tableName,
         items: items,
         action,
+        columnsNames,
       }))[0];
 
       if (accessResult.err) {

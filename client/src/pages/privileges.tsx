@@ -122,7 +122,7 @@ export default function Privileges() {
           },
           profiles: {
             name: 'connections',
-            filter: {  },
+            filter: {},
           },
         },
       };
@@ -304,7 +304,7 @@ export default function Privileges() {
   const listProfiles = () => {
     if (itemsListQuery.status != 'success') {
       return (
-        <select>
+        <select key='profilesDropDown'>
           <option>empty list</option>
         </select>
       );
@@ -314,6 +314,7 @@ export default function Privileges() {
     return (
       <>
         <select
+          key='profilesDropDown'
           onChange={(e) => {
             Refs.current.globalFilter = e.target.value;
             itemsListQuery.refetch();
@@ -324,9 +325,15 @@ export default function Privileges() {
             Refs.current.selectInputs.profiles = el;
           }}
         >
-          <option value={loggedInUser.id}>{loggedInUser.username}</option>
+          <option key='loggedInUserOption' value={loggedInUser.id}>
+            {loggedInUser.username}
+          </option>
           {profiles.map((profile: { id: string; username: string }) => {
-            return <option value={profile.id}>{profile.username}</option>;
+            return (
+              <option key={profile.id} value={profile.id}>
+                {profile.username}
+              </option>
+            );
           })}
         </select>
       </>

@@ -54,7 +54,7 @@ const create = async (req, res, next) => {
     tableName: 'projects',
     action: 'create',
     userID: req.userID,
-    items: [{parentID: portfolio}],
+    items: [{ parentID: portfolio }],
   });
   if (privilegesResult.err) {
     return next(
@@ -93,20 +93,24 @@ const create = async (req, res, next) => {
 };
 
 const update = async (req, res, next) => {
-  const {
-    portfolio,
-    id,
-    owner_FK,
-    title,
-    description,
-    bgColor,
-    dueDate,
-    status,
-    progress,
-    milestone,
-    budget,
-    expense,
-  } = req.body;
+  const canBeModifiedFields = [
+    'title',
+    'description',
+    'bgColor',
+    'status',
+    'portfolio',
+    'dueDate',
+    'budget',
+    'expense',
+  ];
+  const { id, owner_FK } = req.body;
+  const newData = {};
+  canBeModifiedFields.forEach((fieldKey) => {
+    if (req.body[fieldKey] !== undefined && req.body[fieldKey] !== null) {
+      newData[fieldKey] = req.body[fieldKey];
+    }
+  });
+
   // console.log(req.body)
   const projectsResp = await MProject.update(
     {
@@ -114,18 +118,13 @@ const update = async (req, res, next) => {
       portfolio_FK: portfolio,
       id,
     },
-    {
-      title,
-      description,
-      bgColor,
-      dueDate: dueDate ? dueDate : null,
-      status,
-      progress,
-      milestone,
-      budget,
-      expense,
-    }
+    newData
   );
+
+  if (projectsResp.warning) {
+    return res.status(400).json({data: projectsResp.warning})
+  }
+
   // console.log(projectsResp)
   if (projectsResp.err) {
     return next('err while updating project');

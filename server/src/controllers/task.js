@@ -17,15 +17,8 @@ const readAll = async (req, res, next) => {
 const readSingle = async (req, res) => {};
 
 const create = async (req, res, next) => {
-  const {
-    project,
-    owner_FK,
-    title,
-    description,
-    bgColor,
-    status,
-    dueDate,
-  } = req.body;
+  const { project, owner_FK, title, description, bgColor, status, dueDate } =
+    req.body;
   const tasksResp = await MTask.create({
     owner_FK,
     project_FK: project,
@@ -48,41 +41,33 @@ const create = async (req, res, next) => {
 };
 
 const update = async (req, res, next) => {
-  const newData = req.body;
+  const { id, owner_FK } = req.body;
   // console.log(newData)
-  const editableFiels = ['title', 'description', 'bgColor', 'dueDate'];
-  const query = [
-    {
-      owner_FK: newData.owner_FK,
-      id: newData.id,
-    },
-    {},
-  ];
-  Object.keys(newData).forEach((fieldKey) => {
-    if (editableFiels.includes(fieldKey)) {
-      if (fieldKey == 'dueDate' && newData[fieldKey] == '') return;
-      query[1][fieldKey] = newData[fieldKey];
+  const canBeModifiedFields = ['title', 'description', 'bgColor', 'dueDate'];
+  const newData = {};
+  canBeModifiedFields.forEach((fieldKey) => {
+    if (req.body[fieldKey] !== undefined && req.body[fieldKey] !== null) {
+      newData[fieldKey] = req.body[fieldKey];
     }
   });
+
+  const tasksResp = await MTask.update({ owner_FK, id }, newData);
+
   // console.log(query)
 
-  if (Object.keys(query[1]).length) {
-    const tasksResp = await MTask.update(...query);
-
-    // console.log(query)
-
-    if (tasksResp.err) {
-      return next('err while updating a task');
-    }
-
-    if (!tasksResp[0].affectedRows) {
-      return next('err while updating a task, zero affected rows');
-    }
-
-    return res.json({ data: 'task updated successfully' });
+  if (tasksResp.warning) {
+    return res.status(400).json({ data: tasksResp.warning });
   }
 
-  return res.json({ data: 'there is nothing to update' });
+  if (tasksResp.err) {
+    return next('err while updating a task');
+  }
+
+  if (!tasksResp[0].affectedRows) {
+    return next('err while updating a task, zero affected rows');
+  }
+
+  return res.json({ data: 'task updated successfully' });
 };
 
 const remove = async (req, res, next) => {

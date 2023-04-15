@@ -51,9 +51,9 @@ const create = async (req, res, next) => {
     );
   }
   if (!privilegesResult.isValid) {
-    return res
-      .status(403)
-      .json({ data: `You have no privileges to perfrom such action. ${privilegesResult.data}` });
+    return res.status(403).json({
+      data: `You have no privileges to perfrom such action. ${privilegesResult.data}`,
+    });
   }
 
   const portfoliosResp = await MPortfolio.create({
@@ -79,7 +79,14 @@ const create = async (req, res, next) => {
 };
 
 const update = async (req, res, next) => {
-  const { id, owner_FK, title, description, bgImg, status } = req.body;
+  const canBeModifiedFields = ['title', 'description', 'bgImg', 'status'];
+  const { id, owner_FK } = req.body;
+  const newData = {};
+  canBeModifiedFields.forEach((fieldKey) => {
+    if (req.body[fieldKey] !== undefined && req.body[fieldKey] !== null) {
+      newData[fieldKey] = req.body[fieldKey];
+    }
+  });
 
   const privilegesResult = await privileges.check({
     tableName: 'portfolios',
@@ -87,6 +94,7 @@ const update = async (req, res, next) => {
     userID: req.userID,
     //TODO: I need a way to determin what columns have changed,
     items: [{ owner_FK, id, columnsNames: ['title'] }],
+    columnsNames: Object.keys(newData)
   });
   if (privilegesResult.err) {
     return next(
@@ -104,16 +112,12 @@ const update = async (req, res, next) => {
       owner_FK,
       id,
     },
-    {
-      title,
-      description,
-      bgImg,
-      status,
-      progress: 0,
-      projectsNumber: 0,
-      doneProjectsNumber: 0,
-    }
+    newData
   );
+
+  if (portfoliosResp.warning) {
+    return res.status(400).json({ data: portfoliosResp.warning });
+  }
 
   if (portfoliosResp.err) {
     return next('err while updating portfolios');
@@ -134,7 +138,7 @@ const remove = async (req, res, next) => {
     action: 'remove',
     userID: req.userID,
     //TODO: I need a way to determin what columns have changed,
-    items: [{ owner_FK, id}],
+    items: [{ owner_FK, id }],
   });
   if (privilegesResult.err) {
     return next(

@@ -143,7 +143,6 @@ export default function Portfolios() {
     });
 
     if (resp.err) {
-      console.log(resp);
       return;
     }
 

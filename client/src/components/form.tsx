@@ -37,17 +37,30 @@ export default function Form(props: propsT) {
     [key: string]: any;
   }>({}).current;
 
+  const Refs = React.useRef<{ originalValues: { [key: string]: string } }>({
+    originalValues: {},
+  });
+  const refsActions = {
+    updateInputValue: (key, value) => {
+      if (!Refs.current.originalValues[key]) {
+        Refs.current.originalValues[key] = value;
+      }
+    },
+  };
+
   const parseFields = () => {
     const newData = Object.keys(props.fields).reduce(
       (acc: { [key: string]: string }, fieldKey) => {
         const tagName = props.fields[fieldKey].tagName;
-        if (customFields[tagName]) {
-          // the prop name of the custom input is different from the actual field name
-          // the latter is what is used the identify that value in the server
-          acc[fieldKey] = fieldsRefs[tagName];
-          return acc;
+        if (fieldsRefs[tagName] !== Refs.current.originalValues[fieldKey]) {
+          if (customFields[tagName]) {
+            // the prop name of the custom input is different from the actual field name
+            // the latter is what is used the identify that value in the server
+            acc[fieldKey] = fieldsRefs[tagName];
+            return acc;
+          }
+          acc[fieldKey] = fieldsRefs[fieldKey].value;
         }
-        acc[fieldKey] = fieldsRefs[fieldKey].value;
         return acc;
       },
       {}
@@ -139,6 +152,9 @@ export default function Form(props: propsT) {
           {field.label}:
           {field?.children ? (
             <TagName
+              onFocus={(e) => {
+                refsActions.updateInputValue(fieldKey, e.target.value);
+              }}
               key={fieldKey + randomKey}
               ref={(el) => {
                 fieldsRefs[fieldKey] = el;
@@ -155,6 +171,9 @@ export default function Form(props: propsT) {
             </TagName>
           ) : (
             <TagName
+              onFocus={(e) => {
+                refsActions.updateInputValue(fieldKey, e.target.value);
+              }}
               key={fieldKey + randomKey}
               ref={(el) => {
                 fieldsRefs[fieldKey] = el;
