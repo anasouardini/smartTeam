@@ -52,7 +52,10 @@ export default function Form(props: propsT) {
     const newData = Object.keys(props.fields).reduce(
       (acc: { [key: string]: string }, fieldKey) => {
         const tagName = props.fields[fieldKey].tagName;
-        if (fieldsRefs[tagName] !== Refs.current.originalValues[fieldKey]) {
+        if (
+          props.mode === 'create' ||
+          fieldsRefs[tagName] !== Refs.current.originalValues[fieldKey]
+        ) {
           if (customFields[tagName]) {
             // the prop name of the custom input is different from the actual field name
             // the latter is what is used the identify that value in the server
