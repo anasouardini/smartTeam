@@ -1,7 +1,7 @@
 const Models = {
-  MPrivileges: require('../models/privileges'),
-  MPortfolios: require('../models/portfolio'),
-  MProjects: require('../models/project'),
+  privileges: require('../models/privileges'),
+  portfolios: require('../models/portfolio'),
+  projects: require('../models/project'),
 };
 
 const parentsMap = {
@@ -13,12 +13,14 @@ const parentsMap = {
 const checkAccessResults = [];
 const checkAccess = async ({
   userID,
+  owner_FK,
   tableName,
   items,
   action,
   columnsNames,
-  checkParents,
+  notFirstCall,
 }) => {
+  // console.log('---------- start of function');
   const resultTemplate = {
     err: false,
     errMessage: '',
@@ -26,124 +28,163 @@ const checkAccess = async ({
     item: {},
   };
 
-  for (let i = 0; i < items.length; i++) {
+  // items might be empty, which means creating ONE item
+  const loopCount = items == undefined && action == 'create' ? 1 : items.length;
+  for (let i = 0; i < loopCount; i++) {
     let itemResp;
-    if (checkParents) {
+    if (notFirstCall) {
       itemResp = await Models[tableName].read({
-        id: items[i].id,
-        owner_FK: items[i].owner_FK,
+        id: items[0].id,
+        owner_FK,
       });
+      // console.log(
+      //   'get parent',
+      //   { tableName: tableName, id: items[0].id, owner_FK },
+      //   itemResp[0]
+      // );
+
+      // when it's not the first call, you just return 
+      // return and continue have the same effect, but it indicates better
+
       if (itemResp.err) {
-        return {
+        checkAccessResults.push({
+          ...resultTemplate,
           err: true,
           data: 'err while fetching privileges in checkAceess -- syntax error in privileges/check',
-        };
+        });
+        return;
       }
-      if (itemResp[0].length) {
-        return {
+      if (!itemResp[0].length) {
+        checkAccessResults.push({
+          ...resultTemplate,
           err: true,
           data: 'err while fetching item in checkAceess -- no item was found',
-        };
+        });
+        return;
       }
     }
 
     // check if the user is the owner
-    const isOwner = items[i].owner_FK == userID;
+    const isOwner = owner_FK == userID;
     if (isOwner) {
-      checkAccessResults[i] = {
+      checkAccessResults.push({
         ...resultTemplate,
         isValid: true,
         item: items[i],
-      };
+      });
       continue;
     }
 
     // after I checked it's not the owner who's performing the action
-    if(!isOwner && tableName === 'portfolios' && action === 'create'){
-      checkAccessResults[i] = {
+    if (!isOwner && tableName === 'portfolios' && action === 'create') {
+      checkAccessResults.push({
         ...resultTemplate,
         isValid: false,
-      };
+      });
       continue;
     }
 
+    // debugging
+    if (!itemResp) {
+      // console.log('privcheck, first run -- items', items);
+    } else {
+      // console.log('privcheck, not first run -- parentResp', itemResp[0]);
+    }
     // fetching privileges
-    // console.log(tableName);
-    const parentPrivsResp = await Models.MPrivileges.check({
+    const itemPrivsResp = await Models.privileges.check({
       route: tableName,
-      itemID: checkParents ? itemResp[0][0].id : items[0].id,
+      itemID: notFirstCall ? itemResp[0]?.[i]?.id : items[i].id,
     });
-    if (parentPrivsResp.err) {
-      checkAccessResults[i] = {
+    if (itemPrivsResp.err) {
+      checkAccessResults.push({
         ...resultTemplate,
         err: true,
         errMessage: 'err while fetching privileges',
-      };
+      });
       continue;
     }
 
     // check parent if there are no privileges for the current item
-    if (!parentPrivsResp[0].length) {
-      const parentTableName = parentsMap?.[tableName.slice(0, -1) + '_FK'];
+    if (!itemPrivsResp[0].length) {
+      const parentTableName = parentsMap[tableName];
       if (parentTableName && parentTableName != 'profile') {
-        const parentID = itemResp[0][0][parentTableName];
-        return checkAccess({
+        const parentIDColumn = parentTableName.slice(0, -1) + '_FK';
+        const parentID =
+          itemResp?.[0]?.[0]?.[parentIDColumn] ??
+          items[i].parentID ??
+          items[i][parentIDColumn];
+        // console.log('recursing', parentTableName);
+        // console.log('getting parent id', parentID);
+
+        // TODO: the recursion call has to indicate if privileges are valid
+        await checkAccess({
           userID,
+          owner_FK,
           tableName: parentTableName,
-          items: [{ id: parentID, owner_FK: items[i].owner_FK }],
+          items: [{ id: parentID }],
           action,
-          checkParents: true,
+          notFirstCall: true,
         });
+        continue;
       }
-      checkAccessResults[i] = { ...resultTemplate };
+      checkAccessResults.push({ ...resultTemplate });
       continue;
     }
 
     // read is implicitly indicated by the existance of a row in privileges table
     if (action === 'read' || action === 'readAll') {
-      checkAccessResults[i] = {
+      checkAccessResults.push({
         ...resultTemplate,
         isValid: true,
         item: items[i],
-      };
+      });
       continue;
     }
 
     // check if has privileges for the provided action
-    const privSection = checkParents ? 'childrenItems' : 'currentItem';
-    const privilegesObj = parentPrivsResp[0][0].privilege;
+    const privSection = notFirstCall ? 'childrenItems' : 'currentItem';
+    const privilegesObj = itemPrivsResp[0][0].privilege;
     // console.log(privilegesObj)
 
     if (action === 'update') {
       let canUpdate = privilegesObj[privSection].update.all;
       // console.log(canUpdate)
-      if (!canUpdate && !checkParents) {
+      if (!canUpdate && !notFirstCall) {
         canUpdate = columnsNames.every(
           (columnName) => privilegesObj[privSection].update?.[columnName]
         );
       }
       // console.log(privilegesObj[privSection])
-      checkAccessResults[i] = { ...resultTemplate, isValid: canUpdate };
+      checkAccessResults.push({ ...resultTemplate, isValid: canUpdate });
       continue;
     }
 
-    checkAccessResults[i] = {
+    // update and read are handled above, what's left is remove and create
+    checkAccessResults.push({
       ...resultTemplate,
       isValid: privilegesObj[privSection]?.[action],
-    };
+    });
     continue;
   }
 
   return checkAccessResults;
 };
 
-const check = async ({ tableName, action, userID, items, columnsNames }) => {
+const check = async ({
+  tableName,
+  owner_FK,
+  action,
+  userID,
+  items,
+  columnsNames,
+}) => {
   const result = { err: false, isValid: false, data: [] };
 
   switch (action) {
     case 'readSingle': {
       const accessResult = await checkAccess({
         userID,
+        owner_FK,
         tableName,
         items,
         action,
@@ -164,11 +205,11 @@ const check = async ({ tableName, action, userID, items, columnsNames }) => {
       // console.log('parent', tableName);
       const privsResp = await checkAccess({
         userID,
+        owner_FK,
         tableName,
         items: items,
         action,
       });
-      // console.log(privsResp)
 
       // items is an array, despite the singular name
       items.forEach((item, index) => {
@@ -176,7 +217,6 @@ const check = async ({ tableName, action, userID, items, columnsNames }) => {
           result.data.push(item);
           return; // continue to the next
         }
-
         if (privsResp[index].isValid) {
           result.data.push(item);
         }
@@ -184,20 +224,21 @@ const check = async ({ tableName, action, userID, items, columnsNames }) => {
       break;
     }
     case 'create': {
-
-      const accessResult = (await checkAccess({
-        userID,
-        tableName,
-        items: items,
-        action,
-      }))[0];
+      const accessResult = (
+        await checkAccess({
+          userID,
+          owner_FK,
+          tableName,
+          action,
+        })
+      )[0];
 
       if (accessResult.err) {
         result.err = accessResult.err;
         result.data = accessResult.data;
         break;
       }
-        result.isValid = accessResult.isValid;
+      result.isValid = accessResult.isValid;
       break;
     }
     case 'update': {
@@ -205,13 +246,16 @@ const check = async ({ tableName, action, userID, items, columnsNames }) => {
         result.isValid = true;
         break;
       }
-      const accessResult = (await checkAccess({
-        userID,
-        tableName,
-        items: items,
-        action,
-        columnsNames,
-      }))[0];
+      const accessResult = (
+        await checkAccess({
+          owner_FK,
+          userID,
+          tableName,
+          items: items,
+          action,
+          columnsNames,
+        })
+      )[0];
 
       if (accessResult.err) {
         result.err = accessResult.err;
@@ -232,12 +276,15 @@ const check = async ({ tableName, action, userID, items, columnsNames }) => {
       }
 
       // console.log(entityName)
-      const accessResult = (await checkAccess({
-        userID,
-        tableName,
-        items: items,
-        action,
-      }))[0];
+      const accessResult = (
+        await checkAccess({
+          owner_FK,
+          userID,
+          tableName,
+          items: items,
+          action,
+        })
+      )[0];
 
       if (accessResult.err) {
         result.err = accessResult.err;
@@ -251,12 +298,15 @@ const check = async ({ tableName, action, userID, items, columnsNames }) => {
       break;
     }
     case 'assign': {
-      const accessResult = (await checkAccess({
-        userID,
-        tableName,
-        items: items,
-        action,
-      }))[0];
+      const accessResult = (
+        await checkAccess({
+          owner_FK,
+          userID,
+          tableName,
+          items: items,
+          action,
+        })
+      )[0];
 
       if (accessResult.err) {
         result.err = accessResult.err;

@@ -7,8 +7,6 @@ const readAll = async (req, res, next) => {
     owner_FK: req.query.owner_FK,
     portfolio_FK: req.query.portfolio,
   });
-
-  // console.log(projectsResp[0])
   if (projectsResp.err) {
     return next('err while reading all projects');
   }
@@ -17,8 +15,10 @@ const readAll = async (req, res, next) => {
     tableName: 'projects',
     action: 'readAll',
     userID: req.userID,
+    owner_FK: req.query.owner_FK,
     items: projectsResp[0],
   });
+
   if (privilegesResult.err) {
     return next(
       `err while checking privileges for ${req.path}\n${privilegesResult.data}`
@@ -49,9 +49,11 @@ const create = async (req, res, next) => {
     budget,
     expense,
   } = req.body;
+  // return res.json({data: 'testing'})
 
   const privilegesResult = await privileges.check({
     tableName: 'projects',
+    owner_FK: req.query.owner_FK,
     action: 'create',
     userID: req.userID,
     items: [{ parentID: portfolio }],
@@ -122,7 +124,7 @@ const update = async (req, res, next) => {
   );
 
   if (projectsResp.warning) {
-    return res.status(400).json({data: projectsResp.warning})
+    return res.status(400).json({ data: projectsResp.warning });
   }
 
   // console.log(projectsResp)
