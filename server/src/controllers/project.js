@@ -53,7 +53,7 @@ const create = async (req, res, next) => {
 
   const privilegesResult = await privileges.check({
     tableName: 'projects',
-    owner_FK: req.query.owner_FK,
+    owner_FK,
     action: 'create',
     userID: req.userID,
     items: [{ parentID: portfolio }],
@@ -106,6 +106,7 @@ const update = async (req, res, next) => {
     'expense',
   ];
   const { id, owner_FK } = req.body;
+  console.log('updtae controller', req.body)
   const newData = {};
   canBeModifiedFields.forEach((fieldKey) => {
     if (req.body[fieldKey] !== undefined && req.body[fieldKey] !== null) {
@@ -113,11 +114,30 @@ const update = async (req, res, next) => {
     }
   });
 
+  const privilegesResult = await privileges.check({
+    tableName: 'projects',
+    owner_FK,
+    action: 'update',
+    userID: req.userID,
+    items: [{ parentID: req.body.portfolio, id }],
+  });
+  if (privilegesResult.err) {
+    return next(
+      `err while checking privileges for ${req.path}\n${privilegesResult.data}`
+    );
+  }
+  if (!privilegesResult.isValid) {
+    return res
+      .status(403)
+      .json({ data: 'You have no privileges to perfrom such action.' });
+  }
+
+
   // console.log(req.body)
   const projectsResp = await MProject.update(
     {
       owner_FK,
-      portfolio_FK: portfolio,
+      portfolio_FK: req.body.portfolio,
       id,
     },
     newData
@@ -141,6 +161,25 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   const { id, owner_FK } = req.body;
+
+  const privilegesResult = await privileges.check({
+    tableName: 'projects',
+    owner_FK,
+    action: 'remove',
+    userID: req.userID,
+    items: [{ parentID: req.body.portfolio, id }],
+  });
+  if (privilegesResult.err) {
+    return next(
+      `err while checking privileges for ${req.path}\n${privilegesResult.data}`
+    );
+  }
+  if (!privilegesResult.isValid) {
+    return res
+      .status(403)
+      .json({ data: 'You have no privileges to perfrom such action.' });
+  }
+
   const projectsResp = await MProject.remove({ owner_FK, id });
 
   if (projectsResp.err) {
