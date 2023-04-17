@@ -17,7 +17,7 @@ const readAll = async (req, res, next) => {
 
   const privilegesResult = await privileges.check({
     tableName: 'portfolios',
-    owner_FK: req.query.owner_FK,
+    owner_FK,
     action: 'readAll',
     userID: req.userID,
     items: portfoliosResp[0],
@@ -43,7 +43,7 @@ const create = async (req, res, next) => {
   const privilegesResult = await privileges.check({
     tableName: 'portfolios',
     action: 'create',
-    owner_FK: req.query.owner_FK,
+    owner_FK: req.body.owner_FK,
     userID: req.userID,
   });
   if (privilegesResult.err) {
@@ -93,7 +93,7 @@ const update = async (req, res, next) => {
     tableName: 'portfolios',
     action: 'update',
     userID: req.userID,
-    owner_FK: req.query.owner_FK,
+    owner_FK: req.body.owner_FK,
     //TODO: I need a way to determin what columns have changed,
     items: [{ id, columnsNames: ['title'] }],
     columnsNames: Object.keys(newData),
@@ -139,7 +139,7 @@ const remove = async (req, res, next) => {
     tableName: 'portfolios',
     action: 'remove',
     userID: req.userID,
-    owner_FK: req.query.owner_FK,
+    owner_FK: req.body.owner_FK,
     //TODO: I need a way to determin what columns have changed,
     items: [{ id }],
   });
