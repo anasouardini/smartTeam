@@ -106,7 +106,7 @@ const update = async (req, res, next) => {
     'expense',
   ];
   const { id, owner_FK } = req.body;
-  console.log('updtae controller', req.body)
+  // console.log('updtae controller', req.body)
   const newData = {};
   canBeModifiedFields.forEach((fieldKey) => {
     if (req.body[fieldKey] !== undefined && req.body[fieldKey] !== null) {
@@ -120,6 +120,7 @@ const update = async (req, res, next) => {
     action: 'update',
     userID: req.userID,
     items: [{ parentID: req.body.portfolio, id }],
+    columnsNames: Object.keys(newData),
   });
   if (privilegesResult.err) {
     return next(
@@ -161,6 +162,7 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   const { id, owner_FK } = req.body;
+  console.log('updtae controller', req.body)
 
   const privilegesResult = await privileges.check({
     tableName: 'projects',

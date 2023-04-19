@@ -182,11 +182,13 @@ export default function Projects() {
     stateActions.form.show(project.id, 'edit');
   };
 
-  const removeProject = async (id: string) => {
-    const resp = await Bridge('remove', `project`, {
-      id,
+  const removeProject = async (project: {[key: string]: any}) => {
+    const body = {
+      id: project.id,
+      portfolio: project.portfolio_FK,
       owner_FK: Refs.current.selectInputs.profiles.value,
-    });
+    }
+    const resp = await Bridge('remove', `project`, body);
 
     if (!resp.err) {
       projectsQuery.refetch();
@@ -244,7 +246,7 @@ export default function Projects() {
           <button>
             <FaTrash
               className='text-primary mx-auto'
-              onClick={() => removeProject(project.id)}
+              onClick={() => removeProject(project)}
             />
           </button>
         );
