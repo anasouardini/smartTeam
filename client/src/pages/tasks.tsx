@@ -193,14 +193,15 @@ export default function Tasks() {
   };
 
   const removeTask = async (
-    id: string,
+    task: {[key:string]: any},
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
     e.stopPropagation();
 
     const resp = await Bridge('remove', `task`, {
-      id,
+      id: task.id,
       owner_FK: Refs.current.selectInputs.profiles.value,
+      project: task.project_FK,
     });
 
     if (resp.err) {
@@ -300,7 +301,7 @@ export default function Tasks() {
                         rounded-md flex justify-between items-center`}
             >
               <h3 key={index}>{task.title}</h3>
-              <button onClick={(e) => removeTask(task.id, e)}>
+              <button onClick={(e) => removeTask(task, e)}>
                 <FaTrash className={`text-primary`} />
               </button>
             </div>

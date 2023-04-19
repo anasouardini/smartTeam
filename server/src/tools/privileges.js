@@ -20,7 +20,7 @@ const checkAccess = async ({
   columnsNames,
   notFirstCall,
 }) => {
-  // console.log('---------- start of function', {items});
+  console.log('---------- start of function', {items});
   const resultTemplate = {
     err: false,
     errMessage: '',
@@ -29,8 +29,7 @@ const checkAccess = async ({
   };
 
   // items might be empty, which means creating ONE item
-  const loopCount = items == undefined && action == 'create' ? 1 : items.length;
-  for (let i = 0; i < loopCount; i++) {
+  for (let i = 0; i < items.length; i++) {
     console.log('function-start, loop-start')
     let itemResp;
     if (notFirstCall) {
@@ -68,6 +67,7 @@ const checkAccess = async ({
     // check if the user is the owner
     const isOwner = owner_FK == userID;
     if (isOwner) {
+      console.log('user is owner')
       checkAccessResults.push({
         ...resultTemplate,
         isValid: true,
@@ -78,7 +78,8 @@ const checkAccess = async ({
 
     // console.log('checking owner and create')
     // after I checked it's not the owner who's performing the action
-    if (!isOwner && tableName === 'portfolios' && action === 'create') {
+    if (!isOwner && tableName === 'portfolios' && action === 'create' && !notFirstCall) {
+      console.log('user is not owner and createing portfolio')
       checkAccessResults.push({
         ...resultTemplate,
         isValid: false,
@@ -89,7 +90,9 @@ const checkAccess = async ({
     // fetching privileges
     const itemPrivsResp = await Models.privileges.check({
       route: tableName,
-      itemID: notFirstCall ? itemResp[0]?.[i]?.id : items[i].id,
+      itemID: notFirstCall
+        ? itemResp[0]?.[i]?.id
+        : items[i].id,
     });
     if (itemPrivsResp.err) {
       checkAccessResults.push({
@@ -103,6 +106,7 @@ const checkAccess = async ({
 
     // check parent if there are no privileges for the current item
     if (!itemPrivsResp[0].length) {
+      console.log('no privs, checking parent')
       const parentTableName = parentsMap[tableName];
       if (parentTableName && parentTableName != 'profile') {
         const parentIDColumn = parentTableName.slice(0, -1) + '_FK';
@@ -113,7 +117,6 @@ const checkAccess = async ({
         // console.log('recursing', parentTableName);
         // console.log('getting parent id', parentID);
 
-        console.log('no privs, checking parent')
 
         // TODO: the recursion call has to indicate if privileges are valid
         await checkAccess({
@@ -192,7 +195,7 @@ const check = async ({
 
   switch (action) {
     case 'readSingle': {
-      console.log('-------------------------------------------------- READ SINGLE CASE')
+      console.log('-------------------------------------------------- READ SINGLE CASE, ---- ', tableName)
       const accessResult = await checkAccess({
         userID,
         owner_FK,
@@ -208,7 +211,7 @@ const check = async ({
       break;
     }
     case 'readAll': {
-      console.log('-------------------------------------------------- READ ALL CASE')
+      console.log('-------------------------------------------------- READ ALL CASE ------ ', tableName)
       result.isValid = true;
       if (!items.length) {
         break;
@@ -236,13 +239,14 @@ const check = async ({
       break;
     }
     case 'create': {
-      console.log('-------------------------------------------------- CREATE CASE')
+      console.log('-------------------------------------------------- CREATE CASE ---- ', tableName)
       const accessResult = (
         await checkAccess({
           userID,
           owner_FK,
           tableName,
           action,
+          items,
         })
       )[0];
 
@@ -255,7 +259,7 @@ const check = async ({
       break;
     }
     case 'update': {
-      console.log('-------------------------------------------------- UPDATE CASE')
+      console.log('-------------------------------------------------- UPDATE CASE ---- ', tableName)
       if (items.owner_FK === userID) {
         result.isValid = true;
         break;
@@ -284,7 +288,7 @@ const check = async ({
       break;
     }
     case 'remove': {
-      console.log('-------------------------------------------------- REMOVE CASE')
+      console.log('-------------------------------------------------- REMOVE CASE ---- ', tableName)
 
       if (items.owner_FK === userID) {
         result.isValid = true;
