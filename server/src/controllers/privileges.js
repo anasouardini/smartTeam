@@ -4,6 +4,7 @@ const MEntities = {
   project_FK: require('../models/project'),
   task_FK: require('../models/task'),
 };
+const privileges = require('../tools/privileges');
 
 const readAll = async (req, res, next) => {
   let privilegesFilter = {
@@ -47,6 +48,25 @@ const create = async (req, res, next) => {
   }
   createQuery[targetEntity.type] = targetEntity.value;
 
+  const privilegesResult = await privileges.check({
+    tableName: targetEntity.type.slice(0, -3) + 's',
+    owner_FK,
+    action: 'assign',
+    userID: req.userID,
+    items: [{ id: targetEntity.value}],
+  });
+  if (privilegesResult.err) {
+    return next(
+      `err while checking privileges for ${req.path}\n${privilegesResult.data}`
+    );
+  }
+  if (!privilegesResult.isValid) {
+    return res
+      .status(403)
+      .json({ data: 'You have no privileges to perfrom such action.' });
+  }
+
+
   // adding a privileges row
   const rulesResp = await MPriviledges.create(createQuery);
   if (rulesResp.err) {
@@ -55,26 +75,6 @@ const create = async (req, res, next) => {
   if (!rulesResp[0].affectedRows) {
     return next('err while creating a rule, zero affected rows');
   }
-
-  // assigning user to the table/entity
-  // const entityResp = await MEntities[targetEntity.type].update(
-  //   { id: targetEntity.value },
-  //   { assignee_FK: user }
-  // );
-  // if (entityResp.err) {
-  //   return next(
-  //     `err while assigning user/${user} to entity ${
-  //       targetEntity.type / targetEntity.value
-  //     } -- query error`
-  //   );
-  // }
-  // if (!entityResp[0].affectedRows) {
-  //   return next(
-  //     `err while assigning user/${user} to entity ${
-  //       targetEntity.type / targetEntity.value
-  //     } -- zero affectedRows`
-  //   );
-  // }
 
   return res.json({
     data: `user ${user} now has access to ${targetEntity.type}/${targetEntity.value}
@@ -101,6 +101,24 @@ const update = async (req, res, next) => {
   });
   // console.log(query)
 
+  const privilegesResult = await privileges.check({
+    tableName: targetEntity.type.slice(0, -3) + 's',
+    owner_FK,
+    action: 'assign',
+    userID: req.userID,
+    items: [{ id: targetEntity.value}],
+  });
+  if (privilegesResult.err) {
+    return next(
+      `err while checking privileges for ${req.path}\n${privilegesResult.data}`
+    );
+  }
+  if (!privilegesResult.isValid) {
+    return res
+      .status(403)
+      .json({ data: 'You have no privileges to perfrom such action.' });
+  }
+
   if (Object.keys(query[1]).length) {
     const rulesResp = await MPriviledges.update(...query);
 
@@ -122,6 +140,43 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   const { id, owner_FK } = req.body;
+
+
+  const entityResp = await MPriviledges.read({owner_FK, id});
+  if (entityResp.err) {
+    return next('err while reading all rules');
+  }
+  if(!entityResp[0].length){
+    return next('err while remving rule, not such rule was found');
+  }
+  if(entityResp[0][0]?.portfolio_FK){
+    targetEntity = {type: 'portfolios', value:entityResp[0][0]?.portfolio_FK}
+  }
+  else if(entityResp[0][0]?.project_FK){
+    targetEntity = {type: 'projects', value:entityResp[0][0]?.project_FK}
+  }
+  else if(entityResp[0][0]?.task_FK){
+    targetEntity = {type: 'tasks', value:entityResp[0][0]?.task_FK}
+  }
+
+  const privilegesResult = await privileges.check({
+    tableName: targetEntity.type,
+    owner_FK,
+    action: 'assign',
+    userID: req.userID,
+    items: [{ id: targetEntity.value}],
+  });
+  if (privilegesResult.err) {
+    return next(
+      `err while checking privileges for ${req.path}\n${privilegesResult.data}`
+    );
+  }
+  if (!privilegesResult.isValid) {
+    return res
+      .status(403)
+      .json({ data: 'You have no privileges to perfrom such action.' });
+  }
+
   const rulesResp = await MPriviledges.remove({ owner_FK, id });
 
   if (rulesResp.err) {

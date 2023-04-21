@@ -32,7 +32,7 @@ const readAll = async (req, res, next) => {
   }
 
   // console.log(tasksResp[0])
-  return res.json({ data: tasksResp[0] });
+  return res.json({ data: privilegesResult.data });
 };
 
 const readSingle = async (req, res) => {};
