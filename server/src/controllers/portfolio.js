@@ -45,6 +45,7 @@ const create = async (req, res, next) => {
     action: 'create',
     owner_FK: req.body.owner_FK,
     userID: req.userID,
+    items: [{}],
   });
   if (privilegesResult.err) {
     return next(
