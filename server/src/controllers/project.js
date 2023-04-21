@@ -178,6 +178,32 @@ const update = async (req, res, next) => {
     return next('err while updating a project, zero affected rows');
   }
 
+
+  // increase the done projects count in the portfolio
+  if(updatedColumnIsStatus){
+    const map = {
+      true: 'increaseDoneProjectsNumber',
+      false: 'decreaseDoneProjectsNumber'
+    }
+    const portfoliosResp = await MPortfolio[map[StatusColumnIsUpdatedToDone]](
+      {
+        owner_FK,
+      }
+    );
+
+    if (portfoliosResp.warning) {
+      return res.status(400).json({ data: portfoliosResp.warning });
+    }
+
+    if (portfoliosResp.err) {
+      return next('err while increaseProjectsNumber portfolios');
+    }
+
+    if (!portfoliosResp[0].affectedRows) {
+      return next('err while increaseProjectsNumber portfolio, zero affected rows');
+    }
+  }
+
   return res.json({ data: 'project updated successfully' });
 };
 

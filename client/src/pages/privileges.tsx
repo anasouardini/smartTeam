@@ -53,46 +53,6 @@ export default function Privileges() {
     commonBorder: `border-2 border-primary rounded-md px-1 py-1`,
   };
 
-  const privilegesQuery = useQuery('privileges', async () => {
-    const queryFilter = Object.keys(Refs.current.selectInputs).reduce<{
-      [key: string]: string | undefined;
-    }>((acc, refKey) => {
-      if (refKey === 'targetEntity') {
-        const selectedValue = Refs.current.selectInputs[refKey]?.value;
-        if (selectedValue) {
-          const listID =
-            Refs.current.selectInputs[refKey]?.getAttribute('list');
-          acc[refKey] = {
-            type: selectedValue.split(' - ')[0].slice(0, -1) + '_FK',
-            value:
-              document.querySelector(
-                `#${listID} option[value='${selectedValue}']`
-              )?.dataset?.value || '%',
-          };
-        }
-        return acc;
-      }
-      acc[refKey] = Refs.current.selectInputs[refKey]?.value
-        ? Refs.current.selectInputs[refKey]?.value
-        : '%';
-      return acc;
-    }, {});
-    // console.log(queryFilter);
-
-    const profile =
-      Refs.current.selectInputs?.profiles?.value ||
-      itemsListQuery.data?.profiles?.[0].id;
-    if (profile) {
-      queryFilter.owner_FK = profile;
-    }
-    let response = await Bridge('post', `privileges/all`, queryFilter);
-    return !response || response?.err == 'serverError' ? false : response.data;
-  });
-
-  // if(privilegesQuery.status == 'success'){
-  //     console.log(privilegesQuery.data)
-  //   }
-
   const itemsListQuery = useQuery(
     'connections&portfolios&projects&tasks&privilegesCategories list',
     async () => {
@@ -133,6 +93,46 @@ export default function Privileges() {
   // if(itemsListQuery.status == 'success'){
   //   console.log(itemsListQuery.data)
   // }
+
+
+  const privilegesQuery = useQuery('privileges', async () => {
+    const queryFilter = Object.keys(Refs.current.selectInputs).reduce<{
+      [key: string]: string | undefined;
+    }>((acc, refKey) => {
+      if (refKey === 'targetEntity') {
+        const selectedValue = Refs.current.selectInputs[refKey]?.value;
+        if (selectedValue) {
+          const listID =
+            Refs.current.selectInputs[refKey]?.getAttribute('list');
+          acc[refKey] = {
+            type: selectedValue.split(' - ')[0].slice(0, -1) + '_FK',
+            value:
+              document.querySelector(
+                `#${listID} option[value='${selectedValue}']`
+              )?.dataset?.value,
+          };
+        }
+        return acc;
+      }
+      acc[refKey] = Refs.current.selectInputs[refKey]?.value
+      return acc;
+    }, {});
+    // console.log(queryFilter);
+
+    const profile =
+      Refs.current.selectInputs?.profiles?.value ||
+      itemsListQuery.data?.profiles?.[0].id;
+    if (profile) {
+      queryFilter.owner_FK = profile;
+    }
+    let response = await Bridge('post', `privileges/all`, queryFilter);
+    return !response || response?.err == 'serverError' ? false : response.data;
+  }, {enabled: !!(itemsListQuery?.data?.profiles?.length)});
+
+  // if(privilegesQuery.status == 'success'){
+  //   console.log(privilegesQuery.data)
+  // }
+
   const Refs = React.useRef<{
     selectInputs: { [key: string]: HTMLSelectElement | HTMLInputElement };
     globalFilter: string;
