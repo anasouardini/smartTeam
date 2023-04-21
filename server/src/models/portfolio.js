@@ -46,4 +46,110 @@ const remove = async (filter) => {
   return response;
 };
 
-module.exports = { create, read, list, update, remove };
+const increaseProjectsNumber = async (filter) => {
+  const autoQuery = {
+    query: `update portfolios set projectsNumber=projectsNumber+1`,
+    vars: []
+  };
+
+  const filterKeys = Object.keys(filter);
+  if(filterKeys.length){
+    autoQuery.query += ` where`;
+
+    filterKeys.forEach((filterKey)=>{
+      autoQuery.query += ` ${filterKey}=? and`
+      autoQuery.vars.push(filter[filterKey])
+    })
+    autoQuery.query = autoQuery.query.slice(0, -4);//removing the last " and"
+  }
+
+  const response = await Pool(autoQuery.query, autoQuery.vars);
+
+  return response;
+};
+
+
+const decreaseProjectsNumber = async (filter) => {
+  const autoQuery = {
+    query: `update portfolios set projectsNumber=projectsNumber-1`,
+    vars: []
+  };
+
+  const filterKeys = Object.keys(filter);
+  if(filterKeys.length){
+    autoQuery.query += ` where`;
+
+    filterKeys.forEach((filterKey)=>{
+      autoQuery.query += ` ${filterKey}=? and`
+      autoQuery.vars.push(filter[filterKey])
+    })
+    autoQuery.query = autoQuery.query.slice(0, -4);//removing the last " and"
+  }
+
+  console.log(autoQuery)
+
+  const response = await Pool(autoQuery.query, autoQuery.vars);
+
+  return response;
+};
+
+
+const increaseDoneProjectsNumber = async (filter) => {
+  const autoQuery = {
+    query: `update portfolios set doneProjectsNumber=doneProjectsNumber+1`,
+    vars: []
+  };
+
+  const filterKeys = Object.keys(filter);
+  if(filterKeys.length){
+    autoQuery.query += ` where`;
+
+    filterKeys.forEach((filterKey)=>{
+      autoQuery.query += ` ${filterKey}=? and`
+      autoQuery.vars.push(filter[filterKey])
+    })
+    autoQuery.query = autoQuery.query.slice(0, -4);//removing the last " and"
+  }
+
+  console.log(autoQuery)
+
+  const response = await Pool(autoQuery.query, autoQuery.vars);
+
+  return response;
+};
+
+const decreaseDoneProjectsNumber = async (filter) => {
+  const autoQuery = {
+    query: `update portfolios set doneProjectsNumber=doneProjectsNumber+1`,
+    vars: []
+  };
+
+  const filterKeys = Object.keys(filter);
+  if(filterKeys.length){
+    autoQuery.query += ` where`;
+
+    filterKeys.forEach((filterKey)=>{
+      autoQuery.query += ` ${filterKey}=? and`
+      autoQuery.vars.push(filter[filterKey])
+    })
+    autoQuery.query = autoQuery.query.slice(0, -4);//removing the last " and"
+  }
+
+  console.log(autoQuery)
+
+  const response = await Pool(autoQuery.query, autoQuery.vars);
+
+  return response;
+};
+
+module.exports = {
+  create,
+  read,
+  list,
+  update,
+  increaseProjectsNumber,
+  decreaseProjectsNumber,
+  increaseDoneProjectsNumber,
+  decreaseDoneProjectsNumber,
+  remove
+};

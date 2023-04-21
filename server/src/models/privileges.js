@@ -56,6 +56,7 @@ const remove = async (filter) => {
 
 //TODO: need to filter by user as well
 const check = async ({route, itemID}) => {
+  // console.log({route, itemID})
   const tableSingular = route.slice(0, -1) + '_FK';// removing the plural 's'
   const response = await Pool(`
     select * from privileges P

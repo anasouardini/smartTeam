@@ -1,4 +1,5 @@
 const MProject = require('../models/project');
+const MPortfolio = require('../models/portfolio');
 const privileges = require('../tools/privileges');
 
 const readAll = async (req, res, next) => {
@@ -89,6 +90,26 @@ const create = async (req, res, next) => {
 
   if (!projectsResp[0].affectedRows) {
     return next('err while creating a project, zero affected rows');
+  }
+
+
+  // increase the projects count in the portfolio
+  const portfoliosResp = await MPortfolio.increaseProjectsNumber(
+    {
+      owner_FK,
+    }
+  );
+
+  if (portfoliosResp.warning) {
+    return res.status(400).json({ data: portfoliosResp.warning });
+  }
+
+  if (portfoliosResp.err) {
+    return next('err while increaseProjectsNumber portfolios');
+  }
+
+  if (!portfoliosResp[0].affectedRows) {
+    return next('err while increaseProjectsNumber portfolio, zero affected rows');
   }
 
   return res.json({ data: 'project created successfully' });
@@ -186,6 +207,24 @@ const remove = async (req, res, next) => {
 
   if (projectsResp.err) {
     return next('err while removing a project');
+  }
+
+
+  const portfoliosResp = await MPortfolio.decreaseProjectsNumber(
+    {
+      owner_FK,
+    }
+  );
+  if (portfoliosResp.warning) {
+    return res.status(400).json({ data: portfoliosResp.warning });
+  }
+
+  if (portfoliosResp.err) {
+    return next('err while increaseProjectsNumber portfolios');
+  }
+
+  if (!portfoliosResp[0].affectedRows) {
+    return next('err while increaseProjectsNumber portfolio, zero affected rows');
   }
 
   return res.json({ data: 'project removed successfully' });
