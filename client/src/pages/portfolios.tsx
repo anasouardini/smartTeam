@@ -180,12 +180,11 @@ export default function Portfolios() {
               {portfolioItem.doneProjectsNumber}/{portfolioItem.projectsNumber}
             </span>
           </div>
-          <a
-            href={`/portfolios/${portfolioItem.id}`}
+          <h4
             className='mt-3 text-xl block'
           >
             {portfolioItem.title}
-          </a>
+          </h4>
           <p className='text-gray-800'>{portfolioItem.description}</p>
         </div>
       );
