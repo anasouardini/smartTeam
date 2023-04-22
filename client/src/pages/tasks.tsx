@@ -80,6 +80,7 @@ export default function Tasks() {
     globalFilter: loggedInUser.id,
   });
 
+
   const itemsListQuery = useQuery('portfolios&projects list', async () => {
     const requestObj = {
       items: {
@@ -120,7 +121,7 @@ export default function Tasks() {
           itemsListQuery.data.projects[0].id,
         users:
           Refs.current.headerFields?.profiles?.value ??
-          itemsListQuery.data.profiles[0].id,
+          itemsListQuery.data.profiles?.[0]?.id,
       };
       const profile =
         Refs.current.selectInputs?.profiles?.value ||

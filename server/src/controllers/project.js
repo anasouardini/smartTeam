@@ -121,7 +121,7 @@ const update = async (req, res, next) => {
     'description',
     'bgColor',
     'status',
-    'portfolio',
+    'portfolio_FK',
     'dueDate',
     'budget',
     'expense',
@@ -135,13 +135,30 @@ const update = async (req, res, next) => {
     }
   });
 
+  // checking changed columns
+  const projectColumnsResp = await MProject.read({id, owner_FK});
+  if (projectColumnsResp.err) {
+    return next('err while checking projects columns, syntax error');
+  }
+  if (!projectColumnsResp[0].length) {
+    return next('err while checking projects columns, no such item');
+  }
+  const columns = projectColumnsResp[0][0];
+  const mutatedColumns = {};
+  Object.keys(columns).forEach((columnKey)=>{
+    if(newData[columnKey] && columns[columnKey] != newData[columnKey]){
+      mutatedColumns[columnKey] = newData[columnKey];
+    }
+  })
+
+  // checking privileges
   const privilegesResult = await privileges.check({
     tableName: 'projects',
     owner_FK,
     action: 'update',
     userID: req.userID,
     items: [{ parentID: req.body.portfolio, id }],
-    columnsNames: Object.keys(newData),
+    columnsNames: Object.keys(mutatedColumns),
   });
   if (privilegesResult.err) {
     return next(
@@ -162,7 +179,7 @@ const update = async (req, res, next) => {
       portfolio_FK: req.body.portfolio,
       id,
     },
-    newData
+    mutatedColumns
   );
 
   if (projectsResp.warning) {
@@ -180,27 +197,31 @@ const update = async (req, res, next) => {
 
 
   // increase the done projects count in the portfolio
-  if(updatedColumnIsStatus){
-    const map = {
-      true: 'increaseDoneProjectsNumber',
-      false: 'decreaseDoneProjectsNumber'
+  if(mutatedColumns['status']){
+    let action = '';
+    if(newData.status === 'done' && mutatedColumns.status !== 'done'){
+      action = 'decreaseProjectsNumber';
+    }else if(mutatedColumns.status === 'done' && newData.status !== 'done'){
+      action = 'increaseProjectsNumber';
     }
-    const portfoliosResp = await MPortfolio[map[StatusColumnIsUpdatedToDone]](
-      {
-        owner_FK,
+    if(action){
+      const portfoliosResp = await MPortfolio[action](
+        {
+          owner_FK,
+        }
+      );
+
+      if (portfoliosResp.warning) {
+        return res.status(400).json({ data: portfoliosResp.warning });
       }
-    );
 
-    if (portfoliosResp.warning) {
-      return res.status(400).json({ data: portfoliosResp.warning });
-    }
+      if (portfoliosResp.err) {
+        return next('err while increaseProjectsNumber portfolios');
+      }
 
-    if (portfoliosResp.err) {
-      return next('err while increaseProjectsNumber portfolios');
-    }
-
-    if (!portfoliosResp[0].affectedRows) {
-      return next('err while increaseProjectsNumber portfolio, zero affected rows');
+      if (!portfoliosResp[0].affectedRows) {
+        return next('err while increaseProjectsNumber portfolio, zero affected rows');
+      }
     }
   }
 

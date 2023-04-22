@@ -151,6 +151,7 @@ export default function Projects() {
   };
 
   const editProject = (project: { [key: string]: any }) => {
+    console.log(itemsListQuery.data.profiles)
     Refs.current.formHiddenFields.owner_FK =
       Refs.current.selectInputs.profiles.value;
     Refs.current.formFields = FormFields('project', {
@@ -158,13 +159,6 @@ export default function Projects() {
         children: itemsListQuery.data.portfolios,
         props: {
           defaultValue: Refs.current.selectInputs.portfolios?.value,
-          readOnly: true,
-        },
-      },
-      assignee: {
-        children: itemsListQuery.data.profiles,
-        props: {
-          defaultValue: itemsListQuery.data.profiles[0].id,
           readOnly: true,
         },
       },

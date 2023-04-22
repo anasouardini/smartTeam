@@ -83,9 +83,13 @@ const create = async (req, res, next) => {
 };
 
 const update = async (req, res, next) => {
-  const newData = req.body;
+  const newData = structuredClone(req.body);
   // console.log(newData)
-  const editableFiels = ['title', 'description', 'bgColor', 'dueDate'];
+  const editableFiels = ['user', 'portfolio_FK', 'project_FK','task_FK','privilegesCategories'];
+  if(req.body.targetEntity && req.body.targetEntity.type && req.body.targetEntity.value){
+    newData[req.body.targetEntity.type] = req.body.targetEntity.value;
+    delete newData.targetEntity;
+  }
   const query = [
     {
       owner_FK: newData.owner_FK,
@@ -96,17 +100,20 @@ const update = async (req, res, next) => {
   Object.keys(newData).forEach((fieldKey) => {
     if (editableFiels.includes(fieldKey)) {
       if (fieldKey == 'dueDate' && newData[fieldKey] == '') return;
+      if(fieldKey == 'privilegesCategories'){
+        query[1]['privCat_FK'] = newData[fieldKey];
+        return;
+      }
       query[1][fieldKey] = newData[fieldKey];
     }
   });
-  // console.log(query)
 
   const privilegesResult = await privileges.check({
-    tableName: targetEntity.type.slice(0, -3) + 's',
-    owner_FK,
+    tableName: req.body.targetEntity.type.slice(0, -3) + 's',
+    owner_FK: req.body.owner_FK,
     action: 'assign',
     userID: req.userID,
-    items: [{ id: targetEntity.value}],
+    items: [{ id: req.body.targetEntity.value}],
   });
   if (privilegesResult.err) {
     return next(

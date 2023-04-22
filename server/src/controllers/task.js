@@ -92,13 +92,30 @@ const update = async (req, res, next) => {
     }
   });
 
+  // checking changed columns
+  const portfolioColumnsResp = await MTask.read({id, owner_FK});
+  if (portfolioColumnsResp.err) {
+    return next('err while checking tasks columns, syntax error');
+  }
+  if (!portfolioColumnsResp[0].length) {
+    return next('err while checking tasks columns, no such item');
+  }
+  const columns = portfolioColumnsResp[0][0];
+  const mutatedColumns = {};
+  Object.keys(columns).forEach((columnKey)=>{
+    if(newData[columnKey] && columns[columnKey] != newData[columnKey]){
+      console.log(columnKey)
+      mutatedColumns[columnKey] = newData[columnKey];
+    }
+  })
+
   const privilegesResult = await privileges.check({
     tableName: 'tasks',
     owner_FK,
     action: 'update',
     userID: req.userID,
     items: [{ parentID: req.body.project, id }],
-    columnsNames: Object.keys(newData),
+    columnsNames: Object.keys(mutatedColumns),
   });
   if (privilegesResult.err) {
     return next(
@@ -111,7 +128,7 @@ const update = async (req, res, next) => {
       .json({ data: 'You have no privileges to perfrom such action.' });
   }
 
-  const tasksResp = await MTask.update({ owner_FK, id }, newData);
+  const tasksResp = await MTask.update({ owner_FK, id }, mutatedColumns);
 
   // console.log(query)
 

@@ -121,7 +121,7 @@ export default function Privileges() {
 
     const profile =
       Refs.current.selectInputs?.profiles?.value ||
-      itemsListQuery.data?.profiles?.[0].id;
+      itemsListQuery.data?.profiles?.[0]?.id;
     if (profile) {
       queryFilter.owner_FK = profile;
     }
@@ -221,7 +221,6 @@ export default function Privileges() {
       },
       ''
     );
-    // console.log(selectedTargetEntity);
 
     formFieldsRef.current = FormFields('privileges', {
       targetEntity: {

@@ -90,14 +90,30 @@ const update = async (req, res, next) => {
     }
   });
 
+  // checking changed columns
+  const portfolioColumnsResp = await MPortfolio.read({id, owner_FK});
+  if (portfolioColumnsResp.err) {
+    return next('err while checking portfolio columns, syntax error');
+  }
+  if (!portfolioColumnsResp[0].length) {
+    return next('err while checking portfolio columns, no such item');
+  }
+  const columns = portfolioColumnsResp[0][0];
+  const mutatedColumns = {};
+  Object.keys(columns).forEach((columnKey)=>{
+    if(newData[columnKey] && columns[columnKey] != newData[columnKey]){
+      mutatedColumns[columnKey] = newData[columnKey];
+    }
+  })
+
+  // checking privileges
   const privilegesResult = await privileges.check({
     tableName: 'portfolios',
     action: 'update',
     userID: req.userID,
     owner_FK: req.body.owner_FK,
-    //TODO: I need a way to determin what columns have changed,
     items: [{ id, columnsNames: ['title'] }],
-    columnsNames: Object.keys(newData),
+    columnsNames: Object.keys(mutatedColumns),
   });
   if (privilegesResult.err) {
     return next(
