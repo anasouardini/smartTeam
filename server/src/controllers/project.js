@@ -230,7 +230,7 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   const { id, owner_FK } = req.body;
-  console.log('updtae controller', req.body)
+  // console.log('updtae controller', req.body)
 
   const privilegesResult = await privileges.check({
     tableName: 'projects',

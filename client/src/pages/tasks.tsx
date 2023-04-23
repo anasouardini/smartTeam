@@ -142,9 +142,33 @@ export default function Tasks() {
       ),
     }
   );
-  // if (tasksQuery.status == 'success') {
-  //   // console.log(tasksQuery.data);
-  // }
+  if (tasksQuery.status == 'success') {
+    // updating fields for form
+    const currentItem = tasksQuery.data.filter((item:{[key: string]: any})=>item.id == state.popup.sideForm.itemID)[0]
+    if(currentItem && Object.keys(currentItem).length){
+      Refs.current.formHiddenFields.owner_FK =
+        Refs.current.selectInputs.profiles.value;
+      Refs.current.formFields = FormFields('task', {
+        portfolio: {
+          children: itemsListQuery.data.portfolios,
+          props: {
+            defaultValue: Refs.current.headerFields.portfolios?.value,
+          },
+        },
+        project: {
+          children: itemsListQuery.data.projects,
+          props: {
+            defaultValue: currentItem.project_FK,
+          },
+        },
+        title: { props: { defaultValue: currentItem.title } },
+        description: { props: { defaultValue: currentItem.description } },
+        bgColor: { props: { defaultValue: currentItem.bgColor } },
+        dueDate: { props: { defaultValue: currentItem.dueDate } },
+        status: { props: { defaultValue: currentItem.status } },
+      });
+    }
+  }
 
   const createNewTask = () => {
     Refs.current.formHiddenFields.owner_FK =

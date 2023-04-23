@@ -104,7 +104,7 @@ const update = async (req, res, next) => {
   const mutatedColumns = {};
   Object.keys(columns).forEach((columnKey)=>{
     if(newData[columnKey] && columns[columnKey] != newData[columnKey]){
-      console.log(columnKey)
+      // console.log(columnKey)
       mutatedColumns[columnKey] = newData[columnKey];
     }
   })

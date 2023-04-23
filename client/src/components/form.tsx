@@ -5,7 +5,6 @@ import Genid from '../tools/genid';
 import FixDate from '../tools/fixDate';
 import customFields from './customFields';
 
-// TODO: [BUG] after editing and refetching, the form should update it's COPY of the item
 // TODO: [BUG] editing the drops downs in the filter header should not effect the form
 // TODO: [BUG] remove the hidden fields add the field organization to the form, when you update the on in the header, the hidden field is not updated
 // TODO: the select fields in the form should filter the options of the select field dependent on it.
@@ -33,6 +32,8 @@ type propsT = {
 };
 
 export default function Form(props: propsT) {
+  console.log(props.fields)
+
   const fieldsRefs = React.useRef<{
     [key: string]: any;
   }>({}).current;

@@ -49,6 +49,21 @@ export default function Privileges() {
     },
   };
 
+  const Refs = React.useRef<{
+    selectInputs: { [key: string]: HTMLSelectElement | HTMLInputElement };
+    globalFilter: string;
+    formHiddenFields: { owner_FK: string };
+    formFields: null | {
+      [key: string]: { tagName: string; props: { [key: string]: string } };
+    }
+  }>({
+    formFields: null,
+    selectInputs: {},
+    globalFilter: loggedInUser.id,
+    formHiddenFields: { owner_FK: '' },
+  });
+
+
   const tailwindClx = {
     commonBorder: `border-2 border-primary rounded-md px-1 py-1`,
   };
@@ -94,7 +109,6 @@ export default function Privileges() {
   //   console.log(itemsListQuery.data)
   // }
 
-
   const privilegesQuery = useQuery('privileges', async () => {
     const queryFilter = Object.keys(Refs.current.selectInputs).reduce<{
       [key: string]: string | undefined;
@@ -129,23 +143,65 @@ export default function Privileges() {
     return !response || response?.err == 'serverError' ? false : response.data;
   }, {enabled: !!(itemsListQuery?.data?.profiles?.length)});
 
-  // if(privilegesQuery.status == 'success'){
-  //   console.log(privilegesQuery.data)
-  // }
 
-  const Refs = React.useRef<{
-    selectInputs: { [key: string]: HTMLSelectElement | HTMLInputElement };
-    globalFilter: string;
-    formHiddenFields: { owner_FK: string };
-  }>({
-    selectInputs: {},
-    globalFilter: loggedInUser.id,
-    formHiddenFields: { owner_FK: '' },
-  });
+  if(privilegesQuery.status == 'success'){
+    // updating fieldds for the form
+    const currentItem = privilegesQuery.data.filter((item:{[key: string]: any})=>item.id == state.popup.sideForm.itemID)[0]
+    if(currentItem && Object.keys(currentItem).length){
+      Refs.current.formHiddenFields.owner_FK =
+        Refs.current.selectInputs.profiles.value;
+      const firstPartLength = 3;
+      const itemsList = Object.fromEntries(
+        Object.entries(itemsListQuery.data).splice(0, firstPartLength)
+      ) as { [key: string]: string[] };
+      // console.log('itemslist', itemsList)
 
-  const formFieldsRef = React.useRef<null | {
-    [key: string]: { tagName: string; props: { [key: string]: string } };
-  }>(null);
+      // This is a mess, I need to refactor this
+      const selectedTargetEntity = Object.keys(itemsList).reduce(
+        (acc, itemKey) => {
+          // console.log(privilegeRule[itemKey.slice(0, -1)+'_FK'], itemKey.slice(0, -1)+'_FK')
+          const selectedItemKey = itemKey.slice(0, -1) + '_FK';
+          if (currentItem[selectedItemKey]) {
+            acc = `${itemKey} - ${
+              itemsList[itemKey].filter(
+                (item) => item.id == [currentItem[selectedItemKey]]
+              )[0].title
+            }`;
+            // console.log(acc);
+          }
+          return acc;
+        },
+        ''
+      );
+
+      Refs.current.formFields = FormFields('privileges', {
+        targetEntity: {
+          tagName: 'ListInput',
+          props: {
+            defaultValue: selectedTargetEntity,
+            itemsList,
+          },
+        },
+        user: {
+          props: {
+            defaultValue: currentItem.user,
+          },
+          children: itemsListQuery.data.users.map((item) => {
+            return { id: item.id, title: item.username };
+          }),
+        },
+        privilegesCategories: {
+          props: {
+            defaultValue: currentItem.privCat_FK,
+          },
+          children: itemsListQuery.data.privilegesCategories.map((item) => {
+            return { id: item.id, title: item.id };
+          }),
+        },
+      });
+      }
+  }
+
 
   // NO HOOKS BELOW THIS LOGIC BLOCK
   if (itemsListQuery.status != 'success') {
@@ -222,7 +278,7 @@ export default function Privileges() {
       ''
     );
 
-    formFieldsRef.current = FormFields('privileges', {
+    Refs.current.formFields = FormFields('privileges', {
       targetEntity: {
         tagName: 'ListInput',
         props: {
@@ -260,7 +316,7 @@ export default function Privileges() {
       Object.entries(itemsListQuery.data).splice(0, firstPartLength)
     ) as { [key: string]: string[] };
 
-    formFieldsRef.current = FormFields('privileges', {
+    Refs.current.formFields = FormFields('privileges', {
       targetEntity: {
         tagName: 'ListInput',
         props: {
@@ -461,7 +517,7 @@ export default function Privileges() {
             owner={{
               ThisIsABetterWayToDoThis: 'use this instead of hidden fields',
             }}
-            fields={formFieldsRef.current}
+            fields={Refs.current.formFields}
             mode={state.popup.sideForm.mode}
             route='privileges'
             refetch={privilegesQuery.refetch}
