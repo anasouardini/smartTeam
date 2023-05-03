@@ -19,10 +19,10 @@ The project is about managing teams/projects, where each profile is like an orga
 ### Back-Edn
 
 1. Express.js
-1. axios
-2. bcrypt
-3. mysql2
-4. Oauth(googl, github) — manually
-8. JWT for user&pasword login — refresh token and accecc token to mitigate the risk of CSRF
-9. Email verification (using JWT)
-5. nodemailer
+3. Axios
+4. Mysql2
+5. Oauth(googl, github) — manually
+8. JWT for user&pasword authentication — refresh token and access token to mitigate the risk of CSRF
+9. Bcrypt, also for user&password authentication
+11. Email verification (using JWT)
+12. Nodemailer (seding email to users to verify their ownership of them)
