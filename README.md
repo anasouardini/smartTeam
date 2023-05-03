@@ -1,4 +1,4 @@
-# SmartTeam
+# SmartTeam — Team management app
 
 The purpose of this project is to practice authentication and authorization, I didn't do a very good job at the prior project when it comes to authentication and authorization, so I decided to give it more practice.
 
