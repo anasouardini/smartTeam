@@ -86,16 +86,17 @@ const checkAuth = async (req, res, next) => {
   );
   const needsAuthentication = !doesNotMatterIfAuthenticated && !tryingToAuth;
   const alreadyAuthenticated = tryingToAuth && fullyAuthenticated;
+  const tryingToSwitchAccounts = req.body.switchingAccounts ?? false;
 
   //---- authentication paths
-  if (alreadyAuthenticated) {
+  if (alreadyAuthenticated && !tryingToSwitchAccounts) {
     const userResp = await MUser.read({ id: refreshTokenValid.userID });
 
     if (!userResp[0].length) {
       return res.json({ redirect: '/login' });
     }
 
-    return res.json({ redirect: `user/${userResp[0][0].username}` });
+    return res.json({ redirect: `/user/${userResp[0][0].username}` });
   } else if (needsAuthentication && !fullyAuthenticated) {
 
     // Access Token is not valid, let's refresh it
