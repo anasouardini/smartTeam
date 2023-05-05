@@ -16,7 +16,7 @@ The project is about managing teams/projects, where each profile is like an orga
 6. Tailwind
 10. Vite
 
-### Back-Edn
+### Back-End
 
 1. Express.js
 3. Axios
