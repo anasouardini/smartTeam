@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, NavLink, useLocation, Navigate } from 'react-router-dom';
 import Bridge from '../tools/bridge';
+import toUrlEncoded from '../tools/toUrlEncoded';
 import {
   FaUser,
   FaUserPlus,
@@ -78,14 +79,25 @@ export default function sharedLayout() {
   }
 
   const initDB = async () => {
-    const res = await Bridge('post', 'initDB');
+    const res = await Bridge('post', `initDB`);
     console.log(res);
   };
 
   const logout = async () => {
-    const res = await Bridge('post', 'logout');
+    const res = await Bridge('post', `logout`);
     console.log(res);
   };
+
+  const loginAs = async ({usr, passwd}:{usr:string, passwd: string})=>{
+    // if(isLoggedInState){
+    //   logout({params:{swithingAccounts: true}});
+    // }
+    const response = await Bridge('post', 'login', {
+      switchingAccounts: true,
+      username: usr,
+      password: passwd,
+    });
+  }
 
   // minimizing not hiding
   const toggleMenu = () => {
@@ -225,7 +237,7 @@ export default function sharedLayout() {
       {/*aria-expanded would not makes sense here*/}
       <nav
         ref={(el) => (menuRefs.nav = el)}
-        className='bg-primary text-white min-w-[10rem] overflow-hidden'
+        className='bg-primary text-white min-w-[10rem]'
       >
         <div className='text-2xl py-4 flex justify-between'>
           <span ref={(el) => (menuRefs.logo = el)} className='pl-3'>
@@ -244,18 +256,105 @@ export default function sharedLayout() {
             </span>
           </button>
         </div>
-        <ul className='backdrop-blur-xl h-[3rem] flex flex-col gap-3 min-w-min'>
+        <ul className='h-[3rem] flex flex-col gap-3 min-w-min'>
           {listNavItems()}
-
-          <li>
-            <button
-              onClick={initDB}
-              className={`${tailwindClasses.navItem} ${tailwindClasses.link} w-full`}
+          
+            <ul
+            className={`${tailwindClasses.navItem} ${tailwindClasses.link} w-full relative cursor-pointer`}
+              onMouseOver={(e) => {
+                  e.currentTarget
+                      .querySelector(':scope > ul')
+                      .classList.remove('hidden');
+              }}
+              onMouseOut={(e) => {
+                  e.currentTarget
+                      .querySelector(':scope > ul')
+                      .classList.add('hidden');
+              }}
             >
               <FaHatWizard />
-              initDB
-            </button>
-          </li>
+              Hacks
+                            <ul
+                                className={`hidden absolute top-[20px] left-0 right-0 pt-4 pl-5`}
+                            >
+                                <li
+                                    className={`cursor-pointer text-white hover:bg-white
+                                                hover:text-orange-500 py-1 px-3`}
+                                    onClick={initDB}
+                                >
+                                    reinitDB
+                                </li>
+                                <ul
+                                    onMouseOver={(e) => {
+                                        e.currentTarget
+                                            .querySelector(':scope > ul')
+                                            .classList.remove('hidden');
+                                    }}
+                                    onMouseOut={(e) => {
+                                        e.currentTarget
+                                            .querySelector(':scope > ul')
+                                            .classList.add('hidden');
+                                    }}
+                                    className={`relative cursor-pointer text-white hover:bg-white
+                                                hover:text-orange-500 py-1 px-3`}
+                                >
+                                    login as
+                                    <ul
+                                        className={`hidden absolute top-[32px] left-3 text-white`}
+                                    >
+                                        <li
+                                            className={`cursor-pointer
+                                                        hover:bg-white hover:text-orange-500 p-1 px-3`}
+                                            onClick={() => {
+                                                loginAs({
+                                                    usr: 'organization',
+                                                    passwd: 'organization',
+                                                });
+                                            }}
+                                        >
+                                            organization
+                                        </li>
+                                        <li
+                                            className={`cursor-pointer
+                                            hover:bg-white hover:text-orange-500 p-1 px-3`}
+                                            onClick={() => {
+                                                loginAs({
+                                                    usr: 'venego',
+                                                    passwd: 'venego',
+                                                });
+                                            }}
+                                        >
+                                            venego
+                                        </li>
+                                        <li
+                                            className={`cursor-pointer
+                                            hover:bg-white hover:text-orange-500 p-1 px-3`}
+                                            onClick={() => {
+                                                loginAs({
+                                                    usr: 'segfaulty',
+                                                    passwd: 'segfaulty',
+                                                });
+                                            }}
+                                        >
+                                            segfaulty
+                                        </li>
+                                        <li
+                                            className={`cursor-pointer
+                                            hover:bg-white hover:text-orange-500 p-1 px-3`}
+                                            onClick={() => {
+                                                loginAs({
+                                                    usr: 'potato',
+                                                    passwd: 'potato',
+                                                });
+                                            }}
+                                        >
+                                            potato
+                                        </li>
+                                    </ul>
+                                </ul>
+                            </ul>
+                        </ul>
+
         </ul>
       </nav>
       {/*
