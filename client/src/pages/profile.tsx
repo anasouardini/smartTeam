@@ -3,6 +3,8 @@ import { useQuery } from 'react-query';
 
 import Bridge from '../tools/bridge';
 
+import {toast} from 'react-toastify';
+
 export default function Profile() {
   const { user: usernameParam } = useParams();
 
@@ -20,7 +22,7 @@ export default function Profile() {
   const getCnxLink = async ()=>{
     const resp = await Bridge('read', 'connectionLink');
     navigator.clipboard.writeText(resp.data);
-    console.log(resp)
+    toast.info("Invitation link has been copied to clipboard")
   }
 
   const updateField = async (
@@ -39,7 +41,7 @@ export default function Profile() {
       `user/${userInfoQuery.data.username}`,
       { [name]: value }
     );
-    console.log(userUpdateResp);
+    toast.info(userUpdateResp.data)
   };
 
   const TClasses = {

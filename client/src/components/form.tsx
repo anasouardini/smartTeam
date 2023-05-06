@@ -5,6 +5,9 @@ import Genid from '../tools/genid';
 import FixDate from '../tools/fixDate';
 import customFields from './customFields';
 
+import {toast} from 'react-toastify';
+
+
 // TODO: [BUG] editing the drops downs in the filter header should not effect the form
 // TODO: [BUG] remove the hidden fields add the field organization to the form, when you update the on in the header, the hidden field is not updated
 // TODO: the select fields in the form should filter the options of the select field dependent on it.
@@ -32,7 +35,7 @@ type propsT = {
 };
 
 export default function Form(props: propsT) {
-  console.log(props.fields)
+  // console.log(props.fields)
 
   const fieldsRefs = React.useRef<{
     [key: string]: any;
@@ -80,7 +83,9 @@ export default function Form(props: propsT) {
       });
 
       if (resp.err) {
-        console.log(resp);
+        // console.log(resp);
+        toast.error(resp)
+        toast(resp)
       } else {
         props.refetch();
       }
@@ -100,7 +105,8 @@ export default function Form(props: propsT) {
 
       // console.log(resp);
       if (resp.err) {
-        console.log(resp);
+        // console.log(resp);
+        toast.error(resp)
       } else {
         props.refetch();
       }

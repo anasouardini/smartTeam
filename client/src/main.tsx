@@ -13,6 +13,9 @@ import Tasks from './pages/tasks';
 import Privileges from './pages/privileges';
 import Templates from './pages/privilegesCategories';
 
+import {ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import SharedLayout from './components/sharedLayout';
 
 const MyRouter = () => (
@@ -68,6 +71,7 @@ ReactDOM.createRoot(window.root as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <MyRouter />
+      <ToastContainer />
     </QueryClientProvider>
   </React.StrictMode>
 );

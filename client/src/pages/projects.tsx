@@ -9,6 +9,8 @@ import { FaPen, FaTrash } from 'react-icons/fa';
 import { useTable } from 'react-table';
 import FormFields from '../components/formFields';
 
+import {toast} from 'react-toastify';
+
 type queryT = {
   status: string;
   isLoading: boolean;
@@ -34,9 +36,8 @@ export default function Projects() {
 
         if (mode == 'edit') {
           if (!itemID) {
-            return console.log(
-              'err: forgot to include the item id for editing'
-            );
+            toast.error('err: forgot to include the item id for editing')
+            return;
           }
           stateCpy.popup.form.mode = mode;
           stateCpy.popup.form.itemID = itemID;
@@ -151,7 +152,6 @@ export default function Projects() {
   };
 
   const editProject = (project: { [key: string]: any }) => {
-    console.log(itemsListQuery.data.profiles)
     Refs.current.formHiddenFields.owner_FK =
       Refs.current.selectInputs.profiles.value;
     Refs.current.formFields = FormFields('project', {
@@ -187,7 +187,7 @@ export default function Projects() {
     if (!resp.err) {
       projectsQuery.refetch();
     } else {
-      console.log(resp);
+      toast.error(resp)
     }
   };
 

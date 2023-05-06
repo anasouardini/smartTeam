@@ -3,6 +3,8 @@ import Bridge from '../../tools/bridge';
 import { useOutletContext, Navigate } from 'react-router-dom';
 import Vars from '../../vars';
 
+import {toast} from 'react-toastify';
+
 export default function Authentication(props: {
   title: string;
   label: string;
@@ -56,7 +58,10 @@ export default function Authentication(props: {
       response = await Bridge('post', 'signup', genBody);
     }
 
-    if (!response?.err) return console.log(response);
+    if (!response?.err){
+      toast.error(response)
+      return;
+    }
   };
 
   return (

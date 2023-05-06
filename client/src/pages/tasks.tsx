@@ -8,6 +8,8 @@ import Form from '../components/form';
 import { FaTrash } from 'react-icons/fa';
 import FormFields from '../components/formFields';
 
+import {toast} from 'react-toastify';
+
 type queryT = {
   status: string;
   isLoading: boolean;
@@ -37,9 +39,7 @@ export default function Tasks() {
 
         if (mode == 'edit') {
           if (itemID === undefined) {
-            return console.log(
-              'err: forgot to include the item id for editing'
-            );
+            toast.error('err: forgot to include the item id for editing');return;
           }
           stateCpy.popup.sideForm.itemID = itemID;
         }
@@ -230,7 +230,7 @@ export default function Tasks() {
     });
 
     if (resp.err) {
-      console.log(resp);
+      toast.error(resp)
       return;
     }
 

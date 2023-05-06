@@ -16,6 +16,8 @@ import {
 } from 'react-icons/fa';
 import { VscChromeClose } from 'react-icons/vsc';
 
+import {toast} from 'react-toastify';
+
 type loggedInUserT = {
   username: string;
   id: string;
@@ -80,12 +82,14 @@ export default function sharedLayout() {
 
   const initDB = async () => {
     const res = await Bridge('post', `initDB`);
-    console.log(res);
+    // console.log(res);
+    toast.info(res);
   };
 
   const logout = async () => {
     const res = await Bridge('post', `logout`);
-    console.log(res);
+    // console.log(res);
+    toast.info(res);
   };
 
   const loginAs = async ({usr, passwd}:{usr:string, passwd: string})=>{

@@ -23,9 +23,8 @@ export default function Portfolios() {
 
         if (mode == 'edit') {
           if (itemID === undefined) {
-            return console.log(
-              'err: forgot to include the item id for editing'
-            );
+            toast.error('you forgot to include the item id for editing')
+            return;
           }
           stateCpy.popup.form.itemID = itemID;
         }

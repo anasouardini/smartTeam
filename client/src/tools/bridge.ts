@@ -1,5 +1,7 @@
 import Vars from '../vars';
 
+import {toast} from 'react-toastify';
+
 const server = {
   url: Vars.serverAddress,
 
@@ -111,13 +113,13 @@ const handleRequest = async (
     try{
       response = await methods[method](route, body);
     }catch(err){
-      console.log('client error while trying to make a request: ', { err: 'connectionError', route });
+      toast.error(`client error while trying to make a request. route:${route}`)
       return { err: 'connectionError', route };
     }
 
     // TODO: probably send the falsy response to react-query
     if (response.status != 200) {
-      console.log({ err: response, route });
+      toast.error(`${response}. route: ${route}`)
       return { err: 'serverError' };
     }
 
@@ -130,7 +132,7 @@ const handleRequest = async (
 
     if (response?.redirect) {
       // I need a way to change layout without using react-router
-      console.log('redirecting..', response?.redirect);
+      // console.log('redirecting..', response?.redirect);
       // alert();
       window.location.href = `http://${location.hostname}:${location.port}${response?.redirect}`;
     }
