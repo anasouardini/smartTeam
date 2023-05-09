@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, NavLink, useLocation, Navigate } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import Bridge from '../tools/bridge';
 import toUrlEncoded from '../tools/toUrlEncoded';
 import {
@@ -26,6 +26,7 @@ type loggedInUserT = {
 // TODO: add tooltips for the icons
 
 export default function sharedLayout() {
+  const routerNavigate = useNavigate();
   const [isLoggedInState, setIsLoginState] = React.useState<
     undefined | boolean
   >(undefined);
@@ -43,6 +44,11 @@ export default function sharedLayout() {
     if (!res?.err) {
       setIsLoginState(res.loginStatus);
       setLoggedInUserState(res.loggedInUser);
+
+      if(rLocation.pathname == '/' && res?.loggedInUser?.username){
+        routerNavigate(`/user/${res.loggedInUser.username}`);
+      }
+
       return;
     }
     setIsLoginState(false);
@@ -59,7 +65,7 @@ export default function sharedLayout() {
     xIcon: HTMLElement | null;
     barsIcon: HTMLElement | null;
   }>({
-    expanded: true,
+    expanded: false,
     nav: null,
     logo: null,
     xIcon: null,
@@ -83,7 +89,7 @@ export default function sharedLayout() {
   const initDB = async () => {
     const res = await Bridge('post', `initDB`);
     // console.log(res);
-    toast.info(res);
+    toast.info(res.data);
   };
 
   const logout = async () => {
@@ -102,7 +108,7 @@ export default function sharedLayout() {
       password: passwd,
     });
   }
-
+  
   // minimizing not hiding
   const toggleMenu = () => {
     if (
@@ -112,6 +118,10 @@ export default function sharedLayout() {
     }
 
     if (menuRefs.expanded) {
+      if(document.querySelector('#table-container')){
+        document.querySelector('#table-container').style.width = 'calc(100vw - 2.2rem - 0.5rem - 40px)';
+      }
+      
       menuRefs.nav.style.marginLeft = '.5rem';
       menuRefs.nav.style.marginTop = '.5rem';
       menuRefs.nav.style.marginBottom = '.5rem';
@@ -126,7 +136,9 @@ export default function sharedLayout() {
       menuRefs.expanded = false;
       return;
     }
-
+    if(document.querySelector('#table-container')){
+      document.querySelector('#table-container').style.width = 'calc(100vw - 10rem - 40px)'
+    }
     menuRefs.nav.style.marginLeft = '0';
     menuRefs.nav.style.marginTop = '0';
     menuRefs.nav.style.marginBottom = '0';
@@ -241,10 +253,11 @@ export default function sharedLayout() {
       {/*aria-expanded would not makes sense here*/}
       <nav
         ref={(el) => (menuRefs.nav = el)}
-        className='bg-primary text-white min-w-[10rem]'
+        className={`bg-primary text-white overflow-hidden hover:overflow-visible
+                  ml-[.5rem] my-[.5rem] rounded-[10px] w-[2.1rem] min-w-[2.1rem] `}
       >
         <div className='text-2xl py-4 flex justify-between'>
-          <span ref={(el) => (menuRefs.logo = el)} className='pl-3'>
+          <span ref={(el) => (menuRefs.logo = el)} className='pl-3 hidden'>
             LOGO
           </span>
           <button
@@ -252,17 +265,16 @@ export default function sharedLayout() {
             className={`cursor-pointer mr-2 pl-[5px]`}
             onClick={toggleMenu}
           >
-            <span ref={(el) => (menuRefs.barsIcon = el)} className='hidden'>
+            <span ref={(el) => (menuRefs.barsIcon = el)} className='inline'>
               <FaBars />
             </span>
-            <span ref={(el) => (menuRefs.xIcon = el)}>
+            <span className={`hidden`} ref={(el) => (menuRefs.xIcon = el)}>
               <VscChromeClose />
             </span>
           </button>
         </div>
         <ul className='h-[3rem] flex flex-col gap-3 min-w-min'>
           {listNavItems()}
-          
             <ul
             className={`${tailwindClasses.navItem} ${tailwindClasses.link} w-full relative cursor-pointer`}
               onMouseOver={(e) => {
@@ -282,7 +294,7 @@ export default function sharedLayout() {
                                 className={`hidden absolute top-[20px] left-0 right-0 pt-4 pl-5`}
                             >
                                 <li
-                                    className={`cursor-pointer text-white hover:bg-white
+                                    className={`cursor-pointer text-white bg-orange-500 hover:bg-white
                                                 hover:text-orange-500 py-1 px-3`}
                                     onClick={initDB}
                                 >
@@ -299,7 +311,7 @@ export default function sharedLayout() {
                                             .querySelector(':scope > ul')
                                             .classList.add('hidden');
                                     }}
-                                    className={`relative cursor-pointer text-white hover:bg-white
+                                    className={`relative cursor-pointer text-white bg-orange-500 hover:bg-white
                                                 hover:text-orange-500 py-1 px-3`}
                                 >
                                     login as
@@ -307,7 +319,7 @@ export default function sharedLayout() {
                                         className={`hidden absolute top-[32px] left-3 text-white`}
                                     >
                                         <li
-                                            className={`cursor-pointer
+                                            className={`cursor-pointer bg-orange-500
                                                         hover:bg-white hover:text-orange-500 p-1 px-3`}
                                             onClick={() => {
                                                 loginAs({
@@ -319,7 +331,7 @@ export default function sharedLayout() {
                                             organization
                                         </li>
                                         <li
-                                            className={`cursor-pointer
+                                            className={`cursor-pointer bg-orange-500
                                             hover:bg-white hover:text-orange-500 p-1 px-3`}
                                             onClick={() => {
                                                 loginAs({
@@ -331,7 +343,7 @@ export default function sharedLayout() {
                                             venego
                                         </li>
                                         <li
-                                            className={`cursor-pointer
+                                            className={`cursor-pointer bg-orange-500
                                             hover:bg-white hover:text-orange-500 p-1 px-3`}
                                             onClick={() => {
                                                 loginAs({
@@ -343,7 +355,7 @@ export default function sharedLayout() {
                                             segfaulty
                                         </li>
                                         <li
-                                            className={`cursor-pointer
+                                            className={`cursor-pointer bg-orange-500
                                             hover:bg-white hover:text-orange-500 p-1 px-3`}
                                             onClick={() => {
                                                 loginAs({
@@ -365,6 +377,7 @@ export default function sharedLayout() {
        */}
       <Outlet
         context={{
+          menuExpanded: menuRefs.expanded,
           isLoggedIn: isLoggedInState,
           loggedInUser: loggedInUserState,
         }}
