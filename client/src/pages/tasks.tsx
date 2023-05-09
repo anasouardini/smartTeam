@@ -82,6 +82,7 @@ export default function Tasks() {
 
 
   const itemsListQuery = useQuery('portfolios&projects list', async () => {
+    
     const requestObj = {
       items: {
         portfolios: {
@@ -111,7 +112,7 @@ export default function Tasks() {
       // when fetching portfolios list give an empty list
 
       // TODO: server does not filter using portfolio
-
+      // console.log('test use query')
       const requestObj = {
         portfolio:
           Refs.current.headerFields?.portfolios?.value ??
@@ -132,7 +133,7 @@ export default function Tasks() {
 
       const urlEncodedRequestObj = new URLSearchParams(requestObj);
       const response = await Bridge('read', `task/all?${urlEncodedRequestObj}`);
-
+      
       return response?.err == 'serverError' ? false : response.data;
     },
     {
@@ -171,6 +172,11 @@ export default function Tasks() {
   }
 
   const createNewTask = () => {
+    const parentsExist = itemsListQuery?.data?.projects?.length;
+    if(!parentsExist){
+      toast.error('You have to create a project first!');
+      return;
+    }
     Refs.current.formHiddenFields.owner_FK =
       Refs.current.selectInputs.profiles.value;
     Refs.current.formFields = FormFields('task', {
@@ -360,7 +366,7 @@ export default function Tasks() {
         <main aria-label='projects' className='text-black px-2 gap-3 grow flex'>
           <section
             aria-label='tasks list'
-            className='grow mt-[2rem] py-4 flex flex-col border-gray-300 border-2 rounded-md px-2'
+            className='grow mt-[2rem] mb-3 py-4 flex flex-col border-gray-300 border-2 rounded-md px-2'
           >
             <div className={`flex`}>
               <div className={``}>
