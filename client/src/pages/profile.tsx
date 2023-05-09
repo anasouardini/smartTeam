@@ -22,7 +22,7 @@ export default function Profile() {
   const getCnxLink = async ()=>{
     const resp = await Bridge('read', 'connectionLink');
     navigator.clipboard.writeText(resp.data);
-    toast.info("Invitation link has been copied to clipboard")
+    toast.info("Invitation link has been copied to clipboard. Send it to the person you want to invite.")
   }
 
   const updateField = async (
@@ -41,7 +41,10 @@ export default function Profile() {
       `user/${userInfoQuery.data.username}`,
       { [name]: value }
     );
-    toast.info(userUpdateResp.data)
+
+    if(userUpdateResp.error){
+      toast.info(userUpdateResp.data)
+    }
   };
 
   const TClasses = {
@@ -55,6 +58,7 @@ export default function Profile() {
     <main className='text-black mt-[7rem] mx-auto w-[80%] max-w-[600px]'>
       <section aria-label='name-title-pic' className={`flex`}>
         <img
+          crossOrigin='anonymous'
           className={`rounded-[50%] w-40`}
           aria-label='profile picture'
           src={userInfoQuery.data.avatar}
@@ -74,11 +78,11 @@ export default function Profile() {
           <input
             onBlur={updateField}
             name='title'
-            aria-label='professional title'
+            aria-label='title/slogan'
             type='text'
             {...{
               defaultValue: userInfoQuery.data.title,
-              placeholder: 'what do you call yourself?',
+              placeholder: 'What id your slogan?',
             }}
             className={`${TClasses.input} ${TClasses.border}`}
           />
@@ -91,7 +95,7 @@ export default function Profile() {
           {...{
             defaultValue: userInfoQuery.data.description,
             placeholder:
-              'Add a little bit of description about yourserlf and the pupose of this account.',
+              'A little description about your organization.',
           }}
           rows={3}
           className={`${TClasses.textArea} ${TClasses.border}`}
@@ -117,14 +121,14 @@ export default function Profile() {
             type='email'
             {...{
               defaultValue: userInfoQuery.data.email,
-              placeholder: 'linus trovalds',
+              placeholder: 'e.g. linus@kernel.org',
             }}
             className={`${TClasses.input} ${TClasses.border}`}
           />
         </label>
       </section>
-      <button className={`mt-5 bg-primary text-white rounded-md px-2 py-1`} onClick={getCnxLink}>
-        Get Connection Link
+      <button className={`mt-9 bg-primary text-white rounded-md px-2 py-1`} onClick={getCnxLink}>
+        Get Invitation Link
       </button>
     </main>
   ) : (
