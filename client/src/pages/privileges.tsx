@@ -381,7 +381,7 @@ export default function Privileges() {
             itemsListQuery.refetch();
             privilegesQuery.refetch();
           }}
-          className={`ml-auto`}
+          className={`ml-auto border-2 border-orange-500 px-1 py-1 rounded`}
           ref={(el) => {
             Refs.current.selectInputs.profiles = el;
           }}
@@ -454,7 +454,7 @@ export default function Privileges() {
 
         {Object.keys(targetItemsList).map((itemKey) => {
           if (itemKey === 'profiles') {
-            return listProfiles();
+            return <></>;
           }
           return (
             <select
@@ -491,11 +491,18 @@ export default function Privileges() {
 
   return (
     <div aria-label='container' className={`grow flex flex-col`}>
-      <header aria-label='filters' className={`px-6 py-4 flex flex-wrap gap-4`}>
-        {listHeaderFields()}
-        <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
-          Filter
-        </button>
+      <header aria-label='filters' className={`px-6 py-4`}>
+        {listProfiles()}
+        <details className={`mt-5`}>
+          <summary>Search</summary>
+        
+          <div className={`flex flex-wrap gap-4 pt-5`}>
+            {listHeaderFields()}
+            <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
+              Filter
+            </button>
+          </div>
+        </details>
       </header>
       <main
         aria-label='portfolios'
@@ -503,7 +510,7 @@ export default function Privileges() {
       >
         <section
           aria-label='tasks list'
-          className='grow mt-[2rem] py-4 flex flex-col border-gray-300 border-2 rounded-md px-2'
+          className='grow mt-2 py-4 flex flex-col border-gray-300 border-2 rounded-md px-2'
         >
           <div className={`flex`}>
             <div className={``}>

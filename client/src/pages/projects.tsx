@@ -339,7 +339,7 @@ export default function Projects() {
             itemsListQuery.refetch();
             projectsQuery.refetch();
           }}
-          className={`ml-auto`}
+          className={`ml-auto border-2 border-orange-500 px-1 py-1 rounded`}
           ref={(el) => {
             Refs.current.selectInputs.profiles = el;
           }}
@@ -355,28 +355,34 @@ export default function Projects() {
 
   return (
     <div aria-label='container' className={`grow flex flex-col`}>
-      <header aria-label='filters' className={`px-6 py-4 flex flex-wrap gap-4`}>
-        <select
-          ref={(el) => (Refs.current.selectInputs.portfolios = el)}
-          onChange={projectsQuery.refetch}
-          className={`w-max`}
-        >
-          {itemsListQuery.status == 'success' &&
-            itemsListQuery.data.portfolios.map(
-              (portfolio: { id: string; title: string }) => (
-                <option value={portfolio.id}>{portfolio.title}</option>
-              )
-            )}
-        </select>
-        {listHeaderFields()}
+      <header aria-label='filters' className={`px-6 py-4`}>
         {listProfiles()}
-        <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
-          Filter
-        </button>
+        <details className={`mt-5`}>
+          <summary>Filter</summary>
+          <div className={`mt-3 flex flex-wrap gap-4`}>
+            <select
+              ref={(el) => (Refs.current.selectInputs.portfolios = el)}
+              onChange={projectsQuery.refetch}
+              className={`w-max`}
+            >
+              {itemsListQuery.status == 'success' &&
+                itemsListQuery.data.portfolios.map(
+                  (portfolio: { id: string; title: string }) => (
+                    <option value={portfolio.id}>{portfolio.title}</option>
+                  )
+                )}
+            </select>
+            {listHeaderFields()}
+            
+            <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
+              Filter
+            </button>
+          </div>
+        </details>
       </header>
       <main
         aria-label='projects'
-        className='text-black mt-[4rem] px-[20px] gap-6 grow flex flex-col items-center'
+        className='text-black mt-3 px-[20px] gap-6 grow flex flex-col items-center'
       >
         {/* new project button*/}
         <button

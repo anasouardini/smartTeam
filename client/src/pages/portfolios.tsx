@@ -206,7 +206,7 @@ export default function Portfolios() {
           onChange={() => {
             portfoliosQuery.refetch();
           }}
-          className={`ml-auto`}
+          className={`ml-auto border-2 border-orange-500 px-1 py-1 rounded`}
           ref={(el) => {
             Refs.current.selectInputs.profiles = el;
           }}
@@ -234,19 +234,26 @@ export default function Portfolios() {
 
   return (
     <div aria-label='container' className={`grow flex flex-col`}>
-      <header aria-label='filters' className={`px-6 py-4 flex flex-wrap gap-4`}>
-        {listFields()}
+      <header aria-label='filters' className={`px-6 py-4`}>
         {listProfiles()}
-        <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
-          Filter
-        </button>
+        <details className={`mt-5`}>
+          <summary>
+            Filter
+          </summary>
+          <div className={`flex flex-wrap gap-4 mt-3`}>
+            {listFields()}
+            <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
+              Filter
+            </button>
+          </div>
+        </details>
       </header>
       <main
         aria-label='portfolios'
-        className='text-black mt-[7rem] pl-20 flex gap-6'
+        className='text-black mt-3 pl-10 flex gap-6 flex-wrap'
       >
         {portfoliosQuery.status == 'success' ? listPortfolios() : <></>}
-
+        
         {/* new portfolio button*/}
         <button
           onClick={createNewPortfolio}

@@ -301,7 +301,7 @@ export default function Tasks() {
             itemsListQuery.refetch();
             tasksQuery.refetch();
           }}
-          className={`ml-auto`}
+          className={`ml-auto border-2 border-orange-500 px-1 py-1 rounded`}
           ref={(el) => {
             Refs.current.selectInputs.profiles = el;
           }}
@@ -352,21 +352,27 @@ export default function Tasks() {
   return (
     <>
       <div aria-label='container' className={`grow flex flex-col`}>
+      
         <header
           aria-label='filters'
-          className={`px-6 py-4 flex flex-wrap gap-4`}
+          className={`px-6 py-4`}
         >
-          {listHeaderFields()}
           {listProfiles()}
-          <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
-            Filter
-          </button>
+          <details className={`mt-5`}>
+            <summary>Filter</summary>
+            <div className={`mt-3 flex flex-wrap gap-5`}>
+              {listHeaderFields()}
+              <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
+                Filter
+              </button>
+            </div>
+          </details>
         </header>
 
         <main aria-label='projects' className='text-black px-2 gap-3 grow flex'>
           <section
             aria-label='tasks list'
-            className='grow mt-[2rem] mb-3 py-4 flex flex-col border-gray-300 border-2 rounded-md px-2'
+            className='grow mt-3 mb-3 py-4 flex flex-col border-gray-300 border-2 rounded-md px-2'
           >
             <div className={`flex`}>
               <div className={``}>
