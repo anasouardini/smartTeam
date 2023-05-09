@@ -309,6 +309,11 @@ export default function Privileges() {
   };
 
   const createNewPrivilege = () => {
+    const parentsExist = itemsListQuery?.data?.profiles?.length;
+    if(!parentsExist){
+      toast.error('You have to add a user to your organization first. Click on profile tab.');
+      return;
+    }
     Refs.current.formHiddenFields.owner_FK =
       Refs.current.selectInputs.profiles.value;
     // this is the number of lists combined into the first <select> element.
