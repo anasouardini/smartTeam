@@ -21,9 +21,10 @@ type propsT = { itemsListQuery: queryT };
 
 //TODO: this global state and state actions is better used as a global hook
 export default function Projects() {
-  const { loggedInUser } = useOutletContext<{
+  const { loggedInUser, menuExpanded } = useOutletContext<{
     loggedInUser: { username: string; id: string };
     isLoggedIn: boolean;
+    menuExpanded: boolean;
   }>();
 
   const [state, setState] = React.useState({
@@ -136,6 +137,11 @@ export default function Projects() {
   };
 
   const createNewProject = () => {
+    const parentsExist = itemsListQuery?.data?.portfolios?.length;
+    if(!parentsExist){
+      toast.error('You have to create a portfolio first!');
+      return;
+    }
     Refs.current.formHiddenFields.owner_FK =
       Refs.current.selectInputs.profiles.value;
     Refs.current.formFields = FormFields('project', {
@@ -370,17 +376,24 @@ export default function Projects() {
       </header>
       <main
         aria-label='projects'
-        className='text-black mt-[7rem] px-10 gap-6 grow flex flex-col items-center'
+        className='text-black mt-[4rem] px-[20px] gap-6 grow flex flex-col items-center'
       >
-        <div className={`overflow-auto max-w-min`}>{mountProjectsTable()}</div>
-
         {/* new project button*/}
         <button
           onClick={createNewProject}
-          className={`${tailwindClx.projectBorder} w-max px-3 py-1 text-primary text-lg capitalize`}
+          className={`${tailwindClx.projectBorder} w-max px-2 text-primary text-sm capitalize self-start`}
         >
-          <span className='text-2xl'>+</span> add new project
+          <span className='text-xl'>+</span> add new project
         </button>
+
+        {
+          projectsQuery?.data?.length ? 
+          <div id='table-container'
+          style={{width: menuExpanded ? "calc(100vw - 10rem - 40px)" : "calc(100vw - 2.2rem - .5rem - 40px)"}}
+          className={`scrollbar overflow-x-scroll`}>{mountProjectsTable()}</div>
+          : <></>
+        }
+        
 
         {state.popup.form.show && Refs.current.formFields != null ? (
           <Form
