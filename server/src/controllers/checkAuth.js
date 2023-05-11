@@ -79,11 +79,12 @@ const checkAuth = async (req, res, next) => {
     '/oauth/google',
     '/oauth/github',
   ].includes(req.path);
-  const verifyingConnection = req.path.match('^/verifyConnection/');
+  const verifyingConnection = req.path.match('^/verifyConnection/') ? true : false;
 
   const doesNotMatterIfAuthenticated = ['/initDB', '/isLogin'].includes(
     req.path || verifyingEmail
-  );
+  ) || req.path.match('^/media/avatars/.*') ? true : false;
+
   const needsAuthentication = !doesNotMatterIfAuthenticated && !tryingToAuth;
   const alreadyAuthenticated = tryingToAuth && fullyAuthenticated;
   const tryingToSwitchAccounts = req.body.switchingAccounts ?? false;

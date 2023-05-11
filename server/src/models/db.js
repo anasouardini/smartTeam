@@ -2,13 +2,15 @@ const pool = require('./dbPool');
 // const {uuidv4:uuid} = require('uuid');
 const defaultOwnerID = 'organization-organization';
 
+require('dotenv').config()
+
 // TODO: an instance of this for each account/user
 const defaultPrivileges = [
   [
     'creator',
     defaultOwnerID,
     JSON.stringify({
-      currentItem: { update: {all:true}, remove: true, assign: true },
+      currentItem: { update: { all: true }, remove: true, assign: true },
       childrenItems: { update: { all: true }, remove: true, create: true, assign: true },
     }),
   ],
@@ -16,7 +18,7 @@ const defaultPrivileges = [
     'manager',
     defaultOwnerID,
     JSON.stringify({
-      currentItem: { update: {all:false, status: true}, remove: false, assign: false },
+      currentItem: { update: { all: false, status: true }, remove: false, assign: false },
       childrenItems: { update: { all: true }, remove: true, create: true, assign: true },
     }),
   ],
@@ -24,7 +26,7 @@ const defaultPrivileges = [
     'watcher',
     defaultOwnerID,
     JSON.stringify({
-      currentItem: { update: {all:false}, remove: false, assign: false },
+      currentItem: { update: { all: false }, remove: false, assign: false },
       childrenItems: { update: { all: false }, remove: false, create: false, assign: false },
     }),
   ],
@@ -32,8 +34,8 @@ const defaultPrivileges = [
     'worker',
     defaultOwnerID,
     JSON.stringify({
-      currentItem: { update: {all:false, status: true}, remove: false, assign: false },
-      childrenItems: { update: { all:false}, remove: false, create: false, assign: false },
+      currentItem: { update: { all: false, status: true }, remove: false, assign: false },
+      childrenItems: { update: { all: false }, remove: false, create: false, assign: false },
     }),
   ],
 ];
@@ -143,7 +145,7 @@ const insertionQueries = {
                             'organization-organization',
                             'organization',
                             '$2a$10$vrGBAXzwHyuL4f8wtp9LtuqJisgrwvYHHUQChFh19h6.h/h/PPGd.',
-                            '',
+                            '${process.env.DEV_SERVER_ADDRESS}/media/avatars/alien-headshot.jpg',
                             'organization',
                             1
                             ),
@@ -151,11 +153,11 @@ const insertionQueries = {
                             'venego-venego-venego-venego',
                             'venego',
                             '$2a$10$2Rs1OQprscaedMDIfa3nM.Rkd4wlUSB/1Y9aniUUF5vNftStoy33G',
-                            '',
+                            '${process.env.DEV_SERVER_ADDRESS}/media/avatars/alien-headshot.jpg',
                             'venego',
                             1
                             ),
-                                      (
+                            (
                             'segfaulty-segfaulty-segfaulty',
                             'segfaulty',
                             '$2a$10$nClU9iPu63tTwErJXhQ1guqMdEtUTZoLhc2NmToZZpgq/8Elm0fmK',
