@@ -59,7 +59,7 @@ export default function Profile() {
       <section aria-label='name-title-pic' className={`flex`}>
         <img
           crossOrigin='anonymous'
-          className={`rounded-[50%] w-40`}
+          className={`rounded-[50%] w-40 aspect-square`}
           aria-label='profile picture'
           src={userInfoQuery.data.avatar}
           alt=''
@@ -82,7 +82,7 @@ export default function Profile() {
             type='text'
             {...{
               defaultValue: userInfoQuery.data.title,
-              placeholder: 'What id your slogan?',
+              placeholder: 'What is your slogan?',
             }}
             className={`${TClasses.input} ${TClasses.border}`}
           />
