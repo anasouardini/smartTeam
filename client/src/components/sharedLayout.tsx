@@ -291,7 +291,7 @@ export default function sharedLayout() {
               <FaHatWizard />
               Hacks
                             <ul
-                                className={`hidden absolute top-[20px] left-0 right-0 pt-4 pl-5`}
+                                className={`hidden absolute top-[20px] left-0 right-0 pt-4 pl-2`}
                             >
                                 <li
                                     className={`cursor-pointer text-white bg-orange-500 hover:bg-white
