@@ -18,26 +18,29 @@ export default function Authentication(props: {
 
   // setting background image in the body
   React.useEffect(()=>{
-    const styleTag = document.createElement('style');
-    const styleText = document.createTextNode(`body{
-      background: #fff url("/skyscapers.jpg") no-repeat center;
-      background-size: cover;
-      position: relative;
+    if(!document.body.querySelector('style.bodyStyleForLoginPage')){
+      const styleTag = document.createElement('style');
+      styleTag.classList.add('bodyStyleForLoginPage');
+      const styleText = document.createTextNode(`body{
+        background: #fff url("/skyscapers.jpg") no-repeat center;
+        background-size: cover;
+        position: relative;
+      }
+      body::before{
+          content: '';
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          z-index: -1;
+          opacity: .8;
+          /* background: linear-gradient(to right, #7c2d12, #7f1d1d, #7c2d12); */
+          background: rgba(100, 100, 100, .7);
+      }`);
+      styleTag.appendChild(styleText);
+      document.body.appendChild(styleTag);
     }
-    body::before{
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        z-index: -1;
-        opacity: .8;
-        /* background: linear-gradient(to right, #7c2d12, #7f1d1d, #7c2d12); */
-        background: rgba(100, 100, 100, .7);
-    }`);
-    styleTag.appendChild(styleText);
-    document.body.appendChild(styleTag);
   }, []);
 
   const inputsRef = React.useRef<{[key:string]: HTMLInputElement}>({}).current;
