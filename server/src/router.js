@@ -54,4 +54,6 @@ router.post('/itemsList', controllers.itemsList.read);
 
 router.post('/initDB', controllers.db.init);
 
+router.get('/media/:section/:file', controllers.media.getFile);
+
 module.exports = router

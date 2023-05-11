@@ -14,4 +14,5 @@ module.exports = {
   verifyEmail: require('./verifyEmail'),
   connection: require('./connection'),
   db: require('./db'),
+  media: require('./media')
 }
