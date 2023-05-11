@@ -123,10 +123,13 @@ export default function sharedLayout() {
       }
       
       menuRefs.nav.style.marginLeft = '.5rem';
-      menuRefs.nav.style.marginTop = '.5rem';
-      menuRefs.nav.style.marginBottom = '.5rem';
-
+      menuRefs.nav.style.marginTop = 'auto';
+      menuRefs.nav.style.marginBottom = 'auto';
       menuRefs.nav.style.width = '2.2rem';
+      menuRefs.nav.style.height = '60vh';
+      menuRefs.nav.style.display = 'flex';
+      menuRefs.nav.style.flexDirection = 'column';
+      menuRefs.nav.style.justifyItems = 'center';
       menuRefs.nav.style.minWidth = '2.2rem'; //TODO: temp solution
       menuRefs.nav.style.borderRadius = '10px';
       menuRefs.logo.style.display = 'none';
@@ -140,8 +143,8 @@ export default function sharedLayout() {
       document.querySelector('#table-container').style.width = 'calc(100vw - 10rem - 40px)'
     }
     menuRefs.nav.style.marginLeft = '0';
-    menuRefs.nav.style.marginTop = '0';
-    menuRefs.nav.style.marginBottom = '0';
+    menuRefs.nav.style.height = '100vh';
+    menuRefs.nav.style.display = 'inline-block';
 
     menuRefs.nav.style.width = '10rem';
     menuRefs.nav.style.minWidth = '10rem'; //TODO: temp solution
@@ -254,7 +257,8 @@ export default function sharedLayout() {
       <nav
         ref={(el) => (menuRefs.nav = el)}
         className={`bg-primary text-white overflow-hidden hover:overflow-visible
-                  ml-[.5rem] my-[.5rem] rounded-[10px] w-[2.1rem] min-w-[2.1rem] `}
+                  ml-[.5rem] h-[60vh] my-auto rounded-[10px] w-[2.1rem] min-w-[2.1rem]
+                  flex flex-col justify-center`}
       >
         <div className='text-2xl py-4 flex justify-between'>
           <span ref={(el) => (menuRefs.logo = el)} className='pl-3 hidden'>
@@ -273,7 +277,7 @@ export default function sharedLayout() {
             </span>
           </button>
         </div>
-        <ul className='h-[3rem] flex flex-col gap-3 min-w-min'>
+        <ul className='flex flex-col gap-3 min-w-min'>
           {listNavItems()}
             <ul
             className={`${tailwindClasses.navItem} ${tailwindClasses.link} w-full relative cursor-pointer`}
