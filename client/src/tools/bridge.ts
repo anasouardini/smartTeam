@@ -119,7 +119,7 @@ const handleRequest = async (
 
     // TODO: probably send the falsy response to react-query
     if (response.status != 200) {
-      toast.error(`${response}. route: ${route}`)
+      // toast.error(`${response}. route: ${route}`)
       return { err: 'serverError' };
     }
 
