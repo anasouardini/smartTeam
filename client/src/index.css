@@ -38,3 +38,22 @@ body::-webkit-scrollbar-thumb:horizontal
     border-radius: 5px;
     background-color: rgb(249 115 22);
 }
+
+/* body bg */
+body{
+    background: #fff url("/skyscapers.jpg") no-repeat center;
+    background-size: cover;
+    position: relative;
+}
+body::before{
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    opacity: .8;
+    /* background: linear-gradient(to right, #7c2d12, #7f1d1d, #7c2d12); */
+    background: #555;
+}
