@@ -40,7 +40,7 @@ const signup = async (req, res) => {
     fullname,
     title: '',
     description: '',
-    avatar: '',
+    avatar: `${process.env.DEV_SERVER_ADDRESS}/media/avatars/alien-headshot.jpg`,
   });
 
   if (createUserResponse?.err || !createUserResponse[0]?.affectedRows) {

@@ -161,7 +161,7 @@ const insertionQueries = {
                             'segfaulty-segfaulty-segfaulty',
                             'segfaulty',
                             '$2a$10$nClU9iPu63tTwErJXhQ1guqMdEtUTZoLhc2NmToZZpgq/8Elm0fmK',
-                            '',
+                            '${process.env.DEV_SERVER_ADDRESS}/media/avatars/alien-headshot.jpg',
                             'segfaulty',
                             1
                             ),
@@ -169,7 +169,7 @@ const insertionQueries = {
                             'potato-potato-potato-potato',
                             'potato',
                             '$2a$10$pOJ54FmgEmrQp9RJsUopvusKhtNB/EgVAzj1zUB5GYy6ycFIyiUnW',
-                            '',
+                            '${process.env.DEV_SERVER_ADDRESS}/media/avatars/alien-headshot.jpg',
                             'potato',
                             1
                             )
