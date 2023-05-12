@@ -70,7 +70,7 @@ export default function sharedLayout() {
     logo: null,
     xIcon: null,
     barsIcon: null,
-  }).current;
+  });
 
   // TODO: menu doesn't work in projects(overflowed width) page
   // redirecting
@@ -109,64 +109,98 @@ export default function sharedLayout() {
     });
   }
   
+  const expandNav = ()=>{
+    if(document.querySelector('#table-container')){
+      document.querySelector('#table-container').style.width = 'calc(100vw - 10rem - 40px)'
+    }
+
+    // expand nav elements
+    Array.from(menuRefs.current.nav.querySelectorAll('ul > *')).forEach((navItem)=>{
+      navItem.style.display = 'inline-block';
+      navItem.style.width = 'auto';
+      navItem.style.overflow = 'auto';
+    });
+
+    // menuRefs.current.nav.querySelector('ul > ul').style.overflow = 'auto';
+    // menuRefs.current.nav.querySelector('ul > div.shallowItems').style.overflow = 'auto';
+
+    menuRefs.current.nav.style.marginLeft = '0';
+    menuRefs.current.nav.style.height = '100vh';
+    menuRefs.current.nav.style.display = 'inline-block';
+
+    menuRefs.current.nav.style.width = '10rem';
+    menuRefs.current.nav.style.minWidth = '10rem'; //TODO: temp solution
+    menuRefs.current.nav.style.borderRadius = '0';
+    menuRefs.current.logo.style.display = 'inline';
+    menuRefs.current.xIcon.style.display = 'inline';
+    menuRefs.current.barsIcon.style.display = 'none';
+
+    menuRefs.current.expanded = true;
+  }
+  const shrinkNav = ()=>{
+    if(document.querySelector('#table-container')){
+      document.querySelector('#table-container').style.width = 'calc(100vw - 2.2rem - 0.5rem - 40px)';
+    }
+
+    // shrink nav elements
+    Array.from(menuRefs.current.nav.querySelectorAll('ul > *')).forEach((navItem)=>{
+      navItem.style.cssText = 'display: flex; width: 2.2rem; overflow: hidden;'
+      
+    });
+    if(!menuRefs.current.nav?.querySelector('style')){
+      const styleTag = document.createElement('style');
+      styleTag.innerText = `nav > ul > *:hover{background: red !important; width: auto !important; overflow: inherit !important}`;
+      menuRefs.current.nav.appendChild(styleTag);
+    }
+
+    // menuRefs.current.nav.querySelector('ul > ul').style.overflow = 'hidden';
+    // menuRefs.current.nav.querySelector('ul > div.shallowItems').style.overflow = 'hidden';
+
+    menuRefs.current.nav.style.marginLeft = '.5rem';
+    menuRefs.current.nav.style.marginTop = 'auto';
+    menuRefs.current.nav.style.marginBottom = 'auto';
+    menuRefs.current.nav.style.width = '2.2rem';
+    menuRefs.current.nav.style.height = '60vh';
+    menuRefs.current.nav.style.display = 'flex';
+    menuRefs.current.nav.style.flexDirection = 'column';
+    menuRefs.current.nav.style.justifyItems = 'center';
+    menuRefs.current.nav.style.minWidth = '2.2rem'; //TODO: temp solution
+    menuRefs.current.nav.style.borderRadius = '10px';
+    menuRefs.current.logo.style.display = 'none';
+    menuRefs.current.xIcon.style.display = 'none';
+    menuRefs.current.barsIcon.style.display = 'inline';
+
+    menuRefs.current.expanded = false;
+  }
+
+  // hacking is necessary, because of react's nature
+  const littleState = React.useRef<{[key: string]: boolean}>({menuEffected: false});
+  if(!littleState.current.menuEffected){
+    if(menuRefs.current.nav){
+      shrinkNav();
+      littleState.current.menuEffected = true;
+    }
+  }
+
   // minimizing not hiding
   const toggleMenu = () => {
     if (
-      !(menuRefs.nav && menuRefs.logo && menuRefs.xIcon && menuRefs.barsIcon)
+      !(menuRefs.current.nav && menuRefs.current.logo && menuRefs.current.xIcon && menuRefs.current.barsIcon)
     ) {
       return;
     }
 
-    if (menuRefs.expanded) {
-      if(document.querySelector('#table-container')){
-        document.querySelector('#table-container').style.width = 'calc(100vw - 2.2rem - 0.5rem - 40px)';
-      }
-      
-      menuRefs.nav.style.marginLeft = '.5rem';
-      menuRefs.nav.style.marginTop = 'auto';
-      menuRefs.nav.style.marginBottom = 'auto';
-      menuRefs.nav.style.width = '2.2rem';
-      menuRefs.nav.style.height = '60vh';
-      menuRefs.nav.style.display = 'flex';
-      menuRefs.nav.style.flexDirection = 'column';
-      menuRefs.nav.style.justifyItems = 'center';
-      menuRefs.nav.style.minWidth = '2.2rem'; //TODO: temp solution
-      menuRefs.nav.style.borderRadius = '10px';
-      menuRefs.logo.style.display = 'none';
-      menuRefs.xIcon.style.display = 'none';
-      menuRefs.barsIcon.style.display = 'inline';
-
-      menuRefs.expanded = false;
+    if (menuRefs.current.expanded) {
+      shrinkNav();
       return;
     }
-    if(document.querySelector('#table-container')){
-      document.querySelector('#table-container').style.width = 'calc(100vw - 10rem - 40px)'
-    }
-    menuRefs.nav.style.marginLeft = '0';
-    menuRefs.nav.style.height = '100vh';
-    menuRefs.nav.style.display = 'inline-block';
 
-    menuRefs.nav.style.width = '10rem';
-    menuRefs.nav.style.minWidth = '10rem'; //TODO: temp solution
-    menuRefs.nav.style.borderRadius = '0';
-    menuRefs.logo.style.display = 'inline';
-    menuRefs.xIcon.style.display = 'inline';
-    menuRefs.barsIcon.style.display = 'none';
+    expandNav();
 
-    menuRefs.expanded = true;
   };
 
   const tailwindClasses = {
     link: 'text-white hover:bg-white hover:text-primary',
-    // linkActive: `bg-white text-primary
-    //             relative before:absolute after:absolute
-    //             before:border-[15px] before:border-r-white before:border-b-transparent
-    //             before:border-t-transparent before:border-l-transparent
-    //             before:top-0 before:right-0 before:translate-y-[-50%] before:translate-x-[20%]
-    //             after:border-[15px] after:border-t-white after:border-b-transparent
-    //             after:border-r-transparent after:border-l-transparent
-    //             after:bottom-0 after:right-0 after:translate-y-[100%] after:translate-x-[70%]
-    //             `,
     linkActive: `bg-white text-primary
                 relative before:absolute after:absolute
                 `,
@@ -237,7 +271,7 @@ export default function sharedLayout() {
       <>
         <li>
           <NavLink to='/login' className={activeLink}>
-            <FaSignInAlt />
+            <FaSignInAlt/>
             login
           </NavLink>
         </li>
@@ -255,13 +289,13 @@ export default function sharedLayout() {
     <>
       {/*aria-expanded would not makes sense here*/}
       <nav
-        ref={(el) => (menuRefs.nav = el)}
-        className={`bg-primary text-white overflow-hidden hover:overflow-visible
+        ref={(el) => (menuRefs.current.nav = el)}
+        className={`bg-primary text-white
                   ml-[.5rem] h-[60vh] my-auto rounded-[10px] w-[2.1rem] min-w-[2.1rem]
                   flex flex-col justify-center`}
       >
         <div className='text-2xl py-4 flex justify-between'>
-          <span ref={(el) => (menuRefs.logo = el)} className='pl-3 hidden'>
+          <span ref={(el) => (menuRefs.current.logo = el)} className='pl-3 hidden'>
             LOGO
           </span>
           <button
@@ -269,10 +303,10 @@ export default function sharedLayout() {
             className={`cursor-pointer mr-2 pl-[5px]`}
             onClick={toggleMenu}
           >
-            <span ref={(el) => (menuRefs.barsIcon = el)} className='inline'>
+            <span ref={(el) => (menuRefs.current.barsIcon = el)} className='inline'>
               <FaBars />
             </span>
-            <span className={`hidden`} ref={(el) => (menuRefs.xIcon = el)}>
+            <span className={`hidden`} ref={(el) => (menuRefs.current.xIcon = el)}>
               <VscChromeClose />
             </span>
           </button>
@@ -295,7 +329,7 @@ export default function sharedLayout() {
               <FaHatWizard />
               Hacks
                             <ul
-                                className={`hidden absolute top-[20px] left-0 right-0 pt-4 pl-2`}
+                                className={`hidden absolute top-[20px] left-0 right-0 pt-4 pl-2 hover:overflow-auto`}
                             >
                                 <li
                                     className={`cursor-pointer text-white bg-orange-500 hover:bg-white
@@ -381,7 +415,7 @@ export default function sharedLayout() {
        */}
       <Outlet
         context={{
-          menuExpanded: menuRefs.expanded,
+          menuExpanded: menuRefs.current.expanded,
           isLoggedIn: isLoggedInState,
           loggedInUser: loggedInUserState,
         }}
