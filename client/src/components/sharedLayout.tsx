@@ -27,13 +27,18 @@ type loggedInUserT = {
 
 export default function sharedLayout() {
   const routerNavigate = useNavigate();
+  const rLocation = useLocation();
+
+  if(rLocation.pathname == '/'){
+    routerNavigate('/login')
+  }
+
   const [isLoggedInState, setIsLoginState] = React.useState<
     undefined | boolean
   >(undefined);
   const [loggedInUserState, setLoggedInUserState] = React.useState<
     loggedInUserT | {}
   >({});
-  const rLocation = useLocation();
 
   const checkLogin = async () => {
     const res: {
@@ -115,21 +120,25 @@ export default function sharedLayout() {
     }
 
     // expand nav elements
-    Array.from(menuRefs.current.nav.querySelectorAll('ul > *')).forEach((navItem)=>{
+    Array.from(menuRefs.current.nav.querySelectorAll(':scope > ul > *')).forEach((navItem)=>{
       navItem.style.display = 'inline-block';
-      navItem.style.width = 'auto';
-      navItem.style.overflow = 'auto';
+      navItem.style.width = 'unset';
+      if(navItem.tagName !== 'UL'){
+        navItem.style.overflow = 'visible';
+      }
     });
 
     // menuRefs.current.nav.querySelector('ul > ul').style.overflow = 'auto';
     // menuRefs.current.nav.querySelector('ul > div.shallowItems').style.overflow = 'auto';
 
     menuRefs.current.nav.style.marginLeft = '0';
+    menuRefs.current.nav.style.paddingTop = '0';
+    menuRefs.current.nav.style.paddingBottom = '0';
     menuRefs.current.nav.style.height = '100vh';
     menuRefs.current.nav.style.display = 'inline-block';
 
     menuRefs.current.nav.style.width = '10rem';
-    menuRefs.current.nav.style.minWidth = '10rem'; //TODO: temp solution
+    menuRefs.current.nav.style.minWidth = '10rem';
     menuRefs.current.nav.style.borderRadius = '0';
     menuRefs.current.logo.style.display = 'inline';
     menuRefs.current.xIcon.style.display = 'inline';
@@ -143,13 +152,13 @@ export default function sharedLayout() {
     }
 
     // shrink nav elements
-    Array.from(menuRefs.current.nav.querySelectorAll('ul > *')).forEach((navItem)=>{
+    Array.from(menuRefs.current.nav.querySelectorAll(':scope > ul > *')).forEach((navItem)=>{
       navItem.style.cssText = 'display: flex; width: 2.2rem; overflow: hidden;'
-      
     });
+
     if(!menuRefs.current.nav?.querySelector('style')){
       const styleTag = document.createElement('style');
-      styleTag.innerText = `nav > ul > *:hover{background: red !important; width: auto !important; overflow: inherit !important}`;
+      styleTag.innerText = `nav > ul > *:hover{width: auto !important; overflow: visible !important}`;
       menuRefs.current.nav.appendChild(styleTag);
     }
 
@@ -159,8 +168,10 @@ export default function sharedLayout() {
     menuRefs.current.nav.style.marginLeft = '.5rem';
     menuRefs.current.nav.style.marginTop = 'auto';
     menuRefs.current.nav.style.marginBottom = 'auto';
+    menuRefs.current.nav.style.paddingTop = '2rem';
+    menuRefs.current.nav.style.paddingBottom = '2rem';
     menuRefs.current.nav.style.width = '2.2rem';
-    menuRefs.current.nav.style.height = '60vh';
+    menuRefs.current.nav.style.height = 'unset';
     menuRefs.current.nav.style.display = 'flex';
     menuRefs.current.nav.style.flexDirection = 'column';
     menuRefs.current.nav.style.justifyItems = 'center';
@@ -173,14 +184,15 @@ export default function sharedLayout() {
     menuRefs.current.expanded = false;
   }
 
-  // hacking is necessary, because of react's nature
-  const littleState = React.useRef<{[key: string]: boolean}>({menuEffected: false});
-  if(!littleState.current.menuEffected){
+  React.useEffect(()=>{
     if(menuRefs.current.nav){
-      shrinkNav();
-      littleState.current.menuEffected = true;
+      if(!menuRefs.current.expanded){
+        shrinkNav();
+      }else{
+        expandNav();
+      }
     }
-  }
+  })
 
   // minimizing not hiding
   const toggleMenu = () => {
@@ -291,7 +303,7 @@ export default function sharedLayout() {
       <nav
         ref={(el) => (menuRefs.current.nav = el)}
         className={`bg-primary text-white
-                  ml-[.5rem] h-[60vh] my-auto rounded-[10px] w-[2.1rem] min-w-[2.1rem]
+                  ml-[.5rem] pt-4 pb-4 my-auto rounded-[10px] w-[2.1rem] min-w-[2.1rem]
                   flex flex-col justify-center`}
       >
         <div className='text-2xl py-4 flex justify-between'>
@@ -326,10 +338,12 @@ export default function sharedLayout() {
                       .classList.add('hidden');
               }}
             >
-              <FaHatWizard />
+              <div className='flex gap-3'>
+                <FaHatWizard />
               Hacks
+              </div>
                             <ul
-                                className={`hidden absolute top-[20px] left-0 right-0 pt-4 pl-2 hover:overflow-auto`}
+                                className={`hidden absolute top-[20px] left-0 right-0 pt-4 pl-2`}
                             >
                                 <li
                                     className={`cursor-pointer text-white bg-orange-500 hover:bg-white
@@ -350,7 +364,7 @@ export default function sharedLayout() {
                                             .classList.add('hidden');
                                     }}
                                     className={`relative cursor-pointer text-white bg-orange-500 hover:bg-white
-                                                hover:text-orange-500 py-1 px-3`}
+                                                hover:text-orange-500 py-1 px-2`}
                                 >
                                     login as
                                     <ul
