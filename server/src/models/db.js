@@ -179,6 +179,7 @@ const insertionQueries = {
 };
 
 const init = async () => {
+
   // initializing tables
   const initQueryEntries = Object.entries(initQueries);
   for (let i = 0; i < initQueryEntries.length; i++) {
