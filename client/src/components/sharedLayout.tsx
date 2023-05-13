@@ -269,7 +269,7 @@ export default function sharedLayout() {
           <li>
             <button
               onClick={logout}
-              className={`${tailwindClasses.navItem} ${tailwindClasses.link} w-full`}
+              className={`${tailwindClasses.navItem} ${tailwindClasses.link} hover:w-full`}
             >
               <FaSignOutAlt />
               logout
@@ -302,7 +302,7 @@ export default function sharedLayout() {
       {/*aria-expanded would not makes sense here*/}
       <nav
         ref={(el) => (menuRefs.current.nav = el)}
-        className={`bg-primary text-white
+        className={`bg-primary text-white z-10
                   ml-[.5rem] pt-4 pb-4 my-auto rounded-[10px] w-[2.1rem] min-w-[2.1rem]
                   flex flex-col justify-center`}
       >
