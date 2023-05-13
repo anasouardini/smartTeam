@@ -358,7 +358,7 @@ export default function Projects() {
       <header aria-label='filters' className={`px-6 py-4`}>
         {listProfiles()}
         <details className={`mt-5`}>
-          <summary>Filter</summary>
+          <summary>Search</summary>
           <div className={`mt-3 flex flex-wrap gap-4`}>
             <select
               ref={(el) => (Refs.current.selectInputs.portfolios = el)}

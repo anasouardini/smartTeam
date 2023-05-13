@@ -238,7 +238,7 @@ export default function Portfolios() {
         {listProfiles()}
         <details className={`mt-5`}>
           <summary>
-            Filter
+            Search
           </summary>
           <div className={`flex flex-wrap gap-4 mt-3`}>
             {listFields()}

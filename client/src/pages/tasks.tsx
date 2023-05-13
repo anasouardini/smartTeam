@@ -359,7 +359,7 @@ export default function Tasks() {
         >
           {listProfiles()}
           <details className={`mt-5`}>
-            <summary>Filter</summary>
+            <summary>Search</summary>
             <div className={`mt-3 flex flex-wrap gap-5`}>
               {listHeaderFields()}
               <button className={`ml-auto bg-primary text-white rounded-md px-2`}>
