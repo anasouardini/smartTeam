@@ -3,11 +3,11 @@ const fs = require("fs");
 const mysql2 = require('mysql2');
 require('dotenv').config()
 
-const pool = mysql2.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  database: process.env.DB_NAME,
-})
+// const pool = mysql2.createPool({
+//   host: process.env.DB_HOST,
+//   user: process.env.DB_USER,
+//   database: process.env.DB_NAME,
+// })
 
 // const pool = mysql2.createPool({
 //   host: process.env.DB_HOST,
@@ -18,7 +18,7 @@ const pool = mysql2.createPool({
 //   }
 // })
 
-// const pool = mysql2.createConnection(process.env.DB_URL);
+const pool = mysql2.createConnection(process.env.DB_URL);
 
 const poolPromise = async (query, params) =>{
 
