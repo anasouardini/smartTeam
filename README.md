@@ -1,8 +1,8 @@
 # SmartTeam — Team management app
 
-The purpose of this project is to practice authentication and authorization, I didn't do a very good job at the prior project when it comes to authentication and authorization, so I decided to give it more practice.
+The purpose of this project is to practice authentication and authorization. I didn't do a very good job on the previous project when it came to authentication and authorization, so I decided to give it more practice.
 
-The project is about managing teams/projects, where each profile is like an organization, each account has it's own portfolios, projects and tasks within those projects. Each member of the organization has or doesn't have certain privileges to certain portfolio, project or task.
+The project is about managing teams/projects, where each profile is like an organization. Each account has its own portfolios, projects, and tasks within those projects. Each member of the organization may or may not have certain privileges for specific portfolios, projects, or tasks
 
 ## Tools
 
@@ -25,4 +25,4 @@ The project is about managing teams/projects, where each profile is like an orga
 8. JWT for user&pasword authentication — refresh token and access token to mitigate the risk of CSRF
 9. Bcrypt, also for user&password authentication
 11. Email verification (using JWT)
-12. Nodemailer (seding email to users to verify their ownership of them)
+12. Nodemailer (seding email to users to verify their ownership)
