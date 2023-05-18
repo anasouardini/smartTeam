@@ -1,5 +1,5 @@
 const pool = require('./dbPool');
-// const {uuidv4:uuid} = require('uuid');
+const {v4:uuid} = require('uuid');
 const defaultOwnerID = 'organization-organization';
 
 require('dotenv').config()
@@ -175,7 +175,19 @@ const insertionQueries = {
                             )
                       ;`,
   insertDefaultPrivilegesCategories: `insert into privilegesCategories(id, owner_FK, privilege)
-                        values( ?, ?, ?)`,
+                            values( ?, ?, ?)`,
+  insertDefaultPortfolios: `insert into portfolios(id, owner_FK, title, description, bgImg,
+                                                    status, progress, projectsNumber, doneProjectsNumber)
+                            values( ?, ?, ?, ?, ?, ?, ?, ? ,?)
+                        `,
+  insertDefaultProjects: `insert into projects(id, owner_FK, portfolio_FK, title, description, bgColor,
+                                                  status, progress, milestone, budget, expense)
+                          values( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        `,
+  insertDefaultTasks: `insert into tasks(id, owner_FK, project_FK, title, description, bgColor,
+                                              status)
+                        values( ?, ?, ?, ?, ?, ?, ?)
+                        `,
 };
 
 const init = async () => {
@@ -228,6 +240,36 @@ const init = async () => {
       return false;
     }
   }
+
+  // insertDefaultPortfolios: `insert into portfolios(id, owner_FK, title, description, bgImg,
+  //                                                   status, progress, projectNumber, doneProjectsNumber)
+  //                           values( ?, ?, ?, ?, ?, ?, ?, ? ,?)
+  //                       `,
+  // insertDefaultProjects: `insert into projects(id, owner_FK, portfolio_FK, title, description, bgColor,
+  //                                                 dueDate, status, progress, milestone, budget, expense)
+  //                         values( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  //                       `,
+  // insertDefaultTasks: `insert into tasks(id, owner_FK, project_FK, title, description, bgColor,
+  //                                             status)
+  //                       values( ?, ?, ?, ?, ?, ?, ?)
+  //                       `,
+  const users = [
+                  'github-114059811',
+                  'segfaulty-segfaulty-segfaulty',
+                  'organization-organization',
+                  'venego-venego-venego-venego',
+                  'potato-potato-potato-potato'
+                ]
+  for(let i=0; i<users.length; i++){
+    const portfolioVars = [uuid(), users[i], 'initial portfolio', '', '', '', 0, 1, 0];
+    let resp = await pool(insertionQueries.insertDefaultPortfolios, portfolioVars);
+
+    const projectVars = [uuid(), users[i], portfolioVars[0], 'initial project', '', '', '', 0, '', 40, 2];
+    resp = await pool(insertionQueries.insertDefaultProjects, projectVars);
+
+    const taskVars = [uuid(), users[i], projectVars[0], 'initial task', '', '', ''];
+    resp = await pool(insertionQueries.insertDefaultTasks, taskVars);
+  };
 
   return true;
 };
