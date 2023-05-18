@@ -48,14 +48,14 @@ export default function Profile() {
   };
 
   const TClasses = {
-    inputLabel: `w-[20rem] flex justify-between items-center capitalize`,
+    inputLabel: `w-[30rem] flex flex-wrap justify-between items-center capitalize`,
     border: `border-gray-300 focus:border-primary outline-none border-2 rounded-md`,
     input: `focus:text-black text-gray-600 px-2 py-1 placeholder:text-gray-600`,
     textArea: `focus:text-black text-gray-600 w-full px-2 py-1 placeholder:text-gray-600`,
   };
 
   return userInfoQuery?.status == 'success' && !userInfoQuery.data?.error ? (
-    <main className='text-black mt-[7rem] mx-auto w-[80%] max-w-[600px]'>
+    <main className='text-black mt-[2rem] mx-auto w-[80%] max-w-[600px]'>
       <section aria-label='name-title-pic' className={`flex`}>
         <img
           crossOrigin='anonymous'
@@ -88,18 +88,22 @@ export default function Profile() {
           />
         </div>
       </section>
+      <hr className='h-[2px] bg-gray-300 my-[3rem] mx-auto w-1/2'/>
       <section aria-label='description' className={`mt-10`}>
-        <textarea
-          onBlur={updateField}
-          name='description'
-          {...{
-            defaultValue: userInfoQuery.data.description,
-            placeholder:
-              'A little description about your organization.',
-          }}
-          rows={3}
-          className={`${TClasses.textArea} ${TClasses.border}`}
-        ></textarea>
+        <label className={`${TClasses.inputLabel}`}>
+          Story:
+          <textarea
+            onBlur={updateField}
+            name='description'
+            {...{
+              defaultValue: userInfoQuery.data.description,
+              placeholder:
+                'A little description about your organization.',
+            }}
+            rows={3}
+            className={`${TClasses.textArea} ${TClasses.border} w-80`}
+          ></textarea>
+        </label>
       </section>
       <section aria-label='other inputs' className={`mt-7 flex flex-col gap-4`}>
         <label className={`${TClasses.inputLabel}`}>
@@ -110,7 +114,7 @@ export default function Profile() {
             aria-label='username'
             type='text'
             defaultValue={userInfoQuery.data.username}
-            className={`${TClasses.input} ${TClasses.border}`}
+            className={`${TClasses.input} ${TClasses.border} w-80`}
           />
         </label>
         <label className={`${TClasses.inputLabel}`}>
@@ -123,11 +127,11 @@ export default function Profile() {
               defaultValue: userInfoQuery.data.email,
               placeholder: 'e.g. linus@kernel.org',
             }}
-            className={`${TClasses.input} ${TClasses.border}`}
+            className={`${TClasses.input} ${TClasses.border} w-80`}
           />
         </label>
       </section>
-      <button className={`mt-9 bg-primary text-white rounded-md px-2 py-1`} onClick={getCnxLink}>
+      <button className={`mt-20 bg-primary text-white rounded-md px-2 py-1`} onClick={getCnxLink}>
         Get Invitation Link
       </button>
     </main>
