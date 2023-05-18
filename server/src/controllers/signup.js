@@ -40,7 +40,7 @@ const signup = async (req, res) => {
     fullname,
     title: '',
     description: '',
-    avatar: `${process.env.DEV_SERVER_ADDRESS}/media/avatars/alien-headshot.jpg`,
+    avatar: `${req.headers.host}/media/avatars/alien-headshot.jpg`,
   });
 
   if (createUserResponse?.err || !createUserResponse[0]?.affectedRows) {
@@ -52,7 +52,7 @@ const signup = async (req, res) => {
   // console.log('l48 signup.js: ', privKey);
   const jwtOptions = { algorithm: 'RS256'};
   const token = jwt.sign({ username, email }, privKey, jwtOptions);
-  const hostname = process.env.PRODUCTION==1 ? req.hostname : process.env.DEV_SERVER_ADDRESS;
+  const hostname = req.headers.host;
   const messageBody = `This email was linkded to an account on ${hostname},
                       If you are the one that linked it feel free to click on the link 
                       bellow to verify it.\n ${hostname}/verifyEmail/${token}`;

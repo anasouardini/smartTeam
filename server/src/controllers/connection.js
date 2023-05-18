@@ -10,8 +10,8 @@ const genLink = async (req, res) => {
   );
   const jwtOptions = { algorithm: 'RS256' };
   const token = jwt.sign({ userID: req.userID }, privKey, jwtOptions);
-  const hostname =
-    process.env.PRODUCTION == 1 ? req.hostname : process.env.DEV_SERVER_ADDRESS;
+
+  const hostname = req.headers.host;
   const link = `${hostname}/verifyConnection/${token}`;
 
   res.json({ data: link });
