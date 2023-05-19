@@ -1,4 +1,4 @@
-# SmartTeam — Team management app
+# SmartTeam — Team management app | <a href="https://smartteam.anasouardini.online" target="_blank">Check It Live</a>
 
 The purpose of this project is to practice authentication and authorization. I didn't do a very good job on the previous project when it came to authentication and authorization, so I decided to give it more practice.
 
