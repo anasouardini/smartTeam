@@ -96,7 +96,7 @@ export default function Authentication(props: {
       <main
         aria-label={props.label}
         className={`
-                    text-white h-[100vh]
+                    text-white
                     grow flex items-center justify-center`}
       >
         <div

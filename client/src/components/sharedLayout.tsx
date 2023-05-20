@@ -299,7 +299,7 @@ export default function sharedLayout() {
 
   return isLoggedInState != undefined ? (
     <>
-      <div className={`flex-1 flex w-full`} style={{'minHeight': 'calc(100vh - 10rem)'}}>
+      <div className={`grow flex w-full`}>
         {/*aria-expanded would not makes sense here*/}
         <nav
           ref={(el) => (menuRefs.current.nav = el)}
@@ -436,7 +436,7 @@ export default function sharedLayout() {
           }}
         />
       </div>
-      <footer className={`w-full flex flex-wrap gap-3 justify-center items-center py-1 bg-orange-500 text-white font-bold`}>
+      <footer className={`grow-0 w-full flex flex-wrap gap-3 justify-center items-center py-1 bg-orange-500 text-white font-bold`}>
         Made by
           <span className='text-black'>
             <a href="https://anasouardini.online">Anas Ouardini</a>
