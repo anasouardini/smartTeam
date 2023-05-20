@@ -299,141 +299,152 @@ export default function sharedLayout() {
 
   return isLoggedInState != undefined ? (
     <>
-      {/*aria-expanded would not makes sense here*/}
-      <nav
-        ref={(el) => (menuRefs.current.nav = el)}
-        className={`bg-primary text-white z-10
-                  ml-[.5rem] pt-4 pb-4 my-auto rounded-[10px] w-[2.1rem] min-w-[2.1rem]
-                  flex flex-col justify-center`}
-      >
-        <div className='text-2xl py-4 flex justify-between'>
-          <span ref={(el) => (menuRefs.current.logo = el)} className='pl-3 hidden'>
-            LOGO
-          </span>
-          <button
-            aria-label='menu minmize button'
-            className={`cursor-pointer mr-2 pl-[5px]`}
-            onClick={toggleMenu}
-          >
-            <span ref={(el) => (menuRefs.current.barsIcon = el)} className='inline'>
-              <FaBars />
+      <div className={`flex-1 flex w-full`} style={{'minHeight': 'calc(100vh - 10rem)'}}>
+        {/*aria-expanded would not makes sense here*/}
+        <nav
+          ref={(el) => (menuRefs.current.nav = el)}
+          className={`bg-primary text-white z-10
+                    ml-[.5rem] pt-4 pb-4 my-auto rounded-[10px] w-[2.1rem] min-w-[2.1rem]
+                    flex flex-col justify-center`}
+        >
+          <div className='text-2xl py-4 flex justify-between'>
+            <span ref={(el) => (menuRefs.current.logo = el)} className='pl-3 hidden'>
+              LOGO
             </span>
-            <span className={`hidden`} ref={(el) => (menuRefs.current.xIcon = el)}>
-              <VscChromeClose />
-            </span>
-          </button>
-        </div>
-        <ul className='flex flex-col gap-3 min-w-min'>
-          {listNavItems()}
-            <ul
-            className={`${tailwindClasses.navItem} ${tailwindClasses.link} w-full relative cursor-pointer`}
-              onMouseOver={(e) => {
-                  e.currentTarget
-                      .querySelector(':scope > ul')
-                      .classList.remove('hidden');
-              }}
-              onMouseOut={(e) => {
-                  e.currentTarget
-                      .querySelector(':scope > ul')
-                      .classList.add('hidden');
-              }}
+            <button
+              aria-label='menu minmize button'
+              className={`cursor-pointer mr-2 pl-[5px]`}
+              onClick={toggleMenu}
             >
-              <div className='flex gap-3'>
-                <FaHatWizard />
-              Hacks
-              </div>
-                            <ul
-                                className={`hidden absolute top-[20px] left-0 right-0 pt-4 pl-2`}
-                            >
-                                <li
-                                    className={`cursor-pointer text-white bg-orange-500 hover:bg-white
-                                                hover:text-orange-500 py-1 px-3`}
-                                    onClick={initDB}
-                                >
-                                    reinitDB
-                                </li>
-                                <ul
-                                    onMouseOver={(e) => {
-                                        e.currentTarget
-                                            .querySelector(':scope > ul')
-                                            .classList.remove('hidden');
-                                    }}
-                                    onMouseOut={(e) => {
-                                        e.currentTarget
-                                            .querySelector(':scope > ul')
-                                            .classList.add('hidden');
-                                    }}
-                                    className={`relative cursor-pointer text-white bg-orange-500 hover:bg-white
-                                                hover:text-orange-500 py-1 px-2`}
-                                >
-                                    login as
-                                    <ul
-                                        className={`hidden absolute top-[32px] left-3 text-white`}
-                                    >
-                                        <li
-                                            className={`cursor-pointer bg-orange-500
-                                                        hover:bg-white hover:text-orange-500 p-1 px-3`}
-                                            onClick={() => {
-                                                loginAs({
-                                                    usr: 'organization',
-                                                    passwd: 'organization',
-                                                });
-                                            }}
-                                        >
-                                            organization
-                                        </li>
-                                        <li
-                                            className={`cursor-pointer bg-orange-500
-                                            hover:bg-white hover:text-orange-500 p-1 px-3`}
-                                            onClick={() => {
-                                                loginAs({
-                                                    usr: 'venego',
-                                                    passwd: 'venego',
-                                                });
-                                            }}
-                                        >
-                                            venego
-                                        </li>
-                                        <li
-                                            className={`cursor-pointer bg-orange-500
-                                            hover:bg-white hover:text-orange-500 p-1 px-3`}
-                                            onClick={() => {
-                                                loginAs({
-                                                    usr: 'segfaulty',
-                                                    passwd: 'segfaulty',
-                                                });
-                                            }}
-                                        >
-                                            segfaulty
-                                        </li>
-                                        <li
-                                            className={`cursor-pointer bg-orange-500
-                                            hover:bg-white hover:text-orange-500 p-1 px-3`}
-                                            onClick={() => {
-                                                loginAs({
-                                                    usr: 'potato',
-                                                    passwd: 'potato',
-                                                });
-                                            }}
-                                        >
-                                            potato
-                                        </li>
-                                    </ul>
-                                </ul>
-                            </ul>
-                        </ul>
+              <span ref={(el) => (menuRefs.current.barsIcon = el)} className='inline'>
+                <FaBars />
+              </span>
+              <span className={`hidden`} ref={(el) => (menuRefs.current.xIcon = el)}>
+                <VscChromeClose />
+              </span>
+            </button>
+          </div>
+          <ul className='flex flex-col gap-3 min-w-min'>
+            {listNavItems()}
+              <ul
+              className={`${tailwindClasses.navItem} ${tailwindClasses.link} w-full relative cursor-pointer`}
+                onMouseOver={(e) => {
+                    e.currentTarget
+                        .querySelector(':scope > ul')
+                        .classList.remove('hidden');
+                }}
+                onMouseOut={(e) => {
+                    e.currentTarget
+                        .querySelector(':scope > ul')
+                        .classList.add('hidden');
+                }}
+              >
+                <div className='flex gap-3'>
+                  <FaHatWizard />
+                Hacks
+                </div>
+                              <ul
+                                  className={`hidden absolute top-[20px] left-0 right-0 pt-4 pl-2`}
+                              >
+                                  <li
+                                      className={`cursor-pointer text-white bg-orange-500 hover:bg-white
+                                                  hover:text-orange-500 py-1 px-3`}
+                                      onClick={initDB}
+                                  >
+                                      reinitDB
+                                  </li>
+                                  <ul
+                                      onMouseOver={(e) => {
+                                          e.currentTarget
+                                              .querySelector(':scope > ul')
+                                              .classList.remove('hidden');
+                                      }}
+                                      onMouseOut={(e) => {
+                                          e.currentTarget
+                                              .querySelector(':scope > ul')
+                                              .classList.add('hidden');
+                                      }}
+                                      className={`relative cursor-pointer text-white bg-orange-500 hover:bg-white
+                                                  hover:text-orange-500 py-1 px-2`}
+                                  >
+                                      login as
+                                      <ul
+                                          className={`hidden absolute top-[32px] left-3 text-white`}
+                                      >
+                                          <li
+                                              className={`cursor-pointer bg-orange-500
+                                                          hover:bg-white hover:text-orange-500 p-1 px-3`}
+                                              onClick={() => {
+                                                  loginAs({
+                                                      usr: 'organization',
+                                                      passwd: 'organization',
+                                                  });
+                                              }}
+                                          >
+                                              organization
+                                          </li>
+                                          <li
+                                              className={`cursor-pointer bg-orange-500
+                                              hover:bg-white hover:text-orange-500 p-1 px-3`}
+                                              onClick={() => {
+                                                  loginAs({
+                                                      usr: 'venego',
+                                                      passwd: 'venego',
+                                                  });
+                                              }}
+                                          >
+                                              venego
+                                          </li>
+                                          <li
+                                              className={`cursor-pointer bg-orange-500
+                                              hover:bg-white hover:text-orange-500 p-1 px-3`}
+                                              onClick={() => {
+                                                  loginAs({
+                                                      usr: 'segfaulty',
+                                                      passwd: 'segfaulty',
+                                                  });
+                                              }}
+                                          >
+                                              segfaulty
+                                          </li>
+                                          <li
+                                              className={`cursor-pointer bg-orange-500
+                                              hover:bg-white hover:text-orange-500 p-1 px-3`}
+                                              onClick={() => {
+                                                  loginAs({
+                                                      usr: 'potato',
+                                                      passwd: 'potato',
+                                                  });
+                                              }}
+                                          >
+                                              potato
+                                          </li>
+                                      </ul>
+                                  </ul>
+                              </ul>
+                          </ul>
 
-        </ul>
-      </nav>
-      {/*
-       */}
-      <Outlet
-        context={{
-          menuExpanded: menuRefs.current.expanded,
-          isLoggedIn: isLoggedInState,
-          loggedInUser: loggedInUserState,
-        }}
-      />
+          </ul>
+        </nav>
+        {/*
+        */}
+        <Outlet
+          context={{
+            menuExpanded: menuRefs.current.expanded,
+            isLoggedIn: isLoggedInState,
+            loggedInUser: loggedInUserState,
+          }}
+        />
+      </div>
+      <footer className={`w-full flex flex-wrap gap-3 justify-center items-center py-1 bg-orange-500 text-white font-bold`}>
+        Made by
+          <span className='text-black'>
+            <a href="https://anasouardini.online">Anas Ouardini</a>
+          </span>
+        | <a href='https://github.com/segfaulty1'>Github</a>
+        | <a href='https://twitter.com/segfaulty1'>Twitter</a>
+        | <a href='https://yesfordev.com'>Blog</a>
+      </footer>
     </>
   ) : (
     <>fetching data</>
