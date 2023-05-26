@@ -439,7 +439,7 @@ export default function sharedLayout() {
       <footer className={`grow-0 w-full flex flex-wrap gap-3 justify-center items-center py-1 bg-orange-500 text-white font-bold`}>
         Made by
           <span className='text-black'>
-            <a href="https://anasouardini.online">Anas Ouardini</a>
+            <a href={`https://anasouardini.online`}>Anas Ouardini</a>
           </span>
         | <a href='https://github.com/segfaulty1'>Github</a>
         | <a href='https://twitter.com/segfaulty1'>Twitter</a>
