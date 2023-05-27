@@ -1,4 +1,5 @@
 const express = require('express');
+const https = require('https');
 const app = express();
 const helmet = require('helmet');
 const cors = require('cors');
@@ -11,16 +12,6 @@ const PORT = process.env.PORT || 2000;
 const url = require('url');
 const vars = require('./vars.js');
 
-app.use((req, res, next)=>{
-  if(vars.serverAddress){next();}
-  const fullAddress = url.format({
-    protocol: req.protocol,
-    host: req.headers.host
-  });
-  // console.log(fullAddress);
-  vars.serverAddress = fullAddress;
-});
-
 app.use(helmet());
 app.use(
   cors({
@@ -28,6 +19,21 @@ app.use(
     credentials: true,
   })
 );
+
+app.use((req, res, next)=>{
+  if(vars.serverAddress && vars.clientAddress){next();}
+  const fullServerAddress = url.format({
+    protocol: req.protocol,
+    host: req.headers.host
+  });
+  // console.log(fullServerAddress);
+  vars.serverAddress = fullServerAddress;
+
+  if(req.headers.host.includes('localhost:') || req.headers.host.includes('127.0.0.1:')){
+    vars.clientAddress = `${req.headers.host.split(':')[0]}:3000`;
+  }
+});
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded());
