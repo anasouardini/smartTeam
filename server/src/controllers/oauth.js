@@ -1,6 +1,7 @@
 require('dotenv').config();
 const OauthLib = require('./oauthLib');
 const MUser = require('../models/user');
+const vars = require('./../vars.js');
 
 // for presisting login
 const fs = require('fs/promises');
@@ -80,7 +81,7 @@ const presistAuth = async (req, res, upsertionData) => {
   });
 
   return res.redirect(
-    `${process.env.DEV_CLIENT_ADDRESS}/user/${upsertionData.accountInfo.username}`
+    `${vars.clientAddress}/user/${upsertionData.accountInfo.username}`
   );
 };
 
@@ -103,7 +104,7 @@ const oauth = async (req, res, next) => {
     onError: (err) => {
       console.log(err);
       return res.redirect(
-        `${process.env.DEV_CLIENT_ADDRESS}/login?error=${err}`
+        `${vars.clientAddress}/login?error=${err}`
       );
     },
   };

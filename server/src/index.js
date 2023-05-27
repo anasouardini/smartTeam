@@ -3,14 +3,28 @@ const app = express();
 const helmet = require('helmet');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const fsSync = require('fs');
 
 require('dotenv').config();
 const PORT = process.env.PORT || 2000;
 
+const url = require('url');
+const vars = require('./vars.js');
+
+app.use((req, res, next)=>{
+  if(vars.serverAddress){next();}
+  const fullAddress = url.format({
+    protocol: req.protocol,
+    host: req.headers.host
+  });
+  // console.log(fullAddress);
+  vars.serverAddress = fullAddress;
+});
+
 app.use(helmet());
 app.use(
   cors({
-    origin: [process.env.DEV_CLIENT_ADDRESS],
+    origin: [vars.clientAddress],
     credentials: true,
   })
 );
@@ -37,6 +51,17 @@ app.use((err, req, res, next) => {
   res.status(500).json({ err: 'something went bad in the server' });
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`server is listening on port: ${PORT}`);
-});
+
+// fire up
+if(process.env.PRODUCTION){
+  https.createServer(
+    {cert: fsSync.readFileSync(process.env.SSL_CERT), key:fsSync.readFileSync(process.env.SSL_KEY)},
+    app).listen(PORT, "0.0.0.0", () => {
+      console.log(`listening on port: ${PORT} from index.js`);
+    }
+  );
+}else{
+  app.listen(PORT, "0.0.0.0", () => {
+      console.log(`listening on port: ${PORT} from index.js`);
+  });
+}

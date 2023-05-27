@@ -1,6 +1,7 @@
 const MUser = require('../models/user');
 const jwt = require('jsonwebtoken');
 const fs = require('fs/promises');
+const vars = require('./../vars.js');
 
 require('dotenv').config();
 
@@ -46,7 +47,7 @@ const verifyEmail = async (req, res) => {
     return next('error while marking the account as verified.');
   }
 
-  return res.redirect(`${process.env.DEV_CLIENT_ADDRESS}/login`);
+  return res.redirect(`${vars.clientAddress}/login`);
 };
 
 module.exports = verifyEmail;
