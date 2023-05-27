@@ -443,9 +443,9 @@ export default function sharedLayout() {
           <span className='text-black'>
             <a href={`https://anasouardini.online`}>Anas Ouardini</a>
           </span>
-        | <a href='https://github.com/anasouardini'>Github</a>
-        | <a href='https://twitter.com/segfaulty1'>Twitter</a>
-        | <a href='https://yesfordev.com'>Blog</a>
+        | <a target='_blank' href='https://github.com/anasouardini'>Github</a>
+        | <a target='_blank' href='https://twitter.com/segfaulty1'>Twitter</a>
+        | <a target='_blank' href='https://yesfordev.com'>Blog</a>
       </footer>
     </>
   ) : (
