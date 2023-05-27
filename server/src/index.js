@@ -26,11 +26,10 @@ app.use((req, res, next)=>{
     protocol: req.protocol,
     host: req.headers.host
   });
-  // console.log(fullServerAddress);
   vars.serverAddress = fullServerAddress;
 
   if(req.headers.host.includes('localhost:') || req.headers.host.includes('127.0.0.1:')){
-    vars.clientAddress = `${req.headers.host.split(':')[0]}:3000`;
+    vars.clientAddress = `${req.protocol}://${req.headers.host.split(':')[0]}:3000`;
   }
 });
 

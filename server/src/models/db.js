@@ -138,7 +138,7 @@ const insertionQueries = {
                             'github-114059811',
                             'segfaulty1',
                             '',
-                            'https://avatars.githubusercontent.com/u/114059811?v=4',
+                            ?,
                             'Ouardini Anas',
                             1
                             ),
@@ -146,7 +146,7 @@ const insertionQueries = {
                             'organization-organization',
                             'organization',
                             '$2a$10$vrGBAXzwHyuL4f8wtp9LtuqJisgrwvYHHUQChFh19h6.h/h/PPGd.',
-                            '${vars.serverAddress}/media/avatars/orange-fluffy-face.jpg',
+                            ?,
                             'organization',
                             1
                             ),
@@ -154,7 +154,7 @@ const insertionQueries = {
                             'venego-venego-venego-venego',
                             'venego',
                             '$2a$10$2Rs1OQprscaedMDIfa3nM.Rkd4wlUSB/1Y9aniUUF5vNftStoy33G',
-                            '${vars.serverAddress}/media/avatars/orange-fluffy-face.jpg',
+                            ?,
                             'venego',
                             1
                             ),
@@ -162,7 +162,7 @@ const insertionQueries = {
                             'segfaulty-segfaulty-segfaulty',
                             'segfaulty',
                             '$2a$10$nClU9iPu63tTwErJXhQ1guqMdEtUTZoLhc2NmToZZpgq/8Elm0fmK',
-                            '${vars.serverAddress}/media/avatars/orange-fluffy-face.jpg',
+                            ?,
                             'segfaulty',
                             1
                             ),
@@ -170,7 +170,7 @@ const insertionQueries = {
                             'potato-potato-potato-potato',
                             'potato',
                             '$2a$10$pOJ54FmgEmrQp9RJsUopvusKhtNB/EgVAzj1zUB5GYy6ycFIyiUnW',
-                            '${vars.serverAddress}/media/avatars/orange-fluffy-face.jpg',
+                            ?,
                             'potato',
                             1
                             )
@@ -212,7 +212,15 @@ const init = async () => {
 
   // inserting default users
   const usersEntry = insertionQueries['insertDefaultUser'];
-  let res = await pool(usersEntry);
+  const avatarPaths = [
+    'https://avatars.githubusercontent.com/u/114059811?v=4',
+    `${vars.serverAddress}/media/avatars/orange-fluffy-face.jpg`,
+    `${vars.serverAddress}/media/avatars/orange-fluffy-face.jpg`,
+    `${vars.serverAddress}/media/avatars/orange-fluffy-face.jpg`,
+    `${vars.serverAddress}/media/avatars/orange-fluffy-face.jpg`,
+    `${vars.serverAddress}/media/avatars/orange-fluffy-face.jpg`,
+  ];
+  let res = await pool(usersEntry, avatarPaths);
   if (!res || res?.errno) {
     console.log([
       '=============================================================',
