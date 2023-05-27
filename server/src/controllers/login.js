@@ -42,7 +42,7 @@ const presistLogin = async (req, res, userID) => {
 };
 
 const login = async (req, res, next) => {
-  console.log('tring to log in')
+  console.log('trying to log in')
 
   if (!req.body?.username || !req.body?.password) {
     return res.status(400).json({ error: 'the entered information is not complete' });

@@ -83,11 +83,13 @@ export default function sharedLayout() {
     rLocation.pathname == '/login' || rLocation.pathname == '/signup';
   if (isLoggedInState != undefined) {
     if (isLoggedInState && authenticating) {
-      return <Navigate to={`/user/${loggedInUserState?.username}`}></Navigate>;
+      // return <Navigate to={`/user/${loggedInUserState?.username}`}></Navigate>;
+      routerNavigate(`/user/${loggedInUserState?.username}`);
     }
 
     if (!isLoggedInState && !authenticating) {
-      return <Navigate to='/login'></Navigate>;
+      // return <Navigate to='/login'></Navigate>;
+      routerNavigate('/login');
     }
   }
 
