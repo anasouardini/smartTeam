@@ -97,7 +97,7 @@ const oauth = async (req, res, next) => {
 
   // start of -- using my oauth lib
   const options = {
-    redirect_uri:  `${req.headers.host}/oauth/${method}`,
+    redirect_uri:  `${req.protocol}${req.headers.host}/oauth/${method}`,
     client_id: process.env[`auth_${method}_id`],
     client_secret: process.env[`auth_${method}_secret`],
 
