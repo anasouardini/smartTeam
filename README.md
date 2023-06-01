@@ -4,6 +4,9 @@ The purpose of this project is to practice authentication and authorization. I d
 
 The project is about managing teams/projects, where each profile is like an organization. Each account has its own portfolios, projects, and tasks within those projects. Each member of the organization may or may not have certain privileges for specific portfolios, projects, or tasks
 
+<img src="https://github.com/anasouardini/smartTeam/assets/114059811/1522ce74-7c9b-4b35-8bd8-477ca711cb18" alt="project's (smartteam) login page " style="width: 50%"/>
+<img src="https://github.com/anasouardini/smartTeam/assets/114059811/6f1878a8-d0ea-41ef-9b7c-35e90990a7b1" alt="Project's (smartteam) profile page" style="width: 50%"/>
+
 ## Tools
 
 ### Front-End
