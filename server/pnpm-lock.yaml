@@ -1,4 +1,8 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
 
 dependencies:
   axios:
@@ -51,6 +55,9 @@ devDependencies:
   typescript:
     specifier: ^4.9.5
     version: 4.9.5
+  typescritp:
+    specifier: ^1.0.0
+    version: 1.0.0
 
 packages:
 
@@ -1327,6 +1334,10 @@ packages:
     resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
     engines: {node: '>=4.2.0'}
     hasBin: true
+    dev: true
+
+  /typescritp@1.0.0:
+    resolution: {integrity: sha512-88hSOM0JRNE+lY8LQvwebA6WCf54+FoDUQuNCuoBvHxu+tj76LteTUymKzwuS6VVAuBLfI5xcZyv88sj4yxDaw==}
     dev: true
 
   /undefsafe@2.0.5:

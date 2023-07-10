@@ -73,6 +73,14 @@ export default function Authentication(props: {
         username: inputsRef['username'].value,
         password: inputsRef['password'].value,
       });
+      console.log({response})
+        
+      if(!response){
+        toast.error('client error while trying to login');
+      }
+      if(response.error){
+        toast.error(response.error);
+      }
     } else if (props.label == 'signup') {
       // console.log(e.target[0])
       const genBody = props.fields.reduce(

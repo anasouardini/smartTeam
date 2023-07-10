@@ -26,15 +26,16 @@ const server = {
 };
 
 const methods = {
-  post: (route: string, body?: {}) =>
-    fetch(`${server.url}/${route}`, server.options('post', body))
+  post: (route: string, body?: {}) =>{
+    return fetch(`${server.url}/${route}`, server.options('post', body))
       .then(async (res) => {
         return {
           ...(await res.json().then((res) => res)),
           status: res.status,
         };
       })
-      .catch(() => false),
+      .catch(() => false)
+  },
 
   read: (route: string) =>
     fetch(`${server.url}/${route}`, server.options('get'))
@@ -95,6 +96,12 @@ const methods = {
       .catch((err) => false),
 };
 
+const redirect = (path: string)=>{
+  let newLocation = `${location.href.split(':')[0]}://${location.hostname}:${location.port}${path}`;
+  // console.log({newLocation});
+  window.location.href = newLocation;
+}
+const sleep = (t:number)=> new Promise(resolve => setTimeout(resolve, t));
 
 // I could've used a proxy but this is so much easier
 const handleRequest = async (
@@ -116,6 +123,7 @@ const handleRequest = async (
       toast.error(`client error while trying to make a request. route:${route}`)
       return { err: 'connectionError', route };
     }
+    // console.log({redirect: response.redirect, data: response.data});
 
     // TODO: probably send the falsy response to react-query
     if (response.status != 200) {
@@ -124,18 +132,25 @@ const handleRequest = async (
     }
 
     accessTokenRenewal = false;
-    if (response?.accessToken) {
-      // the user either just logged in or the accessToken is invalid
-      localStorage.setItem('accessToken', response?.accessToken);
+    if (response.accessToken) {
+      localStorage.setItem('accessToken', response.accessToken);
+
+      // if there is a redirection, then the access token was not refreshed, it's the first one
+      if(response.redirect){
+        redirect(response.redirect);
+        break;// don't remove this, JS is... ;)
+      }
+
+      // the server sent a new accessToken
+      // the user either doesn't have an Access Token or it's invalid
       accessTokenRenewal = true;
     }
 
     if (response?.redirect) {
       // I need a way to change layout without using react-router
-      // console.log('redirecting..', response?.redirect);
-      // alert();
-      window.location.href = `http://${location.hostname}:${location.port}${response?.redirect}`;
+      redirect(response.redirect);
     }
+
   }while (accessTokenRenewal)
 
   return response;
