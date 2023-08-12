@@ -47,7 +47,7 @@ export default function sharedLayout() {
       loggedInUser: loggedInUserT;
     } = await Bridge('read', 'isLogin');
     if (!res?.err) {
-      setIsLoginState(res.loginStatus);
+      setIsLoginState(res.loginStatus ?? false);
       setLoggedInUserState(res.loggedInUser);
 
       if(rLocation.pathname == '/' && res?.loggedInUser?.username){
